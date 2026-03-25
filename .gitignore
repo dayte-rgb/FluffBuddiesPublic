@@ -1,1 +1,16 @@
-website.db
+# SQLite database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# macOS system files
+.DS_Store
+
+# Editor files
+.vscode/
