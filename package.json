@@ -1,0 +1,25 @@
+{
+  "name": "final-project-fluff-buddies",
+  "version": "1.0.0",
+  "description": "Turner Day, Gabriela Blanco Reyes, Sana Adnan, and David Broczkowski",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cs205-sp-26/final-project-fluff-buddies.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cs205-sp-26/final-project-fluff-buddies/issues"
+  },
+  "homepage": "https://github.com/cs205-sp-26/final-project-fluff-buddies#readme",
+  "dependencies": {
+    "ejs": "^5.0.1",
+    "express": "^5.2.1"
+  }
+}
