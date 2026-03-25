@@ -1,12 +1,12 @@
 PRAGMA foreign_keys = ON;
 
 
-CREATE TABLE IF NOT EXISTS IF NOT EXISTS SecurityQuestion (
+CREATE TABLE IF NOT EXISTS SecurityQuestion (
   question_id INTEGER PRIMARY KEY,
-  question_text TEXT NOT NULL,
+  question_text TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS IF NOT EXISTS User (
+CREATE TABLE IF NOT EXISTS User (
   user_id INTEGER PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL UNIQUE,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS IF NOT EXISTS User (
   profile_picture_link TEXT
 );
 
-CREATE TABLE IF NOT EXISTS IF NOT EXISTS UserMessage (
+CREATE TABLE IF NOT EXISTS UserMessage (
   message_id INTEGER PRIMARY KEY,
   sender_id INTEGER NOT NULL,
   recipient_id INTEGER NOT NULL,
@@ -45,17 +45,19 @@ CREATE TABLE IF NOT EXISTS SkillCategory (
 );
 
 CREATE TABLE IF NOT EXISTS SkillCategoryByUser (
-  skill_category_id INTEGER PRIMARY KEY NOT NULL,
-  user_id INTEGER PRIMARY KEY NOT NULL,
+  skill_category_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
   
     FOREIGN KEY (skill_category_id)
       REFERENCES SkillCategory(skill_category_id),
   
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id)
+      REFERENCES User(user_id),
+    
+    PRIMARY KEY (skill_category_id, user_id)
 );
 
-CREATE TABLE IF NOT EXISTS PaymentType (
+CREATE TABLE IF NOT EXISTS PaymentContent (
   payment_id INTEGER PRIMARY KEY,
   payment_name TEXT NOT NULL UNIQUE
 );
@@ -67,18 +69,20 @@ CREATE TABLE IF NOT EXISTS JobPayment (
     FOREIGN KEY (job_id)
       REFERENCES JobContent(job_id),
     FOREIGN KEY (payment_id)
-      REFERENCES PaymentType(payment_id)
+      REFERENCES PaymentContent(payment_id)
 );
 
 CREATE TABLE IF NOT EXISTS JobCategoryByUser (
-  job_category_id INTEGER PRIMARY KEY NOT NULL,
-  user_id INTEGER PRIMARY KEY NOT NULL,
+  job_category_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
   
     FOREIGN KEY (job_category_id)
       REFERENCES JobCategory(job_category_id),
   
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id)
+      REFERENCES User(user_id),
+
+    PRIMARY KEY (job_category_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS LeaderboardContent (
@@ -89,12 +93,13 @@ CREATE TABLE IF NOT EXISTS LeaderboardContent (
 );
 
 CREATE TABLE IF NOT EXISTS UserBadge (
-  user_id INTEGER PRIMARY KEY NOT NULL,
-  badge_id INTEGER PRIMARY KEY NOT NULL,
+  user_id INTEGER NOT NULL,
+  badge_id INTEGER NOT NULL,
     FOREIGN KEY (user_id)
       REFERENCES User(user_id),
     FOREIGN KEY (badge_id)
-      REFERENCES BadgeContent(badge_id)
+      REFERENCES BadgeContent(badge_id),
+    PRIMARY KEY (user_id, badge_id)
 );
 
 CREATE TABLE IF NOT EXISTS CertificationContent (
@@ -114,19 +119,21 @@ CREATE TABLE IF NOT EXISTS JobContent (
 );
 
 CREATE TABLE IF NOT EXISTS SkillCategoriesByJob (
-  job_id INTEGER PRIMARY KEY NOT NULL,
-  skill_category_id INTEGER PRIMARY KEY NOT NULL,
+  job_id INTEGER NOT NULL,
+  skill_category_id INTEGER NOT NULL,
   
     FOREIGN KEY (skill_category_id)
       REFERENCES SkillCategory(skill_category_id),
   
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id)
+      REFERENCES JobContent(job_id),
+    
+    PRIMARY KEY (job_id, skill_category_id)
 );
 
 CREATE TABLE IF NOT EXISTS JobReview (
   review_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
-  job_id INTEGER NOT NULL UNIQUE
+  job_id INTEGER NOT NULL UNIQUE,
 
     FOREIGN KEY(review_id)
       REFERENCES ReviewContent(review_id),
@@ -145,19 +152,21 @@ CREATE TABLE IF NOT EXISTS ReviewContent (
 );
 
 CREATE TABLE IF NOT EXISTS OrganizationMember (
-  org_id INTEGER PRIMARY KEY NOT NULL,
-  user_id INTEGER PRIMARY KEY NOT NULL,
+  org_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
   
     FOREIGN KEY (org_id)
       REFERENCES User(user_id),
   
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id)
+      REFERENCES User(user_id),
+
+    PRIMARY KEY (org_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS EmployerJob (
   job_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
-  employer_id INTEGER NOT NULL UNIQUE,
+  employer_id INTEGER NOT NULL,
 
     FOREIGN KEY (job_id)
       REFERENCES JobContent(job_id),
@@ -166,90 +175,123 @@ CREATE TABLE IF NOT EXISTS EmployerJob (
 );
 
 CREATE TABLE IF NOT EXISTS JobCategoriesByJob (
-  job_id INTEGER PRIMARY KEY NOT NULL,
-  job_category_id INTEGER PRIMARY KEY NOT NULL,
+  job_id INTEGER NOT NULL,
+  job_category_id INTEGER NOT NULL,
   
     FOREIGN KEY (job_id)
       REFERENCES JobContent(job_id),
   
     FOREIGN KEY (job_category_id)
-      REFERENCES JobCategory(job_category_id)
+      REFERENCES JobCategory(job_category_id),
+    
+    PRIMARY KEY (job_id, job_category_id)
 );
-
--- CONTINUE BELOW
 
 CREATE TABLE IF NOT EXISTS MessageContent (
   message_id INTEGER PRIMARY KEY,
-  message_content TEXT,
-  datetime TEXT
+  message_content TEXT NOT NULL,
+  datetime TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS AchievementMetric (
-  metric_id INTEGER PRIMARY KEY ,
-  metric_name TEXT,
+  metric_id INTEGER PRIMARY KEY,
+  metric_name TEXT NOT NULL UNIQUE,
   description TEXT
 );
 
 CREATE TABLE IF NOT EXISTS AchievementContent (
   achievement_id INTEGER PRIMARY KEY ,
-  achievement_name TEXT,
-  metric_id INTEGER,
+  achievement_name TEXT NOT NULL UNIQUE,
+  metric_id INTEGER NOT NULL,
   badge_id INTEGER,
-  required_quantity INTEGER,
-  
+  required_quantity INTEGER NOT NULL,
+    FOREIGN KEY (badge_id)
+      REFERENCES BadgeContent(badge_id),
     FOREIGN KEY (metric_id)
       REFERENCES AchievementMetric(metric_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserAchievement (
-  user_id INTEGER PRIMARY KEY,
-  achievement_id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  achievement_id INTEGER NOT NULL,
 
-  
+    FOREIGN KEY(user_id)
+      REFERENCES User(user_id),
+
     FOREIGN KEY (achievement_id)
-      REFERENCES AchievementContent(achievement_id)
+      REFERENCES AchievementContent(achievement_id),
+    
+    PRIMARY KEY (user_id, achievement_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserSpecies (
-  user_id INTEGER PRIMARY KEY ,
-  species TEXT
+  user_id INTEGER PRIMARY KEY NOT NULL,
+  species TEXT NOT NULL,
+
+  FOREIGN KEY (user_id)
+    REFERENCES User(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS PetOwner (
-  owner_id INTEGER PRIMARY KEY ,
-  pet_id INTEGER PRIMARY KEY ,
+  owner_id INTEGER NOT NULL,
+  pet_id INTEGER NOT NULL,
   
     FOREIGN KEY (pet_id)
-      REFERENCES User(profile_picture_link),
+      REFERENCES User(user_id),
   
     FOREIGN KEY (owner_id)
-      REFERENCES User(profile_picture_link)
+      REFERENCES User(user_id),
+    
+    PRIMARY KEY (owner_id, pet_id)
 );
 
 CREATE TABLE IF NOT EXISTS EmployeeJob (
-  job_id INTEGER PRIMARY KEY ,
-  employee_id INTEGER PRIMARY KEY ,
-  
+  job_id INTEGER NOT NULL,
+  employee_id INTEGER NOT NULL,
+    
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id)
+      REFERENCES JobContent(job_id),
+
+    FOREIGN KEY (employee_id)
+      REFERENCES User(user_id),
+
+    PRIMARY KEY (job_id, employee_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserSecurityAnswer (
-  user_id INTEGER PRIMARY KEY ,
-  question_id INTEGER PRIMARY KEY,
-  answer_text TEXT
+  user_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  answer_text TEXT NOT NULL,
+
+  FOREIGN KEY (user_id)
+    REFERENCES User(user_id),
+
+  FOREIGN KEY (question_id)
+    REFERENCES SecurityQuestion(question_id),
+  
+  PRIMARY KEY (user_id, question_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserCertification (
-  user_id INTEGER PRIMARY KEY ,
-  certification_id INTEGER PRIMARY KEY ,
-  
+  user_id INTEGER NOT NULL,
+  certification_id INTEGER NOT NULL,
+
+    FOREIGN KEY (user_id)
+      REFERENCES User(user_id),
+
     FOREIGN KEY (certification_id)
-      REFERENCES CertificationContent(certification_id)
+      REFERENCES CertificationContent(certification_id),
+    
+    PRIMARY KEY (user_id, certification_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserReview (
-  review_id INTEGER PRIMARY KEY,
-  user_id INTEGER
+  review_id INTEGER PRIMARY KEY UNIQUE,
+  user_id INTEGER NOT NULL,
+
+  FOREIGN KEY (review_id)
+    REFERENCES ReviewContent(review_id),
+  FOREIGN KEY (user_id)
+    REFERENCES User(user_id)
 );
 
