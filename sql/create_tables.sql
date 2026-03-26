@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS SecurityQuestion (
 CREATE TABLE IF NOT EXISTS User (
   user_id INTEGER PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
-  password TEXT NOT NULL UNIQUE,
-  phone_number TEXT,
+  password TEXT NOT NULL,
+  phone_number TEXT UNIQUE,
   email TEXT UNIQUE,
   zipcode INTEGER,
   profile_description TEXT,
