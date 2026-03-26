@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/cs205-sp-26/final-project-fluff-buddies#readme",
   "dependencies": {
+    "better-sqlite3": "^12.8.0",
     "ejs": "^5.0.1",
     "express": "^5.2.1"
   }

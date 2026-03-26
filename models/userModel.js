@@ -44,27 +44,51 @@ class userModel {
 
     return info;
   }
-  /*
-  update(user_id, new_username = null, new_email = null) {
-    const query = 'UPDATE User SET username = ?, email = ? WHERE user_id = ?';
+  
+  update(user_id, new_username = null, new_password = null, new_phone_number = null, new_email = null, new_zipcode = null, new_profile_description = null, new_account_type = null, new_profile_picture_link = null) {
+    const query = 'UPDATE User SET username = ?, password = ?, phone_number = ?, email = ?, zipcode = ?, profile_description = ?, account_type = ?, profile_picture_link = ? WHERE user_id = ?';
 
     const user_info = this.retrieve(user_id);
-
+    
     if(new_username == null){
       new_username = user_info.username;
+    }
+
+    if(new_password == null){
+      new_password = user_info.password;
+    }
+
+    if(new_phone_number == null){
+      new_phone_number = user_info.phone_number;
     }
 
     if(new_email == null){
       new_email = user_info.email;
     }
 
+    if(new_zipcode == null){
+      new_zipcode = user_info.zipcode;
+    }
+
+    if(new_profile_description == null){
+      new_profile_description = user_info.profile_description;
+    }
+
+    if(new_account_type == null){
+      new_account_type = user_info.account_type;
+    }
+
+    if(new_profile_picture_link == null){
+      new_profile_picture_link = user_info.profile_picture_link;
+    }
+
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(new_username, new_email, user_id);
+    const info = stmt.run(new_username, new_password, new_phone_number, new_email, new_zipcode, new_profile_description, new_account_type, new_profile_picture_link, user_id);
 
     return this.retrieve(user_id);
   }
-  */
+  
 
   get_user_id(username){
     const query = 'SELECT user_id FROM User WHERE username = ?';
