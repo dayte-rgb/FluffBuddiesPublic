@@ -21,11 +21,11 @@ CREATE TABLE IF NOT EXISTS User (
 CREATE TABLE IF NOT EXISTS UserMessage (
   message_id INTEGER PRIMARY KEY,
   sender_id INTEGER NOT NULL,
-  recipient_id INTEGER NOT NULL,
+  recipient_id INTEGER,
     FOREIGN KEY (recipient_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE SET NULL,
     FOREIGN KEY (sender_id)
-      REFERENCES User(user_id)
+      REFERENCES User(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS JobCategory (
@@ -49,10 +49,10 @@ CREATE TABLE IF NOT EXISTS SkillCategoryByUser (
   user_id INTEGER NOT NULL,
   
     FOREIGN KEY (skill_category_id)
-      REFERENCES SkillCategory(skill_category_id),
+      REFERENCES SkillCategory(skill_category_id) ON DELETE CASCADE,
   
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
     
     PRIMARY KEY (skill_category_id, user_id)
 );
@@ -65,11 +65,11 @@ CREATE TABLE IF NOT EXISTS PaymentContent (
 CREATE TABLE IF NOT EXISTS JobPayment (
   job_id INTEGER PRIMARY KEY NOT NULL,
   payment_id INTEGER NOT NULL,
-  payment_quantity INTEGER NOT NULL,
+  payment_quantity INTEGER NOT NULL CHECK(payment_quantity >= 0),
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id),
+      REFERENCES JobContent(job_id)  ON DELETE CASCADE,
     FOREIGN KEY (payment_id)
-      REFERENCES PaymentContent(payment_id)
+      REFERENCES PaymentContent(payment_id)  ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS JobCategoryByUser (
@@ -77,10 +77,10 @@ CREATE TABLE IF NOT EXISTS JobCategoryByUser (
   user_id INTEGER NOT NULL,
   
     FOREIGN KEY (job_category_id)
-      REFERENCES JobCategory(job_category_id),
+      REFERENCES JobCategory(job_category_id)  ON DELETE CASCADE,
   
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id)  ON DELETE CASCADE,
 
     PRIMARY KEY (job_category_id, user_id)
 );
@@ -96,9 +96,9 @@ CREATE TABLE IF NOT EXISTS UserBadge (
   user_id INTEGER NOT NULL,
   badge_id INTEGER NOT NULL,
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id)  ON DELETE CASCADE,
     FOREIGN KEY (badge_id)
-      REFERENCES BadgeContent(badge_id),
+      REFERENCES BadgeContent(badge_id)  ON DELETE CASCADE,
     PRIMARY KEY (user_id, badge_id)
 );
 
@@ -112,10 +112,10 @@ CREATE TABLE IF NOT EXISTS JobContent (
   job_id INTEGER PRIMARY KEY ,
   description TEXT,
   datetime TEXT,
-  duration INTEGER,
+  duration INTEGER CHECK(duration >= 0),
   zipcode INTEGER,
-  employee_num INTEGER NOT NULL,
-  job_filled BOOLEAN NOT NULL
+  employee_num INTEGER NOT NULL CHECK(employee_num > 0),
+  job_filled INTEGER NOT NULL CHECK(job_filled IN (0, 1))
 );
 
 CREATE TABLE IF NOT EXISTS SkillCategoriesByJob (
@@ -123,10 +123,10 @@ CREATE TABLE IF NOT EXISTS SkillCategoriesByJob (
   skill_category_id INTEGER NOT NULL,
   
     FOREIGN KEY (skill_category_id)
-      REFERENCES SkillCategory(skill_category_id),
+      REFERENCES SkillCategory(skill_category_id)  ON DELETE CASCADE,
   
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id),
+      REFERENCES JobContent(job_id)  ON DELETE CASCADE,
     
     PRIMARY KEY (job_id, skill_category_id)
 );
@@ -136,19 +136,19 @@ CREATE TABLE IF NOT EXISTS JobReview (
   job_id INTEGER NOT NULL UNIQUE,
 
     FOREIGN KEY(review_id)
-      REFERENCES ReviewContent(review_id),
+      REFERENCES ReviewContent(review_id) ON DELETE CASCADE,
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id)
+      REFERENCES JobContent(job_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS ReviewContent (
   review_id INTEGER PRIMARY KEY ,
-  punctuality INTEGER,
-  quality INTEGER,
-  friendliness INTEGER,
+  punctuality INTEGER CHECK(punctuality IN (0,1,2,3,4,5)),
+  quality INTEGER CHECK(quality IN (0,1,2,3,4,5)),
+  friendliness INTEGER CHECK(friendliness IN (0,1,2,3,4,5)),
   comments TEXT,
   datetime TEXT NOT NULL,
-  verified BOOLEAN NOT NULL
+  verified INTEGER NOT NULL CHECK(verified IN (0,1))
 );
 
 CREATE TABLE IF NOT EXISTS OrganizationMember (
@@ -156,10 +156,10 @@ CREATE TABLE IF NOT EXISTS OrganizationMember (
   user_id INTEGER NOT NULL,
   
     FOREIGN KEY (org_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
   
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
 
     PRIMARY KEY (org_id, user_id)
 );
@@ -169,9 +169,9 @@ CREATE TABLE IF NOT EXISTS EmployerJob (
   employer_id INTEGER NOT NULL,
 
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id),
+      REFERENCES JobContent(job_id) ON DELETE CASCADE,
     FOREIGN KEY (employer_id)
-      REFERENCES User(user_id)
+      REFERENCES User(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS JobCategoriesByJob (
@@ -179,10 +179,10 @@ CREATE TABLE IF NOT EXISTS JobCategoriesByJob (
   job_category_id INTEGER NOT NULL,
   
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id),
+      REFERENCES JobContent(job_id) ON DELETE CASCADE,
   
     FOREIGN KEY (job_category_id)
-      REFERENCES JobCategory(job_category_id),
+      REFERENCES JobCategory(job_category_id) ON DELETE CASCADE,
     
     PRIMARY KEY (job_id, job_category_id)
 );
@@ -204,11 +204,11 @@ CREATE TABLE IF NOT EXISTS AchievementContent (
   achievement_name TEXT NOT NULL UNIQUE,
   metric_id INTEGER NOT NULL,
   badge_id INTEGER,
-  required_quantity INTEGER NOT NULL,
+  required_quantity INTEGER NOT NULL CHECK(required_quantity >= 0),
     FOREIGN KEY (badge_id)
-      REFERENCES BadgeContent(badge_id),
+      REFERENCES BadgeContent(badge_id) ON DELETE SET NULL,
     FOREIGN KEY (metric_id)
-      REFERENCES AchievementMetric(metric_id)
+      REFERENCES AchievementMetric(metric_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS UserAchievement (
@@ -216,10 +216,10 @@ CREATE TABLE IF NOT EXISTS UserAchievement (
   achievement_id INTEGER NOT NULL,
 
     FOREIGN KEY(user_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
 
     FOREIGN KEY (achievement_id)
-      REFERENCES AchievementContent(achievement_id),
+      REFERENCES AchievementContent(achievement_id) ON DELETE CASCADE,
     
     PRIMARY KEY (user_id, achievement_id)
 );
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS UserSpecies (
   species TEXT NOT NULL,
 
   FOREIGN KEY (user_id)
-    REFERENCES User(user_id)
+    REFERENCES User(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS PetOwner (
@@ -237,10 +237,10 @@ CREATE TABLE IF NOT EXISTS PetOwner (
   pet_id INTEGER NOT NULL,
   
     FOREIGN KEY (pet_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
   
     FOREIGN KEY (owner_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
     
     PRIMARY KEY (owner_id, pet_id)
 );
@@ -250,10 +250,10 @@ CREATE TABLE IF NOT EXISTS EmployeeJob (
   employee_id INTEGER NOT NULL,
     
     FOREIGN KEY (job_id)
-      REFERENCES JobContent(job_id),
+      REFERENCES JobContent(job_id) ON DELETE CASCADE,
 
     FOREIGN KEY (employee_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
 
     PRIMARY KEY (job_id, employee_id)
 );
@@ -264,10 +264,10 @@ CREATE TABLE IF NOT EXISTS UserSecurityAnswer (
   answer_text TEXT NOT NULL,
 
   FOREIGN KEY (user_id)
-    REFERENCES User(user_id),
+    REFERENCES User(user_id) ON DELETE CASCADE,
 
   FOREIGN KEY (question_id)
-    REFERENCES SecurityQuestion(question_id),
+    REFERENCES SecurityQuestion(question_id) ON DELETE CASCADE,
   
   PRIMARY KEY (user_id, question_id)
 );
@@ -277,10 +277,10 @@ CREATE TABLE IF NOT EXISTS UserCertification (
   certification_id INTEGER NOT NULL,
 
     FOREIGN KEY (user_id)
-      REFERENCES User(user_id),
+      REFERENCES User(user_id) ON DELETE CASCADE,
 
     FOREIGN KEY (certification_id)
-      REFERENCES CertificationContent(certification_id),
+      REFERENCES CertificationContent(certification_id) ON DELETE CASCADE,
     
     PRIMARY KEY (user_id, certification_id)
 );
@@ -290,8 +290,8 @@ CREATE TABLE IF NOT EXISTS UserReview (
   user_id INTEGER NOT NULL,
 
   FOREIGN KEY (review_id)
-    REFERENCES ReviewContent(review_id),
+    REFERENCES ReviewContent(review_id) ON DELETE CASCADE,
   FOREIGN KEY (user_id)
-    REFERENCES User(user_id)
+    REFERENCES User(user_id) ON DELETE CASCADE
 );
 
