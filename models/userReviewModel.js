@@ -1,6 +1,6 @@
 const { connectToDatabase } = require('../database');
 
-class employeeJobModel {
+class userReviewModel {
   constructor() {
     this.db = connectToDatabase();
   }
@@ -53,3 +53,5 @@ class employeeJobModel {
     return old_info;
   }
 }
+
+module.exports = userReviewModel;
