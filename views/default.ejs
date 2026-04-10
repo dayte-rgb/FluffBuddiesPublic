@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EJS Example</title>
+</head>
+<body>
+    <h1>Welcome, <%= name %>!</h1>
+    <p>Here are some items:</p>
+    <ul>
+        <% items.forEach(item => { %>
+            <li><%= item %></li>
+        <% }); %>
+    </ul>
+</body>
+</html>
