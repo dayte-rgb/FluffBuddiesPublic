@@ -1,0 +1,41 @@
+const { connectToDatabase } = require('../database');
+
+class organizationMemberModel {
+  constructor() {
+    this.db = connectToDatabase();
+  }
+
+  create(org_id, user_id){
+    const query = "INSERT INTO OrganizationMember (org_id, user_id) VALUES (?, ?)";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.run(org_id, user_id);
+
+    return {org_id, user_id};
+  }
+
+  retrieve(org_id, user_id){
+    const query = "SELECT * FROM OrganizationMember WHERE org_id = ? AND user_id = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.run(org_id, user_id);
+
+    return info
+  }
+
+  delete(org_id, user_id){
+    const query = "DELETE FROM OrganizationMember WHERE org_id = ? AND user_id = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const old_info = this.retrieve(org_id, user_id);
+
+    const info = stmt.run(org_id, user_id);
+
+    return old_info;
+  }
+}
+
+module.exports = organizationMemberModel;
