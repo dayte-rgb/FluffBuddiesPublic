@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<head>>
+  <title>Review – <%= worker_name %></title>
+  <link rel="stylesheet" href="review.css" />
+</head>
+<body>
+
+<div class="card">
+  <h1>Leave a Review</h1>
+
+  <p class="subtitle">Job: <%= job_title %> — <%= job_date %></p>
+
+  <form id="review-form">
+
+    <input type="hidden" id="job_id" value="<%= job_id %>">
+
+    <div class="metric">
+      <label>Punctuality</label>
+      <div class="stars">
+        <input type="radio" name="punctuality" id="p5" value="5"><label for="p5">★</label>
+        <input type="radio" name="punctuality" id="p4" value="4"><label for="p4">★</label>
+        <input type="radio" name="punctuality" id="p3" value="3"><label for="p3">★</label>
+        <input type="radio" name="punctuality" id="p2" value="2"><label for="p2">★</label>
+        <input type="radio" name="punctuality" id="p1" value="1"><label for="p1">★</label>
+      </div>
+    </div>
+
+    <div class="metric">
+      <label>Quality of Work</label>
+      <div class="stars">
+        <input type="radio" name="quality" id="q5" value="5"><label for="q5">★</label>
+        <input type="radio" name="quality" id="q4" value="4"><label for="q4">★</label>
+        <input type="radio" name="quality" id="q3" value="3"><label for="q3">★</label>
+        <input type="radio" name="quality" id="q2" value="2"><label for="q2">★</label>
+        <input type="radio" name="quality" id="q1" value="1"><label for="q1">★</label>
+      </div>
+    </div>
+
+    <div class="metric">
+      <label>Friendliness</label>
+      <div class="stars">
+        <input type="radio" name="friendliness" id="f5" value="5"><label for="f5">★</label>
+        <input type="radio" name="friendliness" id="f4" value="4"><label for="f4">★</label>
+        <input type="radio" name="friendliness" id="f3" value="3"><label for="f3">★</label>
+        <input type="radio" name="friendliness" id="f2" value="2"><label for="f2">★</label>
+        <input type="radio" name="friendliness" id="f1" value="1"><label for="f1">★</label>
+      </div>
+    </div>
+
+    <div class="overall-box">
+      <div>
+        <div class="avg-label">Overall average</div>
+        <div class="avg" id="overall-display">—</div>
+      </div>
+      <div id="overall-stars"></div>
+    </div>
+
+    <div class="metric">
+      <label>Additional Comments (optional)</label>
+      <textarea id="comments" rows="3" placeholder="Describe the service..."></textarea>
+    </div>
+
+    <button type="submit">Submit Review</button>
+    <p id="error-msg">Please rate all three categories before submitting.</p>
+
+  </form>
+
+  <div id="success">
+    <div class="checkmark">✓</div>
+    <h1>Review submitted!</h1>
+    <p>Your review has been recorded. It will take effect once the job is verified.</p>
+  </div>
+</div>
+
+<script src="review.js"></script>
+</body>
+</html>

@@ -43,7 +43,6 @@ app.get('/default', (req, res) => {
         items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
     });
 });
-
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
