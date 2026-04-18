@@ -12,6 +12,12 @@ const reviewContentModel = require('./models/reviewContentModel.js');
 const reviewContent = new reviewContentModel();
 const employeeJobModel = require('./models/employeeJobModel');
 const employeeJob = new employeeJobModel();
+const JobSearchModel = require('./models/JobSearchModel');
+const jobSearch = new JobSearchModel();
+const jobCategoryModel = require('./models/jobCategoryModel');
+const jobCategory = new jobCategoryModel();
+const skillCategoryModel = require('./models/skillCategoryModel');
+const skillCategory = new skillCategoryModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -53,8 +59,23 @@ app.get('/default', (req, res) => {
 });
 
 // Displays job search query page
-app.get('/job_search', (req, res) => {
+app.get('/job-search', (req, res) => {
+  const jobCategories = jobCategory.retrieveAll();
+  const skillCategories = skillCategory.retrieveAll();
+  
+  res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
+});
 
+// Handles execution of search query
+app.post('/job-search', (req, res) => {
+  const { zipcode, keyword, job_category, skill_category } = req.body;
+  
+  const results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_category || null, job_category || null);
+  
+  const jobCategories = jobCategory.retrieveAll();
+  const skillCategories = skillCategory.retrieveAll();
+  
+  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_category, skill_category } });
 });
 
 // Display a page with details of a selected job listing

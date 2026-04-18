@@ -25,6 +25,16 @@ class jobCategoryModel {
     return info;
   }
 
+  retrieveAll(){
+    const query = "SELECT * FROM JobCategory";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(job_category_id, category_name){
     const query = "UPDATE JobCategory SET category_name = ? WHERE job_category_id = ?";
 

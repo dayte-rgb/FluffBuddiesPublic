@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Search for Jobs - Fluff Buddies</title>
+</head>
+<body>
+    <h1> Search Filters </h1>
+
+    <form action="/job-search" method="POST">
+        <label for="zipcode">Zipcode:</label>
+        <input type="text" id="zipcode" name="zipcode" value="<%= searchParams ? searchParams.zipcode : '' %>"><br><br>
+
+        <label for="keyword">Keyword:</label>
+        <input type="text" id="keyword" name="keyword" value="<%= searchParams ? searchParams.keyword : '' %>"><br><br>
+
+        <label for="job_category">Job Category:</label>
+        <select id="job_category" name="job_category">
+            <option value="">Any</option>
+            <% jobCategories.forEach(cat => { %>
+                <option value="<%= cat.job_category_id %>" <%= searchParams && searchParams.job_category == cat.job_category_id ? 'selected' : '' %>><%= cat.category_name %></option>
+            <% }); %>
+        </select><br><br>
+
+        <label for="skill_category">Skill Category:</label>
+        <select id="skill_category" name="skill_category">
+            <option value="">Any</option>
+            <% skillCategories.forEach(cat => { %>
+                <option value="<%= cat.skill_category_id %>" <%= searchParams && searchParams.skill_category == cat.skill_category_id ? 'selected' : '' %>><%= cat.category_name %></option>
+            <% }); %>
+        </select><br><br>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <h1> Search Results </h1>
+
+    <% if (results && results.length > 0) { %>
+        <ul>
+            <% results.forEach(job => { %>
+                <li>
+                    <h3><%= job.description %></h3>
+                    <p>Date & Time: <%= job.datetime %></p>
+                    <p>Zip Code: <%= job.zipcode %></p>
+                    <p>Duration: <%= job.duration %></p>
+                    <a href="/booking/<%= job.job_id %>">View Details</a>
+                </li>
+            <% }); %>
+        </ul>
+    <% } else if (results) { %>
+        <p>No jobs found matching your criteria.</p>
+    <% } %>
+
+    <a href="/">Back to Landing Page</a>
+</body>
+</html>
