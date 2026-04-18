@@ -13,11 +13,15 @@ INSERT INTO User VALUES
 -- insert data into JobCategory
 -- (<job_category_id>, <category_name>)
 INSERT INTO JobCategory VALUES
-(1, "Dog Walking"),
+(1, "Other"),
 (2, "Pet Sitting"),
-(3, "Grooming"),
-(4, "Veterinary Assistance"),
-(5, "Training");
+(3, "Leisure"),
+(4, "Educational"),
+(5, "Transporation")
+(6, "Maintenance"),
+(7, "Grooming"),
+(8, "Heavy-Duty Labor"),
+(9, "Light Labor");
 
 -- insert data into BadgeContent
 -- (NULL, <badge_name>, <badge_image_link>)
@@ -30,11 +34,16 @@ INSERT INTO BadgeContent VALUES
 -- insert data into SkillCategory
 -- (<skill_category_id>, <category_name>)
 INSERT INTO SkillCategory VALUES
-(1, "Dog Handling"),
-(2, "Cat Care"),
-(3, "First Aid"),
-(4, "Obedience Training"),
-(5, "Exotic Animals");
+(1, "Other"),
+(2, "Technical"),
+(3, "Hands-On"),
+(4, "Organization"),
+(5, "Problem-Solving")
+(6, "Communication"),
+(7, "Teamwork"),
+(8, "Emotional-Intelligence"),
+(9, "Soft Skills");
+
 
 -- insert data into PaymentContent
 -- (NULL, <payment_name>)
@@ -156,8 +165,8 @@ INSERT INTO UserMessage VALUES
 -- (<metric_id>, <metric_name>, <description>)
 INSERT INTO AchievementMetric VALUES
 (1, "Jobs Completed", "Total number of jobs successfully completed"),
-(2, "5-Star Reviews", "Total number of five-star reviews received"),
-(3, "Hours Worked", "Total hours worked across all jobs"),
+(2, "Age of Account", "Measures the age of the account"),
+(3, "Average Rating", "Compares the average rating of the user to a specific number"),
 (4, "Repeat Clients", "Number of clients who have booked more than once");
 
 -- insert data into AchievementContent

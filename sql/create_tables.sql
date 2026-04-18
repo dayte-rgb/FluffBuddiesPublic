@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS User (
   zipcode INTEGER,
   profile_description TEXT,
   account_type CHECK( account_type IN ('pet', 'owner', 'organization', 'user')) NOT NULL,
-  profile_picture_link TEXT
+  profile_picture_link TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS UserMessage (
