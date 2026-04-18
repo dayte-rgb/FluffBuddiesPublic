@@ -25,6 +25,16 @@ class skillCategoryModel {
     return info;
   }
 
+  retrieveAll(){
+    const query = "SELECT * FROM SkillCategory";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(skill_category_id, category_name){
     const query = "UPDATE SkillCategory SET category_name = ? WHERE skill_category_id = ?";
 

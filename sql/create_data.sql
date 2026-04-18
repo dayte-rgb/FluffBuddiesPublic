@@ -5,7 +5,10 @@ INSERT INTO User VALUES
 (NULL, "john_owner", "password123", "610-555-0101", "john@gmail.com", "18042", "Dog lover looking for reliable pet sitters", 'owner', "john_pic.jpeg"),
 (NULL, "fluffy_dog", "pawword1", "610-555-0202", "fluffy@gmail.com", "18045", "Friendly golden retriever, loves walks", 'pet', "fluffy_pic.jpeg"),
 (NULL, "paws_org", "orgpass1", "610-555-0303", "paws@pawsorg.com", "18101", "Local animal shelter and rescue organization", 'organization', "paws_logo.jpeg"),
-(NULL, "sarah_owner", "securepass", "610-555-0404", "sarah@gmail.com", "18042", "Cat mom of three, needs occasional help", 'owner', "sarah_pic.jpeg");
+(NULL, "sarah_owner", "incorrect", "610-555-0404", "sarah@gmail.com", "12871", "Cat mom of three, needs occasional help", 'owner', "sarah_pic.jpeg"),
+(NULL, "mike_walker", "mypassword", "610-555-0505", "mike@gmail.com", "32232", "Experienced dog walker available weekends", 'user', "mike_pic.jpeg"),
+(NULL, "lisa_sitter", "4", "610-555-0606", "lisa@gmail.com", "23984", "Pet sitter with 5 years experience", 'user', "lisa_pic.jpeg"),
+(NULL, "groom_org", "donthackme", "610-555-0707", "groom@groomorg.com", "71129", "Professional grooming services", 'organization', "groom_logo.jpeg");
 
 -- insert data into JobCategory
 -- (<job_category_id>, <category_name>)
@@ -47,7 +50,39 @@ INSERT INTO JobContent VALUES
 (NULL, "Need someone to walk my golden retriever every weekday morning", "2025-04-01 08:00:00", 60, 18042, 1, FALSE),
 (NULL, "Looking for a pet sitter for a weekend while I travel", "2025-04-10 09:00:00", 2880, 18045, 1, FALSE),
 (NULL, "Dog grooming needed before a show", "2025-04-05 14:00:00", 120, 18101, 1, TRUE),
-(NULL, "Help needed caring for 3 cats while owner is away", "2025-04-15 10:00:00", 1440, 18042, 1, FALSE);
+(NULL, "Help needed caring for 3 cats while owner is away", "2025-04-15 10:00:00", 1440, 12967, 1, FALSE),
+(NULL, "Weekend dog walking for energetic husky", "2025-04-20 07:00:00", 90, 35234, 2, FALSE),
+(NULL, "Cat sitting needed for vacation", "2025-04-25 08:00:00", 3563646, 17221, 2, FALSE),
+(NULL, "Dog training sessions for obedience", "2025-04-18 16:00:00", 123312, 18042, 3, FALSE),
+(NULL, "Bird cage cleaning and feeding", "2025-04-22 10:00:00", 6764332, 18045, 4, FALSE),
+(NULL, "Horse grooming and exercise", "2025-04-28 06:00:00", 9999, 25452, 4, FALSE);
+
+-- insert data into JobCategoriesByJob
+-- (<job_id>, <job_category_id>)
+INSERT INTO JobCategoriesByJob VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 2),
+(5, 1),
+(6, 2),
+(7, 5),
+(8, 2),
+(9, 3);
+
+-- insert data into SkillCategoriesByJob
+-- (<job_id>, <skill_category_id>)
+INSERT INTO SkillCategoriesByJob VALUES
+(1, 1),
+(2, 1),
+(2, 2),
+(3, 1),
+(4, 2),
+(5, 1),
+(6, 2),
+(7, 4),
+(8, 5),
+(9, 1);
 
 -- insert data into JobPayment
 -- (<job_id>, <payment_id>, <payment_quantity>)
@@ -55,7 +90,12 @@ INSERT INTO JobPayment VALUES
 (1, 1, 20),
 (2, 3, 80),
 (3, 2, 60),
-(4, 4, 25);
+(4, 4, 25),
+(5, 1, 25),
+(6, 3, 120),
+(7, 1, 50),
+(8, 4, 15),
+(9, 2, 75);
 
 -- insert data into EmployerJob
 -- (<job_id>, <employer_id>)
@@ -63,7 +103,12 @@ INSERT INTO EmployerJob VALUES
 (1, 2),
 (2, 2),
 (3, 4),
-(4, 5);
+(4, 5),
+(5, 2),
+(6, 5),
+(7, 2),
+(8, 4),
+(9, 4);
 
 -- insert data into LeaderboardContent
 -- (NULL, <reward_badge_id>, <start_time>, <end_time>)
