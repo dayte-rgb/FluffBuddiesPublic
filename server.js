@@ -4,6 +4,12 @@ const path = require('path');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
 const logger = new Log('requests.log', true);
+const jobContentModel = require('./models/jobContentModel');
+const jobContent = new jobContentModel();
+const jobReviewModel = require('./models/jobReviewModel.js');
+const jobReview = new jobReviewModel();
+const reviewContentModel = require('./models/reviewContentModel.js');
+const reviewContent = new reviewContentModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -43,6 +49,24 @@ app.get('/default', (req, res) => {
         items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
     });
 });
+
+// Displays job search query page
+app.get('/job_search', (req, res) => {
+
+});
+
+// Display a page with details of a selected job listing
+app.get('/booking/:job_id', (req, res) => {
+  let jobData = jobContent.retrieve(req.params.job_id);
+  let reviews= jobReview.retrieveByJobID(req.params.job_id);
+  let reviewData = [];
+  for(let i = 0; i < reviews.length; i++){
+    reviewData.push(reviewContent.retrieve(reviews[i].review_id));
+  }
+
+  res.render('booking-detail', { jobData, reviewData });
+});
+
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;

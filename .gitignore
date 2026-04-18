@@ -20,3 +20,6 @@ node_modules/
 
 # stryker temp files
 .stryker-tmp
+
+# Log file
+requests.log
