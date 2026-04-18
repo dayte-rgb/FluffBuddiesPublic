@@ -10,6 +10,8 @@ const jobReviewModel = require('./models/jobReviewModel.js');
 const jobReview = new jobReviewModel();
 const reviewContentModel = require('./models/reviewContentModel.js');
 const reviewContent = new reviewContentModel();
+const employeeJobModel = require('./models/employeeJobModel');
+const employeeJob = new employeeJobModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -65,6 +67,19 @@ app.get('/booking/:job_id', (req, res) => {
   }
 
   res.render('booking-detail', { jobData, reviewData });
+});
+
+// Handle booking a job
+app.post('/booking/:job_id', (req, res) => { 
+  const employee_id = req.body.employee_id;
+  
+  try {
+    employeeJob.create(req.params.job_id, employee_id);
+    res.json({ success: true, message: 'Job booked successfully!' });
+  } catch (error) {
+    console.error('Error booking job:', error);
+    res.status(500).json({ success: false, message: 'Failed to book job.' });
+  }
 });
 
 function write_res_log(res){

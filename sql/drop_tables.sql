@@ -33,5 +33,6 @@ DROP TABLE IF EXISTS EmployeeJob;
 DROP TABLE IF EXISTS UserSecurityAnswer;
 DROP TABLE IF EXISTS UserCertification;
 DROP TABLE IF EXISTS UserReview;
+DROP TABLE IF EXISTS PaymentContent;
 
 PRAGMA foreign_keys = ON;

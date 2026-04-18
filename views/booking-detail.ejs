@@ -13,6 +13,8 @@
 
     <p>Duration: <%= jobData.duration %></p>
 
+    <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>"> Click to book this job. </button>
+
     <% if(reviewData.length > 0 && reviewData) { %>
         <h1>Reviews</h1>
 
@@ -31,5 +33,6 @@
     <% } %>
 
     <a href="/">Back to Landing Page</a>
+    <script src="/js/booking-detail.js"></script>
 </body>
 </html>
