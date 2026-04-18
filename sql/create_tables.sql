@@ -205,7 +205,7 @@ CREATE TABLE IF NOT EXISTS AchievementContent (
   achievement_name TEXT NOT NULL UNIQUE,
   metric_id INTEGER NOT NULL,
   badge_id INTEGER,
-  required_quantity INTEGER NOT NULL CHECK(required_quantity >= 0),
+  required_quantity FLOAT NOT NULL CHECK(required_quantity >= 0),
     FOREIGN KEY (badge_id)
       REFERENCES BadgeContent(badge_id) ON DELETE SET NULL,
     FOREIGN KEY (metric_id)
