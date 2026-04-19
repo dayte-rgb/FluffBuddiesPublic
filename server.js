@@ -43,10 +43,9 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+
 app.get('/', (req, res) => {
-  res.status(200);
-  write_res_log(res);
-  res.redirect('index.html');
+  res.render('welcome');
 });
 
 // Define a route handler for GET requests to the URL ('/default')
@@ -81,14 +80,21 @@ app.post('/job-search', (req, res) => {
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', (req, res) => {
   let jobData = jobContent.retrieve(req.params.job_id);
-  let reviews= jobReview.retrieveByJobID(req.params.job_id);
+  if (!jobData) {
+    return res.status(404).send('Job not found');
+  }
+  let reviews = jobReview.retrieveByJobID(req.params.job_id);
   let reviewData = [];
-  for(let i = 0; i < reviews.length; i++){
+  for (let i = 0; i < reviews.length; i++) {
     reviewData.push(reviewContent.retrieve(reviews[i].review_id));
   }
-
-  res.render('booking-detail', { jobData, reviewData });
+  const {connectToDatabase} = require('./database.js');
+  const db = connectToDatabase();
+  const userData = db.prepare('SELECT * FROM User WHERE user_id = ?').get(jobData.employee_num);
+  
+  res.render('booking-detail', { jobData, reviewData, userData });
 });
+
 
 // Handle booking a job
 app.post('/booking/:job_id', (req, res) => { 

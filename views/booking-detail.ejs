@@ -1,37 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>Job Listing - Fluff Buddies</title>
+    <title>Job Listing - Paw Patrol</title>
+    <link rel="stylesheet" href="/css/default_stylesheet.css">
+    <link rel="stylesheet" href="/css/booking-detail.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
-    <h1>Job Listing: <%= jobData.description %></h1>
-    
-    <p>Date & Time: <%= jobData.datetime %></p>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+        <nav class="sidebar-nav">
+            <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+            <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+            <a href="/Leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-clipboard-list"></i></a>
+            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+        </nav>
+    </div>
 
-    <p>Zip Code: <%= jobData.zipcode %></p>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="card">
 
-    <p>Duration: <%= jobData.duration %></p>
-
-    <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>"> Click to book this job. </button>
-
-    <% if(reviewData.length > 0 && reviewData) { %>
-        <h1>Reviews</h1>
-
-        <% reviewData.forEach(review => { %>
-            <div class="review">
-                <p>Punctuality: <%= review.punctuality %></p>
-                <p>Quality: <%= review.quality %></p>
-                <p>Friendliness: <%= review.friendliness %></p>
-                <p><%= review.comments %></p>
-                <p>Creation Date: <%= review.datetime %></p>
-                <% if (review.verified == 1) { %>
-                    <p> This review has been verified. </p>
+            <!-- Profile Section -->
+            <div class="profile-pic-wrapper">
+                <% if(userData && userData.profile_picture_link) { %>
+                    <img src="<%= userData.profile_picture_link %>" alt="Profile Picture" class="profile-pic">
+                <% } else { %>
+                    <div class="profile-pic-placeholder">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                <% } %>
+                <% if(userData) { %>
+                    <p class="username">@<%= userData.username %></p>
                 <% } %>
             </div>
-        <% }); %>
-    <% } %>
 
-    <a href="/">Back to Landing Page</a>
+            <!-- Job Info -->
+            <h2 class="job-title"><%= jobData.description %></h2>
+            <div class="info-row">
+                <i class="fa-solid fa-calendar info-icon"></i>
+                <div>
+                    <span class="info-label">Date & Time</span>
+                    <span class="info-value"><%= jobData.datetime %></span>
+                </div>
+            </div>
+            <div class="info-row">
+                <i class="fa-solid fa-location-dot info-icon"></i>
+                <div>
+                    <span class="info-label">Zip Code</span>
+                    <span class="info-value"><%= jobData.zipcode %></span>
+                </div>
+            </div>
+            <div class="info-row">
+                <i class="fa-solid fa-clock info-icon"></i>
+                <div>
+                    <span class="info-label">Duration</span>
+                    <span class="info-value"><%= jobData.duration %> mins</span>
+                </div>
+            </div>
+
+            <!-- Book Button -->
+            <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>">
+                Book This Job
+            </button>
+        </div>
+
+        <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
+    </div>
+
     <script src="/js/booking-detail.js"></script>
 </body>
+
 </html>
