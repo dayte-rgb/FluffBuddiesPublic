@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Job Listing - Fluff Buddies</title>
+</head>
+<body>
+    <h1>Job Listing: <%= jobData.description %></h1>
+    
+    <p>Date & Time: <%= jobData.datetime %></p>
+
+    <p>Zip Code: <%= jobData.zipcode %></p>
+
+    <p>Duration: <%= jobData.duration %></p>
+
+    <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>"> Click to book this job. </button>
+
+    <% if(reviewData.length > 0 && reviewData) { %>
+        <h1>Reviews</h1>
+
+        <% reviewData.forEach(review => { %>
+            <div class="review">
+                <p>Punctuality: <%= review.punctuality %></p>
+                <p>Quality: <%= review.quality %></p>
+                <p>Friendliness: <%= review.friendliness %></p>
+                <p><%= review.comments %></p>
+                <p>Creation Date: <%= review.datetime %></p>
+                <% if (review.verified == 1) { %>
+                    <p> This review has been verified. </p>
+                <% } %>
+            </div>
+        <% }); %>
+    <% } %>
+
+    <a href="/">Back to Landing Page</a>
+    <script src="/js/booking-detail.js"></script>
+</body>
+</html>

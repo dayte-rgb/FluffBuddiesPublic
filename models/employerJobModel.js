@@ -35,14 +35,14 @@ class employerJobModel {
     return this.retrieve(job_id);
   }
 
-  delete(job_id, employee_id){
-    const query = "DELETE FROM EmployeeJob WHERE job_id = ? AND employee_id = ?";
+  delete(job_id){
+    const query = "DELETE FROM EmployerJob WHERE job_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const job_info = this.retrieve(job_id, employee_id);
+    const job_info = this.retrieve(job_id);
 
-    const info = stmt.run(job_id, employee_id);
+    const info = stmt.run(job_id);
 
     return job_info;
   }

@@ -14,3 +14,12 @@ node_modules/
 
 # Editor files
 .vscode/
+
+# Server dependency files
+*.json
+
+# stryker temp files
+.stryker-tmp
+
+# Log file
+requests.log

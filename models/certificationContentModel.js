@@ -1,0 +1,51 @@
+const { connectToDatabase } = require('../database');
+
+class certificationContentModel {
+  constructor() {
+    this.db = connectToDatabase();
+  }
+
+  create(certification_name, company){
+    const query = "INSERT INTO CertificationContent (certification_id, certification_name, company) VALUES (NULL, ?, ?)";
+
+    const stmt = this.db.prepare(query);
+
+    const info = query.run(certification_name, company);
+
+    return {id: info.lastInsertRowid, certification_name, company};
+  }
+
+  retrieve(certification_id){
+    const query = "SELECT * FROM CertificationContent WHERE certification_id = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.get(certification_id);
+
+    return info;
+  }
+
+  update(certification_id, certification_name, company){
+    const query = "UPDATE CertificationContent SET certification_name = ?, company = ? WHERE certification_id = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.run(certification_name, certification_id, company);
+
+    return this.retrieve(certification_id);
+  }
+
+  delete(certification_id){
+    const query = "DELETE FROM CertificationContent WHERE certification_id = ?";
+
+    const deleted_info = retrieve(certification_id);
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.run(certification_id);
+
+    return deleted_info;
+  }
+}
+
+module.exports = certificationContentModel;

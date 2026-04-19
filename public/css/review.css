@@ -1,0 +1,162 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 480px;
+    width: 100%;
+    border: 1px solid #e0ddd8;
+  }
+  
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+  }
+  
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 1.5rem;
+  }
+  
+  .metric {
+    margin-bottom: 1.25rem;
+  }
+  
+  .metric label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  
+  .stars {
+    display: flex;
+    flex-direction: row-reverse; 
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  
+  .stars input[type="radio"] {
+    display: none; 
+  }
+  
+  .stars label {
+    font-size: 28px;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.1s;
+    margin: 0;
+  }
+  
+  .stars input[type="radio"]:checked ~ label,
+  .stars label:hover,
+  .stars label:hover ~ label {
+    color: #f5a623;
+  }
+  
+  /* ── Overall average box ── */
+  .overall-box {
+    background: #f9f8f5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .avg {
+    font-size: 26px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  
+  .avg-label {
+    font-size: 12px;
+    color: #888;
+  }
+  
+  #overall-stars {
+    font-size: 20px;
+    color: #f5a623;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  
+  textarea:focus {
+    border-color: #aaa;
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  
+  button:hover {
+    background: #333;
+  }
+  
+  #error-msg {
+    color: #c0392b;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+  
+  #success {
+    display: none;
+    text-align: center;
+    padding: 1rem 0;
+  }
+  
+  #success .checkmark {
+    font-size: 40px;
+    color: #27ae60;
+    margin-bottom: 12px;
+  }
+  
+  #success h1 {
+    margin-bottom: 8px;
+  }
+  
+  #success p {
+    font-size: 14px;
+    color: #555;
+  }

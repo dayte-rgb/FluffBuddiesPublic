@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS OrganizationMember;
 DROP TABLE IF EXISTS EmployerJob;
 DROP TABLE IF EXISTS JobCategoriesByJob;
 DROP TABLE IF EXISTS MessageContent;
-DROP TABLE IF EXISTS AchievementMetric;
+DROP TABLE IF EXISTS MetricContent;
 DROP TABLE IF EXISTS AchievementContent;
 DROP TABLE IF EXISTS UserAchievement;
 DROP TABLE IF EXISTS UserSpecies;
@@ -33,5 +33,6 @@ DROP TABLE IF EXISTS EmployeeJob;
 DROP TABLE IF EXISTS UserSecurityAnswer;
 DROP TABLE IF EXISTS UserCertification;
 DROP TABLE IF EXISTS UserReview;
+DROP TABLE IF EXISTS PaymentContent;
 
 PRAGMA foreign_keys = ON;
