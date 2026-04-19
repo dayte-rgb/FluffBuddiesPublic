@@ -192,7 +192,8 @@ INSERT INTO UserReview VALUES
 -- insert data into SecurityQuestion
 -- (<question_id>, <question_text>)
 INSERT INTO SecurityQuestion VALUES
-(1, "What was the name of your first pet?"),
+(1, "What is your favorite food?"),
 (2, "What city were you born in?"),
-(3, "What is your mother's maiden name?"),
-(4, "What was the name of your elementary school?");
+(3, "What is your favorite color?"),
+(4, "What is your favorite toy?"),
+(5, "What is your childhood dream job?");
