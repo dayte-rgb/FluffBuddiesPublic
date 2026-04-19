@@ -21,8 +21,9 @@ app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
 
+
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.render('welcome');
 });
 
 // Define a route handler for GET requests to the URL ('/default')

@@ -1,41 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Fredoka+One&display=swap');
 
-body {
-    background-color: rgb(133, 214, 241);
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-title {
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    font-size: 50px;
-    text-align: center;
+body {
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
 }
 
 h1 {
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    font-size: 30px;
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 45px;
+    color: #665931;
     text-align: center;
+    margin: 0;
 }
 
-p {
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    font-size: 20px;
-    text-align: center;
+.logo {
+    width: 50%;
 }
 
-ul {
-    text-align: center;
-    list-style: none;
-}
-
-button {
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    border-radius: 5px;
-    background-color: darkolivegreen;
-    color:deepskyblue;
-}
-
-.sign-in {
+.button-container {
     display: flex;
-    justify-content: center; 
+    justify-content: center;
     align-items: center;
-    height: 40px;   
+    gap: 30px;
+}
+
+#login-button, #signup-button {
+    font-family: 'Nunito', sans-serif;
+    border-radius: 50px;
+    background-color: #f48b48;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 120px;
+    transition: all 0.2s ease;
+}
+
+#login-button:hover, #signup-button:hover {
+    background-color: #d97a3a;
+    transform: scale(1.05);
 }
