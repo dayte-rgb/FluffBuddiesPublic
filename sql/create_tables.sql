@@ -90,7 +90,13 @@ CREATE TABLE IF NOT EXISTS LeaderboardContent (
   leaderboard_id INTEGER PRIMARY KEY ,
   reward_badge_id INTEGER NOT NULL,
   start_time TEXT NOT NULL,
-  end_time TEXT NOT NULL
+  end_time TEXT NOT NULL,
+  metric_id INTEGER NOT NULL,
+  badge_id INTEGER,
+  FOREIGN KEY (badge_id)
+      REFERENCES BadgeContent(badge_id) ON DELETE SET NULL,
+    FOREIGN KEY (metric_id)
+      REFERENCES MetricContent(metric_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS UserBadge (
@@ -194,7 +200,7 @@ CREATE TABLE IF NOT EXISTS MessageContent (
   datetime TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS AchievementMetric (
+CREATE TABLE IF NOT EXISTS MetricContent (
   metric_id INTEGER PRIMARY KEY,
   metric_name TEXT NOT NULL UNIQUE,
   description TEXT
@@ -209,7 +215,7 @@ CREATE TABLE IF NOT EXISTS AchievementContent (
     FOREIGN KEY (badge_id)
       REFERENCES BadgeContent(badge_id) ON DELETE SET NULL,
     FOREIGN KEY (metric_id)
-      REFERENCES AchievementMetric(metric_id) ON DELETE CASCADE
+      REFERENCES MetricContent(metric_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS UserAchievement (
