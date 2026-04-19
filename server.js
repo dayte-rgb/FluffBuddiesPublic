@@ -12,7 +12,7 @@ const reviewContentModel = require('./models/reviewContentModel.js');
 const reviewContent = new reviewContentModel();
 const employeeJobModel = require('./models/employeeJobModel');
 const employeeJob = new employeeJobModel();
-const JobSearchModel = require('./models/JobSearchModel');
+const JobSearchModel = require('./models/jobSearchModel');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
@@ -60,22 +60,22 @@ app.get('/default', (req, res) => {
 
 // Displays job search query page
 app.get('/job-search', (req, res) => {
-  const jobCategories = jobCategory.retrieveAll();
-  const skillCategories = skillCategory.retrieveAll();
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
   
   res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
 });
 
 // Handles execution of search query
 app.post('/job-search', (req, res) => {
-  const { zipcode, keyword, job_category, skill_category } = req.body;
+  let { zipcode, keyword, job_categories, skill_categories } = req.body;
   
-  const results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_category || null, job_category || null);
+  let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
   
-  const jobCategories = jobCategory.retrieveAll();
-  const skillCategories = skillCategory.retrieveAll();
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
   
-  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_category, skill_category } });
+  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_categories, skill_categories } });
 });
 
 // Display a page with details of a selected job listing
