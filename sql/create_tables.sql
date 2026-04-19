@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS OrganizationMember (
 );
 
 CREATE TABLE IF NOT EXISTS EmployerJob (
-  job_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+  job_id INTEGER PRIMARY KEY NOT NULL,
   employer_id INTEGER NOT NULL,
 
     FOREIGN KEY (job_id)
@@ -293,7 +293,7 @@ CREATE TABLE IF NOT EXISTS UserCertification (
 );
 
 CREATE TABLE IF NOT EXISTS UserReview (
-  review_id INTEGER PRIMARY KEY UNIQUE,
+  review_id INTEGER PRIMARY KEY,
   user_id INTEGER NOT NULL,
 
   FOREIGN KEY (review_id)
