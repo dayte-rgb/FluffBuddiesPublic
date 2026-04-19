@@ -15,7 +15,7 @@ class userBadgeModel {
     return {user_id, badge_id};
   }
 
-  retrieve(user_id, badge_id){
+  getByIds(user_id, badge_id){
     const query = "SELECT * FROM UserBadge WHERE user_id = ? AND badge_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,12 +25,22 @@ class userBadgeModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserBadge';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(user_id, badge_id){
     const query = "DELETE FROM UserBadge WHERE user_id = ? AND badge_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(user_id, badge_id);
+    const old_info = this.getByIds(user_id, badge_id);
 
     const info = stmt.run(user_id, badge_id);
 

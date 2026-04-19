@@ -5,17 +5,17 @@ class skillCategoryModel {
     this.db = connectToDatabase();
   }
 
-  create(skill_category_id, category_name){
-    const query = "INSERT INTO SkillCategory (skill_category_id, category_name) VALUES (?, ?)";
+  create(category_name){
+    const query = "INSERT INTO SkillCategory (skill_category_id, category_name) VALUES (NULL, ?)";
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(skill_category_id, category_name);
+    const info = query.run(category_name);
 
-    return {skill_category_id, category_name};
+    return {id: info.lastInsertRowid, category_name};
   }
 
-  retrieve(skill_category_id){
+  getById(skill_category_id){
     const query = "SELECT * FROM SkillCategory WHERE skill_category_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,7 +25,17 @@ class skillCategoryModel {
     return info;
   }
 
-  retrieveAll(){
+  getByName(category_name){
+    const query = "SELECT * FROM SkillCategory WHERE category_name = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.get(category_name);
+
+    return info;
+  }
+
+  getAll(){
     const query = "SELECT * FROM SkillCategory";
 
     const stmt = this.db.prepare(query);
@@ -42,13 +52,13 @@ class skillCategoryModel {
 
     const info = stmt.run(category_name, skill_category_id);
 
-    return this.retrieve(skill_category_id);
+    return this.getById(skill_category_id);
   }
 
   delete(skill_category_id){
     const query = "DELETE FROM SkillCategory WHERE skill_category_id = ?";
 
-    const deleted_info = retrieve(skill_category_id);
+    const deleted_info = this.getById(skill_category_id);
 
     const stmt = this.db.prepare(query);
 

@@ -15,7 +15,7 @@ class employerJobModel {
     return {job_id, employer_id};
   }
 
-  retrieve(job_id){
+  getById(job_id){
     const query = "SELECT * FROM EmployerJob WHERE job_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,14 +25,24 @@ class employerJobModel {
     return info;
   }
 
-  update(job_id, new_employer_id){
+  getAll(){
+    const query = 'SELECT * FROM EmployerJob';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
+  update(job_id, employer_id){
     const query = "UPDATE EmployerJob SET employer_id = ? WHERE job_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(new_employer_id, job_id);
+    const info = stmt.run(employer_id, job_id);
 
-    return this.retrieve(job_id);
+    return this.getById(job_id);
   }
 
   delete(job_id){
@@ -40,7 +50,7 @@ class employerJobModel {
 
     const stmt = this.db.prepare(query);
 
-    const job_info = this.retrieve(job_id);
+    const job_info = this.getById(job_id);
 
     const info = stmt.run(job_id);
 

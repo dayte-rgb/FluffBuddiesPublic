@@ -15,7 +15,7 @@ class jobReviewModel {
     return {review_id, job_id};
   }
 
-  retrieve(review_id){
+  getById(review_id){
     const query = "SELECT * FROM JobReview WHERE review_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,12 +25,22 @@ class jobReviewModel {
     return info;
   }
 
-  retrieveByJobID(job_id){
+  getByJobId(job_id){
     const query = "SELECT review_id FROM JobReview WHERE job_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.all(job_id);
+    const info = stmt.get(job_id);
+
+    return info;
+  }
+
+  getAll(){
+    const query = 'SELECT * FROM JobReview';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
 
     return info;
   }
@@ -42,13 +52,13 @@ class jobReviewModel {
 
     const info = stmt.run(job_id, review_id);
 
-    return this.retrieve(review_id);
+    return this.getById(review_id);
   }
 
   delete(review_id){
     const query = "DELETE FROM JobReview WHERE review_id = ?";
 
-    const deleted_info = retrieve(review_id);
+    const deleted_info = this.getById(review_id);
 
     const stmt = this.db.prepare(query);
 

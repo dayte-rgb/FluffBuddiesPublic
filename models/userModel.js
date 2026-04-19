@@ -21,7 +21,7 @@ class userModel {
 
   delete(user_id){
     // get the user's info before deletion to return to the user
-    const deleted_user_info = this.retrieve(user_id);
+    const deleted_user_info = this.getById(user_id);
 
     const query = 'DELETE FROM User WHERE user_id = ?';
 
@@ -35,7 +35,7 @@ class userModel {
     return deleted_user_info;
   }
 
-  retrieve(user_id) {
+  getById(user_id) {
     const query = 'SELECT * FROM User WHERE user_id = ?';
 
     const stmt = this.db.prepare(query);
@@ -44,68 +44,58 @@ class userModel {
 
     return info;
   }
-  
-  update(user_id, new_username = null, new_password = null, new_phone_number = null, new_email = null, new_zipcode = null, new_profile_description = null, new_account_type = null, new_profile_picture_link = null) {
-    const query = 'UPDATE User SET username = ?, password = ?, phone_number = ?, email = ?, zipcode = ?, profile_description = ?, account_type = ?, profile_picture_link = ? WHERE user_id = ?';
 
-    const user_info = this.retrieve(user_id);
-    
-    if(new_username == null){
-      new_username = user_info.username;
-    }
-
-    if(new_password == null){
-      new_password = user_info.password;
-    }
-
-    if(new_phone_number == null){
-      new_phone_number = user_info.phone_number;
-    }
-
-    if(new_email == null){
-      new_email = user_info.email;
-    }
-
-    if(new_zipcode == null){
-      new_zipcode = user_info.zipcode;
-    }
-
-    if(new_profile_description == null){
-      new_profile_description = user_info.profile_description;
-    }
-
-    if(new_account_type == null){
-      new_account_type = user_info.account_type;
-    }
-
-    if(new_profile_picture_link == null){
-      new_profile_picture_link = user_info.profile_picture_link;
-    }
+  getByUsername(username){
+    const query = 'SELECT * FROM User WHERE username = ?';
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(new_username, new_password, new_phone_number, new_email, new_zipcode, new_profile_description, new_account_type, new_profile_picture_link, user_id);
+    const info = stmt.get(user_id);
 
-    return this.retrieve(user_id);
+    return info;
   }
-  
 
-  get_user_id(username){
-    const query = 'SELECT user_id FROM User WHERE username = ?';
+  getByPhoneNumber(phone_number){
+    const query = 'SELECT * FROM User WHERE phone_number = ?';
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.get(username);
+    const info = stmt.get(phone_number);
 
-    // tries to access user_id, but if there is no username associated with a tuple,
-    // returns null instead
-    try{
-      return info.user_id;
-    } catch(error){
-      return null;
-    }
-    
+    return info;
   }
+
+  getByEmail(email){
+    const query = 'SELECT * FROM User WHERE email = ?';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.get(user_id);
+
+    return info;
+  }
+
+  getAll(){
+    const query = 'SELECT * FROM User';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+  
+  
+  update(user_id, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) {
+    const query = 'UPDATE User SET password = ?, phone_number = ?, email = ?, zipcode = ?, profile_description = ?, account_type = ?, profile_picture_link = ? WHERE user_id = ?';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.run(password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link, user_id);
+
+    return this.getById(user_id);
+  }
+
 }
 
 module.exports = userModel;
