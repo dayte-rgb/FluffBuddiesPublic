@@ -26,9 +26,9 @@ class reviewContentModel {
   }
 
   update(review_id, punctuality, quality, friendliness, comments, datetime, verified){
-    const query = "UPDATE ReviewContent SET punctuality = ?, quality = ?, friendlines = ?, comments = ?, datetime = ?, verified = ? WHERE review_id = ?";
+    const query = "UPDATE ReviewContent SET punctuality = ?, quality = ?, friendliness = ?, comments = ?, datetime = ?, verified = ? WHERE review_id = ?";
 
-    const old_info = retrieve(review_id);
+    const old_info = this.retrieve(review_id);
 
     if(punctuality == null){
         punctuality = old_info.punctuality;
