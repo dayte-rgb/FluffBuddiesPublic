@@ -1,23 +1,27 @@
 -- insert data into User
 -- (NULL, <username>, <password>, <phone_number>, <email>, <zipcode>, <profile_description>, <account_type>, <profile_picture_link>)
 INSERT INTO User VALUES
-(NULL, "default_user", "admin", "111-111-1111", "default@gmail.com", "00001", "A default account for testing purposes", 'user', "prof_pic.jpeg"),
-(NULL, "john_owner", "password123", "610-555-0101", "john@gmail.com", "18042", "Dog lover looking for reliable pet sitters", 'owner', "john_pic.jpeg"),
-(NULL, "fluffy_dog", "pawword1", "610-555-0202", "fluffy@gmail.com", "18045", "Friendly golden retriever, loves walks", 'pet', "fluffy_pic.jpeg"),
-(NULL, "paws_org", "orgpass1", "610-555-0303", "paws@pawsorg.com", "18101", "Local animal shelter and rescue organization", 'organization', "paws_logo.jpeg"),
-(NULL, "sarah_owner", "incorrect", "610-555-0404", "sarah@gmail.com", "12871", "Cat mom of three, needs occasional help", 'owner', "sarah_pic.jpeg"),
-(NULL, "mike_walker", "mypassword", "610-555-0505", "mike@gmail.com", "32232", "Experienced dog walker available weekends", 'user', "mike_pic.jpeg"),
-(NULL, "lisa_sitter", "4", "610-555-0606", "lisa@gmail.com", "23984", "Pet sitter with 5 years experience", 'user', "lisa_pic.jpeg"),
-(NULL, "groom_org", "donthackme", "610-555-0707", "groom@groomorg.com", "71129", "Professional grooming services", 'organization', "groom_logo.jpeg");
+(NULL, "default_user", "admin", "111-111-1111", "default@gmail.com", "00001", "A default account for testing purposes", 'user', "prof_pic.jpeg", datetime('now')),
+(NULL, "john_owner", "password123", "610-555-0101", "john@gmail.com", "18042", "Dog lover looking for reliable pet sitters", 'owner', "john_pic.jpeg", datetime('now')),
+(NULL, "fluffy_dog", "pawword1", "610-555-0202", "fluffy@gmail.com", "18045", "Friendly golden retriever, loves walks", 'pet', "fluffy_pic.jpeg", datetime('now')),
+(NULL, "paws_org", "orgpass1", "610-555-0303", "paws@pawsorg.com", "18101", "Local animal shelter and rescue organization", 'organization', "paws_logo.jpeg", datetime('now')),
+(NULL, "sarah_owner", "incorrect", "610-555-0404", "sarah@gmail.com", "12871", "Cat mom of three, needs occasional help", 'owner', "sarah_pic.jpeg", datetime('now')),
+(NULL, "mike_walker", "mypassword", "610-555-0505", "mike@gmail.com", "32232", "Experienced dog walker available weekends", 'user', "mike_pic.jpeg", datetime('now')),
+(NULL, "lisa_sitter", "4", "610-555-0606", "lisa@gmail.com", "23984", "Pet sitter with 5 years experience", 'user', "lisa_pic.jpeg", datetime('now')),
+(NULL, "groom_org", "donthackme", "610-555-0707", "groom@groomorg.com", "71129", "Professional grooming services", 'organization', "groom_logo.jpeg", datetime('now'));
 
 -- insert data into JobCategory
 -- (<job_category_id>, <category_name>)
 INSERT INTO JobCategory VALUES
-(1, "Dog Walking"),
+(1, "Other"),
 (2, "Pet Sitting"),
-(3, "Grooming"),
-(4, "Veterinary Assistance"),
-(5, "Training");
+(3, "Leisure"),
+(4, "Educational"),
+(5, "Transporation"),
+(6, "Maintenance"),
+(7, "Grooming"),
+(8, "Heavy-Duty Labor"),
+(9, "Light Labor");
 
 -- insert data into BadgeContent
 -- (NULL, <badge_name>, <badge_image_link>)
@@ -30,11 +34,24 @@ INSERT INTO BadgeContent VALUES
 -- insert data into SkillCategory
 -- (<skill_category_id>, <category_name>)
 INSERT INTO SkillCategory VALUES
-(1, "Dog Handling"),
-(2, "Cat Care"),
-(3, "First Aid"),
-(4, "Obedience Training"),
-(5, "Exotic Animals");
+(1, "Other"),
+(2, "Technical"),
+(3, "Hands-On"),
+(4, "Organization"),
+(5, "Problem-Solving"),
+(6, "Communication"),
+(7, "Teamwork"),
+(8, "Emotional-Intelligence"),
+(9, "Soft Skills");
+
+-- insert data into MetricContent
+-- (<metric_id>, <metric_name>, <description>)
+INSERT INTO MetricContent VALUES
+(1, "Jobs Completed", "Total number of jobs successfully completed"),
+(2, "Age of Account", "Measures the age of the account"),
+(3, "Average Rating", "Compares the average rating of the user to a specific number"),
+(4, "Review Total", "Number of reviews an account has that other people have made");
+
 
 -- insert data into PaymentContent
 -- (NULL, <payment_name>)
@@ -113,8 +130,8 @@ INSERT INTO EmployerJob VALUES
 -- insert data into LeaderboardContent
 -- (NULL, <reward_badge_id>, <start_time>, <end_time>)
 INSERT INTO LeaderboardContent VALUES
-(NULL, 1, "2025-03-01 00:00:00", "2025-03-31 23:59:59"),
-(NULL, 2, "2025-04-01 00:00:00", "2025-04-30 23:59:59");
+(NULL, 1, "2025-03-01 00:00:00", "2025-03-31 23:59:59", 3, 1),
+(NULL, 2, "2025-04-01 00:00:00", "2025-04-30 23:59:59", 2, 1);
 
 -- insert data into CertificationContent
 -- (NULL, <certification_name>, <company>)
@@ -152,14 +169,6 @@ INSERT INTO UserMessage VALUES
 (2, 3, 2),
 (3, 2, 3);
 
--- insert data into AchievementMetric
--- (<metric_id>, <metric_name>, <description>)
-INSERT INTO AchievementMetric VALUES
-(1, "Jobs Completed", "Total number of jobs successfully completed"),
-(2, "5-Star Reviews", "Total number of five-star reviews received"),
-(3, "Hours Worked", "Total hours worked across all jobs"),
-(4, "Repeat Clients", "Number of clients who have booked more than once");
-
 -- insert data into AchievementContent
 -- (NULL, <achievement_name>, <metric_id>, <badge_id>, <required_quantity>)
 INSERT INTO AchievementContent VALUES
@@ -183,7 +192,8 @@ INSERT INTO UserReview VALUES
 -- insert data into SecurityQuestion
 -- (<question_id>, <question_text>)
 INSERT INTO SecurityQuestion VALUES
-(1, "What was the name of your first pet?"),
+(1, "What is your favorite food?"),
 (2, "What city were you born in?"),
-(3, "What is your mother's maiden name?"),
-(4, "What was the name of your elementary school?");
+(3, "What is your favorite color?"),
+(4, "What is your favorite toy?"),
+(5, "What is your childhood dream job?");
