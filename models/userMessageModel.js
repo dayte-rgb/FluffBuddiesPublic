@@ -25,6 +25,16 @@ class userMessageModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserMessage';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(message_id, sender_id, recipient_id){
     const query = "UPDATE UserMessage SET sender_id = ?, recipient_id = ? WHERE message_id = ?";
 

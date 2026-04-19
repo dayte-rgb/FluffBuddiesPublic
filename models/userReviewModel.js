@@ -25,6 +25,16 @@ class userReviewModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserReview';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(review_id, user_id){
     const query = "UPDATE UserReview SET user_id = ? WHERE review_id = ?";
 

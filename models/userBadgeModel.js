@@ -25,6 +25,16 @@ class userBadgeModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserBadge';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(user_id, badge_id){
     const query = "DELETE FROM UserBadge WHERE user_id = ? AND badge_id = ?";
 

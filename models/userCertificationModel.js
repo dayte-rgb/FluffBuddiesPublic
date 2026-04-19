@@ -25,6 +25,16 @@ class userCertificationModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserCertification';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(user_id, certification_id){
     const query = "DELETE FROM UserCertification WHERE user_id = ? AND certification_id = ?";
 

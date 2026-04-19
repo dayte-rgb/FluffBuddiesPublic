@@ -25,6 +25,16 @@ class jobCategoryByUserModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM JobCategoryByUser';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(user_id, job_category_id){
     const query = "DELETE FROM JobCategoryByUser WHERE user_id = ? AND job_category_id = ?";
 

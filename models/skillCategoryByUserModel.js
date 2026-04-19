@@ -25,6 +25,16 @@ class skillCategoryByUserModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM SkillCategoryByUser';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(user_id, skill_category_id){
     const query = "DELETE FROM SkillCategoryByUser WHERE user_id = ? AND skill_category_id = ?";
 

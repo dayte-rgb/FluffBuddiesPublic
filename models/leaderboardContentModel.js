@@ -25,6 +25,16 @@ class leaderboardContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM LeaderboardContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(leaderboard_id, reward_badge_id, start_time, end_time, metric_id, badge_id){
     const query = "UPDATE LeaderboardContent SET reward_badge_id = ?, start_time = ?, end_time = ?, metric_id = ?, badge_id = ? WHERE leaderboard_id = ?";
 

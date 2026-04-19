@@ -25,6 +25,16 @@ class certificationContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM CertificationContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(certification_id, certification_name, company){
     const query = "UPDATE CertificationContent SET certification_name = ?, company = ? WHERE certification_id = ?";
 

@@ -25,6 +25,16 @@ class jobContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM JobContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(job_id, description, datetime, duration, zipcode, employee_num, job_filled){
     const query = "UPDATE JobContent SET description = ?, datetime = ?, duration = ?, zipcode = ?, employee_num = ?, job_filled = ? WHERE job_id = ?";
 

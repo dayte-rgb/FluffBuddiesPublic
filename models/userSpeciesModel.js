@@ -25,6 +25,16 @@ class userSpeciesModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserSpecies';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(user_id, species){
     const query = "UPDATE UserSpecies SET species = ? WHERE user_id = ?";
 

@@ -22,7 +22,17 @@ class petOwnerModel {
 
     const info = stmt.run(owner_id, pet_id);
 
-    return info
+    return info;
+  }
+
+  getAll(){
+    const query = 'SELECT * FROM PetOwner';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
   }
 
   delete(owner_id, pet_id){

@@ -25,6 +25,16 @@ class employeeJobModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM EmployeeJob';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(job_id, employee_id){
     const query = "DELETE FROM EmployeeJob WHERE job_id = ? AND employee_id = ?";
 

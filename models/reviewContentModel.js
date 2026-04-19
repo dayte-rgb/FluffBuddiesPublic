@@ -25,6 +25,16 @@ class reviewContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM ReviewContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(review_id, punctuality, quality, friendliness, comments, datetime, verified){
     const query = "UPDATE ReviewContent SET punctuality = ?, quality = ?, friendliness = ?, comments = ?, datetime = ?, verified = ? WHERE review_id = ?";
 

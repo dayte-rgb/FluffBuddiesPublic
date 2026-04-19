@@ -35,6 +35,16 @@ class metricContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM MetricContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(metric_id, metric_name, description){
     const query = "UPDATE MetricContent SET metric_name = ?, description = ? WHERE metric_id = ?";
 

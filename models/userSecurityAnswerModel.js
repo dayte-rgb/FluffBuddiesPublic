@@ -25,6 +25,16 @@ class userSecurityAnswerModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserSecurityAnswer';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(user_id, question_id, answer_text){
     const query = "UPDATE UserSecurityAnswer SET answer_text = ? WHERE user_id = ? AND question_id = ?";
 

@@ -25,6 +25,16 @@ class userAchievementModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM UserAchievement';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(user_id, achievement_id){
     const query = "DELETE FROM UserAchievement WHERE user_id = ? AND achievement_id = ?";
 

@@ -25,6 +25,16 @@ class securityQuestionModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM SecurityQuestion';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(question_id, new_question_text){
     const query = "UPDATE SecurityQuestion SET question_text = ? WHERE question_id = ?";
 

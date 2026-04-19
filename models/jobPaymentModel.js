@@ -25,6 +25,16 @@ class jobPaymentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM JobPayment';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(job_id, payment_id, payment_quantity){
     const query = "UPDATE JobPayment SET payment_id = ?, payment_quantity = ? WHERE job_id = ?";
 

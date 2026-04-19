@@ -35,6 +35,16 @@ class jobReviewModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM JobReview';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(review_id, job_id){
     const query = "UPDATE JobReview SET job_id = ? WHERE review_id = ?";
 

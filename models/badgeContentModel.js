@@ -35,6 +35,16 @@ class badgeContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM BadgeContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(badge_id, badge_name, badge_image_link){
     const query = "UPDATE BadgeContent SET badge_name = ?, badge_image_link = ? WHERE badge_id = ?";
 

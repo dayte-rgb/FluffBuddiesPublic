@@ -25,6 +25,16 @@ class employerJobModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM EmployerJob';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(job_id, employer_id){
     const query = "UPDATE EmployerJob SET employer_id = ? WHERE job_id = ?";
 

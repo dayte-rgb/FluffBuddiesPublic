@@ -35,7 +35,6 @@ class skillCategoryModel {
     return info;
   }
 
-
   getAll(){
     const query = "SELECT * FROM SkillCategory";
 

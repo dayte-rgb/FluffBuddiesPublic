@@ -25,6 +25,16 @@ class messageContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM MessageContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(message_id, message_content, datetime){
     const query = "UPDATE MessageContent SET message_content = ?, datetime = ? WHERE message_id = ?";
 

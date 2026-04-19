@@ -35,6 +35,16 @@ class paymentContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM PaymentContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(payment_id, payment_name){
     const query = "UPDATE PaymentContent SET payment_name = ? WHERE payment_id = ?";
 

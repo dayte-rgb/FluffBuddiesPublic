@@ -35,6 +35,16 @@ class achievementContentModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM AchievementContent';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   update(achievement_id, achievement_name, metric_id, badge_id, required_quantity){
     const query = "UPDATE AchievementContent SET achievement_name = ?, metric_id = ?, badge_id = ?, required_quantity = ? WHERE achievement_id = ?";
 

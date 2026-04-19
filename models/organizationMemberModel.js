@@ -25,6 +25,16 @@ class organizationMemberModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM OrganizationMember';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(org_id, user_id){
     const query = "DELETE FROM OrganizationMember WHERE org_id = ? AND user_id = ?";
 

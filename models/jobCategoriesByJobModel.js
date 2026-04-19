@@ -25,6 +25,16 @@ class jobCategoriesByJobModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM JobCategoriesByJob';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(job_id, job_category_id){
     const query = "DELETE FROM JobCategoriesByJob WHERE job_id = ? AND job_category_id = ?";
 
