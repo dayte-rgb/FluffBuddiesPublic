@@ -15,12 +15,22 @@ class badgeContentModel {
     return {id: info.lastInsertRowid, badge_name, badge_image_link};
   }
 
-  retrieve(badge_id){
+  getById(badge_id){
     const query = "SELECT * FROM BadgeContent WHERE badge_id = ?";
 
     const stmt = this.db.prepare(query);
 
     const info = stmt.get(badge_id);
+
+    return info;
+  }
+
+  getByName(badge_name){
+    const query = "SELECT * FROM BadgeContent WHERE badge_name = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.get(badge_name);
 
     return info;
   }
@@ -32,13 +42,13 @@ class badgeContentModel {
 
     const info = stmt.run(badge_name, badge_id, badge_image_link);
 
-    return this.retrieve(badge_id);
+    return this.getById(badge_id);
   }
 
   delete(badge_id){
     const query = "DELETE FROM BadgeContent WHERE badge_id = ?";
 
-    const deleted_info = retrieve(badge_id);
+    const deleted_info = this.getById(badge_id);
 
     const stmt = this.db.prepare(query);
 

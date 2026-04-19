@@ -15,7 +15,7 @@ class jobPaymentModel {
     return {job_id, payment_id, payment_quantity};
   }
 
-  retrieve(job_id){
+  getById(job_id){
     const query = "SELECT * FROM JobPayment WHERE job_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -32,13 +32,13 @@ class jobPaymentModel {
 
     const info = stmt.run(payment_id, job_id, payment_quantity);
 
-    return this.retrieve(job_id);
+    return this.getById(job_id);
   }
 
   delete(job_id){
     const query = "DELETE FROM JobPayment WHERE job_id = ?";
 
-    const deleted_info = retrieve(job_id);
+    const deleted_info = this.getById(job_id);
 
     const stmt = this.db.prepare(query);
 

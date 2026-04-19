@@ -15,12 +15,22 @@ class metricContentModel {
     return {id: info.lastInsertRowid, metric_name, description};
   }
 
-  retrieve(metric_id){
+  getById(metric_id){
     const query = "SELECT * FROM MetricContent WHERE metric_id = ?";
 
     const stmt = this.db.prepare(query);
 
     const info = stmt.get(metric_id);
+
+    return info;
+  }
+
+  getByName(metric_name){
+    const query = "SELECT * FROM MetricContent WHERE metric_name = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.get(metric_name);
 
     return info;
   }
@@ -32,13 +42,13 @@ class metricContentModel {
 
     const info = stmt.run(metric_name, metric_id, description);
 
-    return this.retrieve(metric_id);
+    return this.getById(metric_id);
   }
 
   delete(metric_id){
     const query = "DELETE FROM MetricContent WHERE metric_id = ?";
 
-    const deleted_info = retrieve(metric_id);
+    const deleted_info = this.getById(metric_id);
 
     const stmt = this.db.prepare(query);
 

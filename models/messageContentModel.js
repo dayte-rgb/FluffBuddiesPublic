@@ -15,7 +15,7 @@ class messageContentModel {
     return {id: info.lastInsertRowid, message_content, datetime};
   }
 
-  retrieve(message_id){
+  getById(message_id){
     const query = "SELECT * FROM MessageContent WHERE message_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -32,13 +32,13 @@ class messageContentModel {
 
     const info = stmt.run(message_content, message_id, datetime);
 
-    return this.retrieve(message_id);
+    return this.getById(message_id);
   }
 
   delete(message_id){
     const query = "DELETE FROM MessageContent WHERE message_id = ?";
 
-    const deleted_info = retrieve(message_id);
+    const deleted_info = this.getById(message_id);
 
     const stmt = this.db.prepare(query);
 

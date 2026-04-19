@@ -15,7 +15,7 @@ class certificationContentModel {
     return {id: info.lastInsertRowid, certification_name, company};
   }
 
-  retrieve(certification_id){
+  getById(certification_id){
     const query = "SELECT * FROM CertificationContent WHERE certification_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -32,13 +32,13 @@ class certificationContentModel {
 
     const info = stmt.run(certification_name, certification_id, company);
 
-    return this.retrieve(certification_id);
+    return this.getById(certification_id);
   }
 
   delete(certification_id){
     const query = "DELETE FROM CertificationContent WHERE certification_id = ?";
 
-    const deleted_info = retrieve(certification_id);
+    const deleted_info = this.getById(certification_id);
 
     const stmt = this.db.prepare(query);
 

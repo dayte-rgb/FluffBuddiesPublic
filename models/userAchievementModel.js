@@ -15,7 +15,7 @@ class userAchievementModel {
     return {user_id, achievement_id};
   }
 
-  retrieve(user_id, achievement_id){
+  getByIds(user_id, achievement_id){
     const query = "SELECT * FROM UserAchievement WHERE user_id = ? AND achievement_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -30,7 +30,7 @@ class userAchievementModel {
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(user_id, achievement_id);
+    const old_info = this.getByIds(user_id, achievement_id);
 
     const info = stmt.run(user_id, achievement_id);
 

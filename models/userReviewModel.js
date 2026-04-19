@@ -15,7 +15,7 @@ class userReviewModel {
     return {review_id, user_id};
   }
 
-  retrieve(review_id){
+  getById(review_id){
     const query = "SELECT * FROM UserReview WHERE review_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,26 +25,20 @@ class userReviewModel {
     return info;
   }
 
-  update(review_id, new_user_id){
+  update(review_id, user_id){
     const query = "UPDATE UserReview SET user_id = ? WHERE review_id = ?";
-
-    const old_info = this.retrieve(review_id);
-
-    if(new_user_id == null){
-        new_user_id = old_info.user_id;
-    }
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(new_user_id, review_id);
+    const info = stmt.run(user_id, review_id);
 
-    return this.retrieve(review_id);
+    return this.getById(review_id);
   }
 
   delete(review_id){
     const query = "DELETE FROM UserReview WHERE review_id = ?";
 
-    const old_info = this.retrieve(review_id);
+    const old_info = this.getById(review_id);
 
     const stmt = this.db.prepare(query);
 

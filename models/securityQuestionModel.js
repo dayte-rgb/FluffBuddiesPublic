@@ -5,17 +5,17 @@ class securityQuestionModel {
     this.db = connectToDatabase();
   }
 
-  create(question_id, question_text){
-    const query = "INSERT INTO SecurityQuestion (question_id, question_text) VALUES (?, ?)";
+  create(question_text){
+    const query = "INSERT INTO SecurityQuestion (question_id, question_text) VALUES (NULL, ?)";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(question_id, question_text);
+    const info = stmt.run(question_text);
 
-    return {question_id, question_text};
+    return {id: info.lastInsertRowid, question_text};
   }
 
-  retrieve(question_id){
+  getById(question_id){
     const query = "SELECT * FROM SecurityQuestion WHERE question_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -32,7 +32,7 @@ class securityQuestionModel {
 
     const info = stmt.run(new_question_text, question_id);
 
-    return this.retrieve(question_id);
+    return this.getById(question_id);
   }
 
   delete(question_id){
@@ -40,7 +40,7 @@ class securityQuestionModel {
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(question_id);
+    const old_info = this.getById(question_id);
 
     const info = stmt.run(question_id);
 

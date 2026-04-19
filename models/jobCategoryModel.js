@@ -5,17 +5,17 @@ class jobCategoryModel {
     this.db = connectToDatabase();
   }
 
-  create(job_category_id, category_name){
-    const query = "INSERT INTO JobCategory (job_category_id, category_name) VALUES (?, ?)";
+  create(category_name){
+    const query = "INSERT INTO JobCategory (job_category_id, category_name) VALUES (NULL, ?)";
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(job_category_id, category_name);
+    const info = query.run(category_name);
 
-    return {job_category_id, category_name};
+    return {id: info.lastInsertRowid, category_name};
   }
 
-  retrieve(job_category_id){
+  getById(job_category_id){
     const query = "SELECT * FROM JobCategory WHERE job_category_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,7 +25,17 @@ class jobCategoryModel {
     return info;
   }
 
-  retrieveAll(){
+  getByName(category_name){
+    const query = "SELECT * FROM JobCategory WHERE category_name = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.get(category_name);
+
+    return info;
+  }
+
+  getAll(){
     const query = "SELECT * FROM JobCategory";
 
     const stmt = this.db.prepare(query);
@@ -42,13 +52,13 @@ class jobCategoryModel {
 
     const info = stmt.run(category_name, job_category_id);
 
-    return this.retrieve(job_category_id);
+    return this.getById(job_category_id);
   }
 
   delete(job_category_id){
     const query = "DELETE FROM JobCategory WHERE job_category_id = ?";
 
-    const deleted_info = retrieve(job_category_id);
+    const deleted_info = this.getById(job_category_id);
 
     const stmt = this.db.prepare(query);
 

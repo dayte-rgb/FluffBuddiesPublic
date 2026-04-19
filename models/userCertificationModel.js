@@ -15,7 +15,7 @@ class userCertificationModel {
     return {user_id, certification_id};
   }
 
-  retrieve(user_id, certification_id){
+  getByIds(user_id, certification_id){
     const query = "SELECT * FROM UserCertification WHERE user_id = ? AND certification_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -30,7 +30,7 @@ class userCertificationModel {
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(user_id, certification_id);
+    const old_info = this.getByIds(user_id, certification_id);
 
     const info = stmt.run(user_id, certification_id);
 

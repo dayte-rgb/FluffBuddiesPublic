@@ -15,7 +15,7 @@ class organizationMemberModel {
     return {org_id, user_id};
   }
 
-  retrieve(org_id, user_id){
+  getByIds(org_id, user_id){
     const query = "SELECT * FROM OrganizationMember WHERE org_id = ? AND user_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -30,7 +30,7 @@ class organizationMemberModel {
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(org_id, user_id);
+    const old_info = this.getByIds(org_id, user_id);
 
     const info = stmt.run(org_id, user_id);
 
