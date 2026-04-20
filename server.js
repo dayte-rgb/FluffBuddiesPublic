@@ -50,31 +50,40 @@ app.get('/', (req, res) => {
 
 // Define a route handler for GET requests to the URL ('/default')
 app.get('/default', (req, res) => {
-    // Render the 'default' template and pass an object with dynamic data.
-    res.render('default', {
-        name: 'Student', // A variable named 'name' with the value 'Student'.
-        items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
-    });
+  // Render the 'default' template and pass an object with dynamic data.
+  res.render('default', {
+    name: 'Student', // A variable named 'name' with the value 'Student'.
+    items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
+  });
 });
 
 // Displays job search query page
 app.get('/job-search', (req, res) => {
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
-  
+
   res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
 });
 
 // Handles execution of search query
 app.post('/job-search', (req, res) => {
-  let { zipcode, keyword, job_categories, skill_categories } = req.body;
-  
-  let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
-  
-  const jobCategories = jobCategory.getAll();
-  const skillCategories = skillCategory.getAll();
-  
-  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_categories, skill_categories } });
+  const { zipcode, keyword, job_category, skill_category } = req.body;
+
+  const results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_category || null, job_category || null);
+
+  const { connectToDatabase } = require('./database.js');
+  const db = connectToDatabase();
+
+  // fetch username for each job
+  const resultsWithUsers = results.map(job => {
+    const user = db.prepare('SELECT username FROM User WHERE user_id = ?').get(job.employee_num);
+    return { ...job, username: user ? user.username : 'Unknown' };
+  });
+
+  const jobCategories = jobCategory.retrieveAll();
+  const skillCategories = skillCategory.retrieveAll();
+
+  res.render('job-search', { jobCategories, skillCategories, results: resultsWithUsers, searchParams: { zipcode, keyword, job_category, skill_category } });
 });
 
 // Display a page with details of a selected job listing
@@ -88,18 +97,18 @@ app.get('/booking/:job_id', (req, res) => {
   for (let i = 0; i < reviews.length; i++) {
     reviewData.push(reviewContent.retrieve(reviews[i].review_id));
   }
-  const {connectToDatabase} = require('./database.js');
+  const { connectToDatabase } = require('./database.js');
   const db = connectToDatabase();
   const userData = db.prepare('SELECT * FROM User WHERE user_id = ?').get(jobData.employee_num);
-  
+
   res.render('booking-detail', { jobData, reviewData, userData });
 });
 
 
 // Handle booking a job
-app.post('/booking/:job_id', (req, res) => { 
+app.post('/booking/:job_id', (req, res) => {
   const employee_id = req.body.employee_id;
-  
+
   try {
     employeeJob.create(req.params.job_id, employee_id);
     res.json({ success: true, message: 'Job booked successfully!' });
@@ -109,7 +118,7 @@ app.post('/booking/:job_id', (req, res) => {
   }
 });
 
-function write_res_log(res){
+function write_res_log(res) {
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
 }

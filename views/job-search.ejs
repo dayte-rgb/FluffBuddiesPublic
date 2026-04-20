@@ -1,64 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>Search for Jobs - Fluff Buddies</title>
-    <link rel="stylesheet" href="https://unpkg.com/slim-select@latest/dist/slimselect.css">
+    <title>Search - Paw Patrol</title>
+    <link rel="stylesheet" href="/css/default_stylesheet.css">
+    <link rel="stylesheet" href="/css/job-search.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
-    <h1> Search Filters </h1>
+    <div class="sidebar">
+        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+        <nav class="sidebar-nav">
+            <a href="/job-search" class="nav-icon active" title="Search"><i
+                    class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+            <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+            <a href="/Leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-clipboard-list"></i></a>
+            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+        </nav>
+    </div>
 
-    <form action="/job-search" method="POST">
-        <label for="zipcode">Zipcode:</label>
-        <input type="text" id="zipcode" name="zipcode" value="<%= searchParams ? searchParams.zipcode : '' %>"><br><br>
+    <div class="main-content">
+        <form action="/job-search" method="POST" class="search-form" id="search-form">
+            <input type="hidden" name="search_type" id="search_type" value="jobs">
 
-        <label for="keyword">Keyword:</label>
-        <input type="text" id="keyword" name="keyword" value="<%= searchParams ? searchParams.keyword : '' %>"><br><br>
+            <!-- Search bar + toggles + filter button on same row -->
+            <!-- Row 1: Search bar -->
+            <div class="search-top">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" name="keyword" placeholder="Search..."
+                        value="<%= searchParams ? searchParams.keyword : '' %>" class="search-input">
+                </div>
+            </div>
 
-        <label for="job_category">Job Category:</label>
-        <select id="job_category" name="job_categories[]" multiple>
-            <% jobCategories.forEach(cat => { %>
-                <option value="<%= cat.job_category_id %>" <%= searchParams && searchParams.job_categories && searchParams.job_categories.includes(cat.job_category_id.toString()) ? 'selected' : '' %>><%= cat.category_name %></option>
-            <% }); %>
-        </select><br><br>
+            <!-- Row 2: Toggles + filter button -->
+            <div class="search-bottom">
+                <div class="search-toggle">
+                    <button type="button" class="toggle-btn active" id="jobs-toggle" onclick="switchTab('jobs')">
+                        <i class="fa-solid fa-clipboard-list"></i> Job Listings
+                    </button>
+                    <button type="button" class="toggle-btn" id="users-toggle" onclick="switchTab('users')">
+                        <i class="fa-solid fa-user"></i> Users
+                    </button>
+                </div>
+                <button type="button" class="filter-toggle" id="filter-toggle-btn" onclick="toggleFilters()">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
 
-        <label for="skill_category">Skill Category:</label>
-        <select id="skill_category" name="skill_categories[]" multiple>
-            <% skillCategories.forEach(cat => { %>
-                <option value="<%= cat.skill_category_id %>" <%= searchParams && searchParams.skill_categories && searchParams.skill_categories.includes(cat.skill_category_id.toString()) ? 'selected' : '' %>><%= cat.category_name %></option>
-            <% }); %>
-        </select><br><br>
+            <!-- Filter panel -->
+            <div class="filter-panel" id="filter-panel">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="zipcode">Zip Code</label>
+                        <input type="text" id="zipcode" name="zipcode" placeholder="e.g. 18042"
+                            value="<%= searchParams ? searchParams.zipcode : '' %>">
+                    </div>
+                    <div class="filter-group">
+                        <label for="job_category">Job Category</label>
+                        <select id="job_category" name="job_category">
+                            <option value="">Any</option>
+                            <% jobCategories.forEach(cat=> { %>
+                                <option value="<%= cat.job_category_id %>" <%=searchParams &&
+                                    searchParams.job_category==cat.job_category_id ? 'selected' : '' %>>
+                                    <%= cat.category_name %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="skill_category">Skill Category</label>
+                        <select id="skill_category" name="skill_category">
+                            <option value="">Any</option>
+                            <% skillCategories.forEach(cat=> { %>
+                                <option value="<%= cat.skill_category_id %>" <%=searchParams &&
+                                    searchParams.skill_category==cat.skill_category_id ? 'selected' : '' %>>
+                                    <%= cat.category_name %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="search-submit-btn">Search</button>
+            </div>
+        </form>
 
-        <button type="submit">Search</button>
-    </form>
+        <!-- Job Results -->
+        <div id="jobs-results">
+            <% if (results && results.length> 0) { %>
+                <div class="results-list">
+                    <% results.forEach(job=> { %>
+                        <div class="job-card">
+                            <div class="job-card-pic">
+                                <div class="profile-pic-placeholder">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="job-card-info">
+                                <p class="job-card-name">@<%= job.username || 'Unknown' %>
+                                </p>
+                                <p class="job-card-title">
+                                    <%= job.description %>
+                                </p>
+                                <p class="job-card-detail"><i class="fa-solid fa-location-dot"></i>
+                                    <%= job.zipcode %>
+                                </p>
+                                <p class="job-card-detail"><i class="fa-solid fa-clock"></i>
+                                    <%= job.duration %> mins
+                                </p>
+                                <p class="job-card-detail"><i class="fa-solid fa-calendar"></i>
+                                    <%= job.datetime %>
+                                </p>
+                            </div>
+                            <div class="job-card-action">
+                                <a href="/booking/<%= job.job_id %>" class="book-now-btn">Book Now</a>
+                            </div>
+                        </div>
+                        <% }); %>
+                </div>
+                <% } else if (results) { %>
+                    <p class="no-results">No jobs found matching your criteria.</p>
+                    <% } %>
+        </div>
 
-    <h1> Search Results </h1>
+        <!-- User Results -->
+        <div id="users-results" style="display:none;">
+            <p class="no-results">User search coming soon.</p>
+        </div>
+    </div>
 
-    <% if (results && results.length > 0) { %>
-        <ul>
-            <% results.forEach(job => { %>
-                <li>
-                    <h3><%= job.description %></h3>
-                    <p>Date & Time: <%= job.datetime %></p>
-                    <p>Zip Code: <%= job.zipcode %></p>
-                    <p>Duration: <%= job.duration %></p>
-                    <a href="/booking/<%= job.job_id %>">View Details</a>
-                </li>
-            <% }); %>
-        </ul>
-    <% } else if (results) { %>
-        <p>No jobs found matching your criteria.</p>
-    <% } %>
-
-    <a href="/">Back to Landing Page</a>
-
-    <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
     <script>
-        new SlimSelect({
-            select: '#job_category'
-        });
-        new SlimSelect({
-            select: '#skill_category'
-        });
+        function toggleFilters() {
+            const panel = document.getElementById('filter-panel');
+            panel.classList.toggle('open');
+        }
+
+        function switchTab(tab) {
+            const jobsToggle = document.getElementById('jobs-toggle');
+            const usersToggle = document.getElementById('users-toggle');
+            const jobsResults = document.getElementById('jobs-results');
+            const usersResults = document.getElementById('users-results');
+            const filterBtn = document.getElementById('filter-toggle-btn');
+            const searchType = document.getElementById('search_type');
+
+            if (tab === 'jobs') {
+                jobsToggle.classList.add('active');
+                usersToggle.classList.remove('active');
+                jobsResults.style.display = 'block';
+                usersResults.style.display = 'none';
+                filterBtn.style.display = 'flex';
+                searchType.value = 'jobs';
+            } else {
+                usersToggle.classList.add('active');
+                jobsToggle.classList.remove('active');
+                usersResults.style.display = 'block';
+                jobsResults.style.display = 'none';
+                filterBtn.style.display = 'none';
+                document.getElementById('filter-panel').classList.remove('open');
+                searchType.value = 'users';
+            }
+        }
     </script>
 </body>
+
 </html>
