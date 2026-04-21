@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <title>Search - Paw Patrol</title>
     <link rel="stylesheet" href="/css/default_stylesheet.css">
     <link rel="stylesheet" href="/css/job-search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/slim-select@latest/dist/slimselect.css">
 </head>
+
 
 <body>
     <div class="sidebar">
@@ -42,9 +45,9 @@
                     <button type="button" class="toggle-btn active" id="jobs-toggle" onclick="switchTab('jobs')">
                         <i class="fa-solid fa-clipboard-list"></i> Job Listings
                     </button>
-                    <button type="button" class="toggle-btn" id="users-toggle" onclick="switchTab('users')">
+                    <!-- <button type="button" class="toggle-btn" id="users-toggle" onclick="switchTab('users')">
                         <i class="fa-solid fa-user"></i> Users
-                    </button>
+                    </button> -->
                 </div>
                 <button type="button" class="filter-toggle" id="filter-toggle-btn" onclick="toggleFilters()">
                     <i class="fa-solid fa-sliders"></i>
@@ -60,28 +63,24 @@
                             value="<%= searchParams ? searchParams.zipcode : '' %>">
                     </div>
                     <div class="filter-group">
-                        <label for="job_category">Job Category</label>
-                        <select id="job_category" name="job_category">
-                            <option value="">Any</option>
-                            <% jobCategories.forEach(cat=> { %>
-                                <option value="<%= cat.job_category_id %>" <%=searchParams &&
-                                    searchParams.job_category==cat.job_category_id ? 'selected' : '' %>>
-                                    <%= cat.category_name %>
-                                </option>
-                                <% }); %>
-                        </select>
+                        
+                        <label for="job_category">Job Category:</label>
+                        <select id="job_category" name="job_categories[]" multiple>
+                            <% jobCategories.forEach(cat => { %>
+                                <option value="<%= cat.job_category_id %>" <%= searchParams && searchParams.job_categories && searchParams.job_categories.includes(cat.job_category_id.toString()) ? 'selected' : '' %>><%= cat.category_name %></option>
+                            <% }); %>
+                        </select><br><br>
+
                     </div>
                     <div class="filter-group">
-                        <label for="skill_category">Skill Category</label>
-                        <select id="skill_category" name="skill_category">
-                            <option value="">Any</option>
-                            <% skillCategories.forEach(cat=> { %>
-                                <option value="<%= cat.skill_category_id %>" <%=searchParams &&
-                                    searchParams.skill_category==cat.skill_category_id ? 'selected' : '' %>>
-                                    <%= cat.category_name %>
-                                </option>
-                                <% }); %>
-                        </select>
+
+                        <label for="skill_category">Skill Category:</label>
+                        <select id="skill_category" name="skill_categories[]" multiple>
+                            <% skillCategories.forEach(cat => { %>
+                                <option value="<%= cat.skill_category_id %>" <%= searchParams && searchParams.skill_categories && searchParams.skill_categories.includes(cat.skill_category_id.toString()) ? 'selected' : '' %>><%= cat.category_name %></option>
+                            <% }); %>
+                        </select><br><br>
+
                     </div>
                 </div>
                 <button type="submit" class="search-submit-btn">Search</button>
@@ -126,11 +125,17 @@
                     <% } %>
         </div>
 
-        <!-- User Results -->
-        <div id="users-results" style="display:none;">
-            <p class="no-results">User search coming soon.</p>
-        </div>
     </div>
+    
+    <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
+    <script>
+        new SlimSelect({
+            select: '#job_category'
+        });
+        new SlimSelect({
+            select: '#skill_category'
+        });
+    </script>
 
     <script>
         function toggleFilters() {
@@ -165,5 +170,6 @@
         }
     </script>
 </body>
+
 
 </html>
