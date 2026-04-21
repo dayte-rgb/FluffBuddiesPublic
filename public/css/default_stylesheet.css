@@ -5,8 +5,26 @@ html, body {
     margin: 0;
     padding: 0;
 }
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Fredoka+One&display=swap');
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 
 body {
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
     background-color: white;
     display: flex;
     justify-content: center;
@@ -24,7 +42,11 @@ h1 {
     font-family: 'Fredoka One', sans-serif;
     font-size: 45px;
     color: #665931;
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 45px;
+    color: #665931;
     text-align: center;
+    margin: 0;
     margin: 0;
 }
 
@@ -35,7 +57,9 @@ h1 {
 }
 
 .button-container {
+.button-container {
     display: flex;
+    justify-content: center;
     justify-content: center;
     align-items: center;
     gap: 30px;

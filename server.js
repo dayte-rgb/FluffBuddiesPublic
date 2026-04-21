@@ -46,6 +46,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 
+
 app.get('/', (req, res) => {
   res.status(200);
   write_res_log(res);
@@ -54,6 +55,11 @@ app.get('/', (req, res) => {
 
 // Define a route handler for GET requests to the URL ('/default')
 app.get('/default', (req, res) => {
+  // Render the 'default' template and pass an object with dynamic data.
+  res.render('default', {
+    name: 'Student', // A variable named 'name' with the value 'Student'.
+    items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
+  });
   // Render the 'default' template and pass an object with dynamic data.
   res.render('default', {
     name: 'Student', // A variable named 'name' with the value 'Student'.
@@ -98,12 +104,16 @@ app.get('/booking/:job_id', (req, res) => {
   let userData = user.getById(jobData.employee_num);
 
   res.render('booking-detail', { jobData, reviewData, userData });
+  res.render('booking-detail', { jobData, reviewData, userData });
 });
+
 
 
 // Handle booking a job
 app.post('/booking/:job_id', (req, res) => {
+app.post('/booking/:job_id', (req, res) => {
   const employee_id = req.body.employee_id;
+
 
   try {
     employeeJob.create(req.params.job_id, employee_id);
@@ -114,6 +124,7 @@ app.post('/booking/:job_id', (req, res) => {
   }
 });
 
+function write_res_log(res) {
 function write_res_log(res) {
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
