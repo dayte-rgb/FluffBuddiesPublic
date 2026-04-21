@@ -16,7 +16,7 @@ node_modules/
 .vscode/
 
 # Server dependency files
-*.json
+package-lock.json
 
 # stryker temp files
 .stryker-tmp
