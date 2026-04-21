@@ -12,12 +12,14 @@ const reviewContentModel = require('./models/reviewContentModel.js');
 const reviewContent = new reviewContentModel();
 const employeeJobModel = require('./models/employeeJobModel');
 const employeeJob = new employeeJobModel();
-const JobSearchModel = require('./models/JobSearchModel');
+const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
 const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
+const userModel = require('./models/userModel.js');
+const user = new userModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -46,7 +48,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.get('/', (req, res) => {
   res.status(200);
   write_res_log(res);
-  res.redirect('index.html');
+  res.render('welcome');
 });
 
 // Define a route handler for GET requests to the URL ('/default')
@@ -60,34 +62,38 @@ app.get('/default', (req, res) => {
 
 // Displays job search query page
 app.get('/job-search', (req, res) => {
-  const jobCategories = jobCategory.retrieveAll();
-  const skillCategories = skillCategory.retrieveAll();
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
   
   res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
 });
 
 // Handles execution of search query
 app.post('/job-search', (req, res) => {
-  const { zipcode, keyword, job_category, skill_category } = req.body;
+  let { zipcode, keyword, job_categories, skill_categories } = req.body;
   
-  const results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_category || null, job_category || null);
+  let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
   
-  const jobCategories = jobCategory.retrieveAll();
-  const skillCategories = skillCategory.retrieveAll();
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
   
-  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_category, skill_category } });
+  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_categories, skill_categories } });
 });
 
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', (req, res) => {
-  let jobData = jobContent.retrieve(req.params.job_id);
-  let reviews= jobReview.retrieveByJobID(req.params.job_id);
+  let jobData = jobContent.getById(req.params.job_id);
+  let reviews= jobReview.getByJobId(req.params.job_id);
   let reviewData = [];
-  for(let i = 0; i < reviews.length; i++){
-    reviewData.push(reviewContent.retrieve(reviews[i].review_id));
+  if(reviews != null){
+    for(let i = 0; i < reviews.length; i++){
+    reviewData.push(reviewContent.getById(reviews[i].review_id));
+  }
   }
 
-  res.render('booking-detail', { jobData, reviewData });
+  let userData = user.getById(jobData.employee_num);
+
+  res.render('booking-detail', { jobData, reviewData, userData });
 });
 
 // Handle booking a job
@@ -112,4 +118,3 @@ function write_res_log(res){
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
-

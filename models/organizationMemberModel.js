@@ -15,7 +15,7 @@ class organizationMemberModel {
     return {org_id, user_id};
   }
 
-  retrieve(org_id, user_id){
+  getByIds(org_id, user_id){
     const query = "SELECT * FROM OrganizationMember WHERE org_id = ? AND user_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,12 +25,22 @@ class organizationMemberModel {
     return info
   }
 
+  getAll(){
+    const query = 'SELECT * FROM OrganizationMember';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(org_id, user_id){
     const query = "DELETE FROM OrganizationMember WHERE org_id = ? AND user_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(org_id, user_id);
+    const old_info = this.getByIds(org_id, user_id);
 
     const info = stmt.run(org_id, user_id);
 

@@ -15,12 +15,22 @@ class userSecurityAnswerModel {
     return {user_id, question_id, answer_text};
   }
 
-  retrieve(user_id, question_id){
+  getByIds(user_id, question_id){
     const query = "SELECT * FROM UserSecurityAnswer WHERE user_id = ? AND question_id = ?";
 
     const stmt = this.db.prepare(query);
 
     const info = stmt.run(user_id, question_id);
+
+    return info;
+  }
+
+  getAll(){
+    const query = 'SELECT * FROM UserSecurityAnswer';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
 
     return info;
   }
@@ -32,7 +42,7 @@ class userSecurityAnswerModel {
 
     const info = stmt.run(answer_text, user_id, question_id);
 
-    return this.retrieve(user_id, question_id);
+    return this.getByIds(user_id, question_id);
   }
 
   delete(user_id, question_id){
@@ -40,7 +50,7 @@ class userSecurityAnswerModel {
 
     const stmt = this.db.prepare(query);
 
-    const old_info = this.retrieve(user_id, question_id);
+    const old_info = this.getByIds(user_id, question_id);
 
     const info = stmt.run(user_id, question_id);
 

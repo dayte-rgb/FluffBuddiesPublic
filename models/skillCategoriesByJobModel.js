@@ -15,7 +15,7 @@ class skillCategoriesByJobModel {
     return {job_id, skill_category_id};
   }
 
-  retrieve(job_id, skill_category_id){
+  getByIds(job_id, skill_category_id){
     const query = "SELECT * FROM SkillCategoriesByJob WHERE job_id = ? AND skill_category_id = ?";
 
     const stmt = this.db.prepare(query);
@@ -25,10 +25,20 @@ class skillCategoriesByJobModel {
     return info;
   }
 
+  getAll(){
+    const query = 'SELECT * FROM SkillCategoriesByJob';
+
+    const stmt = this.db.prepare(query);
+
+    const info = stmt.all();
+
+    return info;
+  }
+
   delete(job_id, skill_category_id){
     const query = "DELETE FROM SkillCategoriesByJob WHERE job_id = ? AND skill_category_id = ?";
 
-    const deleted_info = retrieve(job_id);
+    const deleted_info = this.getByIds(job_id);
 
     const stmt = this.db.prepare(query);
 
