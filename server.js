@@ -109,6 +109,17 @@ app.post('/booking/:job_id', (req, res) => {
   }
 });
 
+app.get('/leaderboard-test', (req, res) => {
+  res.render('leaderboard', {
+    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
+    entries: [
+      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
+      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
+      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
+    ]
+  });
+});
+
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
