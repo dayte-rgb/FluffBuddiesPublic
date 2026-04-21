@@ -1,0 +1,37 @@
+{
+  "name": "final-project-fluff-buddies",
+  "version": "1.0.0",
+  "description": "Turner Day, Gabriela Blanco Reyes, Sana Adnan, and David Broczkowski",
+  "main": "database.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cs205-sp-26/final-project-fluff-buddies.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cs205-sp-26/final-project-fluff-buddies/issues"
+  },
+  "homepage": "https://github.com/cs205-sp-26/final-project-fluff-buddies#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "mocha": "^11.7.5",
+    "node": "^25.9.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/jest-runner": "^9.6.1",
+    "@stryker-mutator/mocha-runner": "^9.6.1",
+    "jest": "^30.3.0"
+  }
+}
