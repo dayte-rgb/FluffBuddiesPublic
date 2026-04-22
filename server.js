@@ -81,19 +81,22 @@ app.post('/job-search', (req, res) => {
 });
 
 // Display a page with details of a selected job listing
-app.get('/booking/:job_id', (req, res) => {
-  let jobData = jobContent.getById(req.params.job_id);
-  let reviews= jobReview.getByJobId(req.params.job_id);
-  let reviewData = [];
-  if(reviews != null){
-    for(let i = 0; i < reviews.length; i++){
-    reviewData.push(reviewContent.getById(reviews[i].review_id));
-  }
-  }
+app.get('/booking/:job_id', async (req, res) => {
+  const jobData = await jobContent.getById(req.params.job_id);
+  const review = await jobReview.getByJobId(req.params.job_id);
 
-  let userData = user.getById(jobData.employee_num);
+  if(review){
+    const reviewId = await review.review_id;
+    const reviewData = await reviewContent.getById(reviewId);
+    const userData = await user.getById(jobData.employee_num);
 
-  res.render('booking-detail', { jobData, reviewData, userData });
+    res.render('booking-detail', { jobData, reviewData, userData });
+  }else{
+    const reviewData = null;
+    const userData = await user.getById(jobData.employee_num);
+
+    res.render('booking-detail', { jobData, reviewData, userData });
+  }
 });
 
 // Handle booking a job
