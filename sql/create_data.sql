@@ -64,15 +64,15 @@ INSERT INTO PaymentContent VALUES
 -- insert data into JobContent  (must come before JobPayment and EmployerJob)
 -- (NULL, <description>, <datetime>, <duration>, <zipcode>, <employee_num>, <job_filled>)
 INSERT INTO JobContent VALUES
-(NULL, "Need someone to walk my golden retriever every weekday morning", "2025-04-01 08:00:00", 60, 18042, 1, FALSE),
-(NULL, "Looking for a pet sitter for a weekend while I travel", "2025-04-10 09:00:00", 2880, 18045, 1, FALSE),
-(NULL, "Dog grooming needed before a show", "2025-04-05 14:00:00", 120, 18101, 1, TRUE),
-(NULL, "Help needed caring for 3 cats while owner is away", "2025-04-15 10:00:00", 1440, 12967, 1, FALSE),
-(NULL, "Weekend dog walking for energetic husky", "2025-04-20 07:00:00", 90, 35234, 2, FALSE),
-(NULL, "Cat sitting needed for vacation", "2025-04-25 08:00:00", 3563646, 17221, 2, FALSE),
-(NULL, "Dog training sessions for obedience", "2025-04-18 16:00:00", 123312, 18042, 3, FALSE),
-(NULL, "Bird cage cleaning and feeding", "2025-04-22 10:00:00", 6764332, 18045, 4, FALSE),
-(NULL, "Horse grooming and exercise", "2025-04-28 06:00:00", 9999, 25452, 4, FALSE);
+(NULL, "Need someone to walk my golden retriever every weekday morning", "2025-04-01 08:00:00", 60, 18042, 1, FALSE, FALSE),
+(NULL, "Looking for a pet sitter for a weekend while I travel", "2025-04-10 09:00:00", 2880, 18045, 1, FALSE, FALSE),
+(NULL, "Dog grooming needed before a show", "2025-04-05 14:00:00", 120, 18101, 1, TRUE, FALSE),
+(NULL, "Help needed caring for 3 cats while owner is away", "2025-04-15 10:00:00", 1440, 12967, 1, FALSE, FALSE),
+(NULL, "Weekend dog walking for energetic husky", "2025-04-20 07:00:00", 90, 35234, 2, FALSE, TRUE),
+(NULL, "Cat sitting needed for vacation", "2025-04-25 08:00:00", 3563646, 17221, 2, FALSE, TRUE),
+(NULL, "Dog training sessions for obedience", "2025-04-18 16:00:00", 123312, 18042, 3, FALSE, TRUE),
+(NULL, "Bird cage cleaning and feeding", "2025-04-22 10:00:00", 6764332, 18045, 4, FALSE, TRUE),
+(NULL, "Horse grooming and exercise", "2025-04-28 06:00:00", 9999, 25452, 4, FALSE, TRUE);
 
 -- insert data into JobCategoriesByJob
 -- (<job_id>, <job_category_id>)
