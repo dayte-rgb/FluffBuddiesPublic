@@ -5,14 +5,14 @@ class jobContentModel {
     this.db = connectToDatabase();
   }
 
-  create(description, datetime, duration, zipcode, employee_num, job_filled){
-    const query = "INSERT INTO JobContent (job_id, description, datetime, duration, zipcode, employee_num, job_filled) VALUES (NULL, ?, ?, ?, ?, ?, ?)";
+  create(description, datetime, duration, zipcode, employee_num, job_filled, job_completed){
+    const query = "INSERT INTO JobContent (job_id, description, datetime, duration, zipcode, employee_num, job_filled, job_completed) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(description, datetime, duration, zipcode, employee_num, job_filled);
+    const info = stmt.run(description, datetime, duration, zipcode, employee_num, job_filled, job_completed);
 
-    return { id: info.lastInsertRowid, description, datetime, duration, zipcode, employee_num, job_filled};
+    return { id: info.lastInsertRowid, description, datetime, duration, zipcode, employee_num, job_filled, job_completed};
   }
 
   getById(job_id){
@@ -35,12 +35,12 @@ class jobContentModel {
     return info;
   }
 
-  update(job_id, description, datetime, duration, zipcode, employee_num, job_filled){
-    const query = "UPDATE JobContent SET description = ?, datetime = ?, duration = ?, zipcode = ?, employee_num = ?, job_filled = ? WHERE job_id = ?";
+  update(job_id, description, datetime, duration, zipcode, employee_num, job_filled, job_completed){
+    const query = "UPDATE JobContent SET description = ?, datetime = ?, duration = ?, zipcode = ?, employee_num = ?, job_filled = ?, job_completed = ? WHERE job_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(description, datetime, duration, zipcode, employee_num, job_filled, job_id);
+    const info = stmt.run(description, datetime, duration, zipcode, employee_num, job_filled, job_completed, job_id);
 
     return this.getById(job_id);
   }
