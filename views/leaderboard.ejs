@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Leaderboard</title>
-  <link rel="stylesheet" href="leaderboard.css" />
+  <link rel="stylesheet" href="/css/leaderboard.css" />
 </head>
 <body>
   <div class="card">
@@ -24,14 +24,14 @@
           <th>Jobs Completed</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="leaderboard-body">
         <% if (!entries || entries.length === 0) { %>
           <tr>
             <td colspan="4" class="empty">No entries yet for this period.</td>
           </tr>
         <% } else { %>
           <% entries.forEach(function(entry, index) { %>
-            <tr>
+            <tr data-worker="<%= entry.worker_name %>" data-rating="<%= entry.avg_rating !== null ? entry.avg_rating : '' %>" data-jobs="<%= entry.jobs_completed %>">
               <td class="rank"><%= index + 1 %></td>
               <td class="worker-name"><%= entry.worker_name %></td>
               <td class="rating-cell">
@@ -48,6 +48,6 @@
     </table>
   </div>
 
-  <script src="public/js/leaderboard.js"></script>
+  <script src="/js/leaderboard.js"></script>
 </body>
 </html>

@@ -125,7 +125,7 @@ app.get('/review-test', (req, res) => {
     worker_name: 'Rex',
     job_title: 'Dog Walking',
     job_date: '2025-04-01',
-    job_id: 1
+    job_id: 99  // changed from 1 to 99
   });
 });
 
@@ -136,11 +136,14 @@ function write_res_log(res){
 
 app.post('/api/reviews', (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
-  
-  const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), false);
-  jobReview.create(newReview.id, job_id);
 
-  res.json({ review_id: newReview.id });
+  try {
+    const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
+    res.json({ review_id: newReview.id });
+  } catch (error) {
+    console.error('Error saving review:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Start the server and make it listen on the specified port.

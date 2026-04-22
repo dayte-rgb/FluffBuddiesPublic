@@ -10,7 +10,7 @@ class jobReviewModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(review_id, job_id);
+    const info = stmt.run(review_id, job_id);
 
     return {review_id, job_id};
   }
