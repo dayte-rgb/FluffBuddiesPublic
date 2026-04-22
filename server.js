@@ -120,6 +120,15 @@ app.get('/leaderboard-test', (req, res) => {
   });
 });
 
+app.get('/review-test', (req, res) => {
+  res.render('review', {
+    worker_name: 'Rex',
+    job_title: 'Dog Walking',
+    job_date: '2025-04-01',
+    job_id: 1
+  });
+});
+
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
