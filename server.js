@@ -133,6 +133,16 @@ function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
 }
+
+app.post('/api/reviews', (req, res) => {
+  const { job_id, punctuality, quality, friendliness, comments } = req.body;
+  
+  const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), false);
+  jobReview.create(newReview.id, job_id);
+
+  res.json({ review_id: newReview.id });
+});
+
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
 app.listen(PORT, () => {
