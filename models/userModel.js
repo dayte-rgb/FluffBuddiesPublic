@@ -50,7 +50,7 @@ class userModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.get(user_id);
+    const info = stmt.get(username);
 
     return info;
   }
@@ -70,9 +70,27 @@ class userModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.get(user_id);
+    const info = stmt.get(email);
 
     return info;
+  }
+
+  // Authenticate user by username or email and password
+  authenticate(identifier, password) {
+    // First try to find by username
+    let user = this.getByUsername(identifier);
+    
+    // If not found by username, try by email
+    if (!user) {
+      user = this.getByEmail(identifier);
+    }
+    
+    // Check if user exists and password matches
+    if (user && user.password === password) {
+      return user;
+    }
+    
+    return null;
   }
 
   getAll(){

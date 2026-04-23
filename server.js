@@ -81,19 +81,22 @@ app.post('/job-search', (req, res) => {
 });
 
 // Display a page with details of a selected job listing
-app.get('/booking/:job_id', (req, res) => {
-  let jobData = jobContent.getById(req.params.job_id);
-  let reviews= jobReview.getByJobId(req.params.job_id);
-  let reviewData = [];
-  if(reviews != null){
-    for(let i = 0; i < reviews.length; i++){
-    reviewData.push(reviewContent.getById(reviews[i].review_id));
-  }
-  }
+app.get('/booking/:job_id', async (req, res) => {
+  const jobData = await jobContent.getById(req.params.job_id);
+  const review = await jobReview.getByJobId(req.params.job_id);
 
-  let userData = user.getById(jobData.employee_num);
+  if(review){
+    const reviewId = await review.review_id;
+    const reviewData = await reviewContent.getById(reviewId);
+    const userData = await user.getById(jobData.employee_num);
 
-  res.render('booking-detail', { jobData, reviewData, userData });
+    res.render('booking-detail', { jobData, reviewData, userData });
+  }else{
+    const reviewData = null;
+    const userData = await user.getById(jobData.employee_num);
+
+    res.render('booking-detail', { jobData, reviewData, userData });
+  }
 });
 
 // Handle booking a job
@@ -120,6 +123,26 @@ app.get('/leaderboard-test', (req, res) => {
   });
 });
 
+app.get('/review-test', (req, res) => {
+  res.render('review', {
+    worker_name: 'Rex',
+    job_title: 'Dog Walking',
+    job_date: '2025-04-01',
+    job_id: 99  // changed from 1 to 99
+  });
+});
+  
+app.get('/leaderboard-test', (req, res) => {
+  res.render('leaderboard', {
+    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
+    entries: [
+      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
+      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
+      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
+    ]
+  });
+});
+  
 app.get('/review-test', (req, res) => {
   res.render('review', {
     worker_name: 'Rex',
