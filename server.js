@@ -217,6 +217,15 @@ app.get('/leaderboard-test', (req, res) => {
   });
 });
 
+app.get('/review-test', (req, res) => {
+  res.render('review', {
+    worker_name: 'Rex',
+    job_title: 'Dog Walking',
+    job_date: '2025-04-01',
+    job_id: 99  // changed from 1 to 99
+  });
+});
+
 // Handle signup render
 app.get('/signup', (req, res) => {
   res.render('signup');
