@@ -122,7 +122,8 @@ CREATE TABLE IF NOT EXISTS JobContent (
   duration INTEGER CHECK(duration >= 0),
   zipcode INTEGER,
   employee_num INTEGER NOT NULL CHECK(employee_num > 0),
-  job_filled INTEGER NOT NULL CHECK(job_filled IN (0, 1))
+  job_filled INTEGER NOT NULL CHECK(job_filled IN (0, 1)),
+  job_completed INTEGER NOT NULL CHECK(job_completed IN(0, 1))
 );
 
 CREATE TABLE IF NOT EXISTS SkillCategoriesByJob (
@@ -150,9 +151,9 @@ CREATE TABLE IF NOT EXISTS JobReview (
 
 CREATE TABLE IF NOT EXISTS ReviewContent (
   review_id INTEGER PRIMARY KEY ,
-  punctuality INTEGER CHECK(punctuality IN (0,1,2,3,4,5)),
-  quality INTEGER CHECK(quality IN (0,1,2,3,4,5)),
-  friendliness INTEGER CHECK(friendliness IN (0,1,2,3,4,5)),
+  punctuality INTEGER NOT NULL CHECK(punctuality IN (0,1,2,3,4,5)),
+  quality INTEGER NOT NULL CHECK(quality IN (0,1,2,3,4,5)),
+  friendliness INTEGER NOT NULL CHECK(friendliness IN (0,1,2,3,4,5)),
   comments TEXT,
   datetime TEXT NOT NULL,
   verified INTEGER NOT NULL CHECK(verified IN (0,1))
