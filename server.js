@@ -156,6 +156,56 @@ app.post('/forgot-password', (req, res) => {
   });
 });
 
+// Handle signup render
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+// Handle signup submission
+app.post('/signup', (req, res) => {
+  const { username, email, password, phone_number, zipcode, account_type } = req.body;
+
+  // Validate required fields
+  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
+    logger.write(`[INFO] Signup attempt with missing fields`);
+    return res.render('signup', { error: 'All fields are required.' });
+  }
+
+  // Validate account_type
+  const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
+  if (!validAccountTypes.includes(account_type)) {
+    logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
+    return res.render('signup', { error: 'Invalid account type selected.' });
+  }
+
+  try {
+    // Check if username already exists
+    const existingUser = user.getByUsername(username);
+    if (existingUser) {
+      logger.write(`[INFO] Signup attempt with existing username: ${username}`);
+      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
+    }
+
+    // Check if email already exists
+    const existingEmail = user.getByEmail(email);
+    if (existingEmail) {
+      logger.write(`[INFO] Signup attempt with existing email: ${email}`);
+      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
+    }
+
+    // Create new user
+    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
+    logger.write(`[INFO] New user created: ${newUser.username}`);
+
+    // Signup successful - render login page with success message
+    res.render('login', { success: 'Account created successfully! Please log in.' });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    logger.write(`[ERROR] Signup error: ${error.message}`);
+    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
+  }
+});
+
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;

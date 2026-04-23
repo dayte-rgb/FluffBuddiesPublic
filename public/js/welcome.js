@@ -11,8 +11,7 @@ if (loginButton) {
 
 if (signupButton) {
     signupButton.addEventListener("click", function(event) {
-        // TODO: Navigate to signup page when implemented
-        alert('Sign up functionality coming soon!');
+        window.location.href = '/signup';
     });
 } else {
     console.error('Signup button not found');
