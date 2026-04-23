@@ -7,6 +7,7 @@ class jobSearchModel {
   }
 
   getAllMatchedJobs(zipcode, keyword, skill_cat_ids, job_cat_ids){
+
     // here, many operations will give errors if skill_cat_ids or job_cat_ids are null, so create a value that tells us that
     let hasSkills;
     let hasJobs;
@@ -83,6 +84,7 @@ class jobSearchModel {
   }
 
   getKMatchedJobs(zipcode, keyword, skill_cat_ids, job_cat_ids, k){
+
     // here, many operations will give errors if skill_cat_ids or job_cat_ids are null, so create a value that tells us that
     let hasSkills;
     let hasJobs;

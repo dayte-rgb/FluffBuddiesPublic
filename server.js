@@ -12,6 +12,8 @@ const reviewContentModel = require('./models/reviewContentModel.js');
 const reviewContent = new reviewContentModel();
 const employeeJobModel = require('./models/employeeJobModel');
 const employeeJob = new employeeJobModel();
+const employerJobModel = require('./models/employerJobModel');
+const employerJob = new employerJobModel();
 const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
@@ -304,10 +306,10 @@ app.get('/create-job', (req, res) => {
 
 // Handle job creation
 app.post('/create-job', (req, res) => {
-  const { description, datetime, duration, zipcode, employee_num, job_filled } = req.body;
+  const { description, datetime, duration, zipcode, employee_num, job_filled, username } = req.body;
 
   // Validate required fields
-  if (!description || !datetime || !duration || !zipcode || !employee_num) {
+  if (!description || !datetime || !duration || !zipcode || !employee_num || !username) {
     logger.write(`[INFO] Create job attempt with missing fields`);
     return res.render('create-job', { 
       error: 'All required fields must be filled out.',
@@ -323,6 +325,7 @@ app.post('/create-job', (req, res) => {
     // Validate numeric fields
     const durationNum = parseInt(duration);
     const employeeNum = parseInt(employee_num);
+    const user_id = user.getByUsername(username).user_id;
 
     if (isNaN(durationNum) || durationNum <= 0) {
       logger.write(`[INFO] Create job attempt with invalid duration: ${duration}`);
@@ -333,9 +336,9 @@ app.post('/create-job', (req, res) => {
     }
 
     if (isNaN(employeeNum) || employeeNum <= 0) {
-      logger.write(`[INFO] Create job attempt with invalid employee ID: ${employee_num}`);
+      logger.write(`[INFO] Create job attempt with invalid number of employees: ${employee_num}`);
       return res.render('create-job', {
-        error: 'Employee ID must be a positive number.',
+        error: 'Number of Employees must be a positive number.',
         success: null
       });
     }
@@ -351,12 +354,17 @@ app.post('/create-job', (req, res) => {
       job_completed
     );
 
-    logger.write(`[INFO] New job created with ID: ${newJob.id}`);
+    const job_id = newJob.id;
+    const newEmployerJob = employerJob.create(
+      job_id,
+      user_id
+    );
 
     // TO BE CHANGED, BANDAID FIX UNTIL CATEGORIES CAN BE ASSIGNED ON PAGE
     skillCategoriesByJob.create(newJob.id, 1);
     jobCategoriesByJob.create(newJob.id, 1);
 
+    logger.write(`[INFO] New job created with ID: ${newJob.id}`);
     // Render success page
     res.render('create-job', {
       error: null,
