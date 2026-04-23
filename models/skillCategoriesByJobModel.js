@@ -10,7 +10,7 @@ class skillCategoriesByJobModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(job_id, skill_category_id);
+    const info = stmt.run(job_id, skill_category_id);
 
     return {job_id, skill_category_id};
   }

@@ -22,6 +22,10 @@ const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
 const user = new userModel();
+const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js');
+const skillCategoriesByJob = new skillCategoriesByJobModel();
+const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
+const jobCategoriesByJob = new jobCategoriesByJobModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -355,6 +359,10 @@ app.post('/create-job', (req, res) => {
       job_id,
       user_id
     );
+
+    // TO BE CHANGED, BANDAID FIX UNTIL CATEGORIES CAN BE ASSIGNED ON PAGE
+    skillCategoriesByJob.create(newJob.id, 1);
+    jobCategoriesByJob.create(newJob.id, 1);
 
     logger.write(`[INFO] New job created with ID: ${newJob.id}`);
     // Render success page
