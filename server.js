@@ -26,6 +26,10 @@ const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js
 const skillCategoriesByJob = new skillCategoriesByJobModel();
 const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
 const jobCategoriesByJob = new jobCategoriesByJobModel();
+const leaderboardContentModel = require('./models/leaderboardContentModel.js');
+const leaderboardContent = new leaderboardContentModel();
+const userReviewModel = require('./models/userReviewModel.js');
+const userReview = new userReviewModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -232,6 +236,18 @@ app.get('/review-test', (req, res) => {
   });
 });
 
+app.get('/review/:job_id', async (req, res) => {
+  const jobData = await jobContent.getById(req.params.job_id);
+  const userData = await user.getById(jobData.employee_num);
+
+  res.render('review', {
+    worker_name: userData.username,
+    job_title: jobData.description,
+    job_date: jobData.datetime,
+    job_id: req.params.job_id
+  });
+});
+
 // Handle signup render
 app.get('/signup', (req, res) => {
   res.render('signup');
@@ -291,8 +307,23 @@ app.post('/api/reviews', (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
 
   try {
-    const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
-    res.json({ review_id: newReview.id });
+    // Save the review content
+    const newReview = reviewContent.create(
+      punctuality, quality, friendliness, comments,
+      new Date().toISOString(), 0
+    );
+    const review_id = newReview.id;
+
+    // Link review → job
+    jobReview.create(review_id, job_id);
+
+    // Link review → worker 
+    const jobData = jobContent.getById(job_id);
+    if (jobData && jobData.employee_num) {
+      userReview.create(review_id, jobData.employee_num);
+    }
+
+    res.json({ review_id });
   } catch (error) {
     console.error('Error saving review:', error);
     res.status(500).json({ error: error.message });
