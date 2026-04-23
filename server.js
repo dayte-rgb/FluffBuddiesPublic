@@ -112,24 +112,98 @@ app.post('/booking/:job_id', (req, res) => {
   }
 });
 
-app.get('/leaderboard-test', (req, res) => {
-  res.render('leaderboard', {
-    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
-    entries: [
-      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
-      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
-      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
-    ]
+// Handle login render
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+// Handle login submission
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // Authenticate user using UserModel
+  const authenticatedUser = user.authenticate(username, password);
+
+  if (authenticatedUser) {
+    // TEMPORARY UNTIL LANDING PAGE IS CREATED
+    logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
+    const jobCategories = jobCategory.getAll();
+    const skillCategories = skillCategory.getAll();
+    res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
+  } else {
+    // Login failed - redirect back to login with error
+    logger.write(`[INFO] Failed login attempt for identifier: ${username}`);
+    res.render('login', { error: 'Invalid username/email or password' });
+  }
+});
+
+// Handle forgot password render
+app.get('/forgot-password', (req, res) => {
+  res.render('forgot-password');
+});
+
+// Handle forgot password submission
+app.post('/forgot-password', (req, res) => {
+  const { email } = req.body;
+
+  // TODO: Implement actual password reset logic
+  // As of now it just shows a successful message.
+  logger.write(`[INFO] Password reset requested for email: ${email}`);
+
+  res.json({
+    success: true,
+    message: 'If an account with that email exists, a password reset link has been sent.'
   });
 });
 
-app.get('/review-test', (req, res) => {
-  res.render('review', {
-    worker_name: 'Rex',
-    job_title: 'Dog Walking',
-    job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
-  });
+// Handle signup render
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+// Handle signup submission
+app.post('/signup', (req, res) => {
+  const { username, email, password, phone_number, zipcode, account_type } = req.body;
+
+  // Validate required fields
+  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
+    logger.write(`[INFO] Signup attempt with missing fields`);
+    return res.render('signup', { error: 'All fields are required.' });
+  }
+
+  // Validate account_type
+  const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
+  if (!validAccountTypes.includes(account_type)) {
+    logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
+    return res.render('signup', { error: 'Invalid account type selected.' });
+  }
+
+  try {
+    // Check if username already exists
+    const existingUser = user.getByUsername(username);
+    if (existingUser) {
+      logger.write(`[INFO] Signup attempt with existing username: ${username}`);
+      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
+    }
+
+    // Check if email already exists
+    const existingEmail = user.getByEmail(email);
+    if (existingEmail) {
+      logger.write(`[INFO] Signup attempt with existing email: ${email}`);
+      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
+    }
+
+    // Create new user
+    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
+    logger.write(`[INFO] New user created: ${newUser.username}`);
+
+    // Signup successful - render login page with success message
+    res.render('login', { success: 'Account created successfully! Please log in.' });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    logger.write(`[ERROR] Signup error: ${error.message}`);
+    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
+  }
 });
   
 app.get('/leaderboard-test', (req, res) => {
