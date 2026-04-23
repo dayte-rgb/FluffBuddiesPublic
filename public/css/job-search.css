@@ -118,6 +118,38 @@ body {
     border-color: #f48b48;
     color: #f48b48;
 }
+
+/* Action buttons container */
+.search-action-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Create Job button */
+.create-job-btn {
+    background: #f48b48;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.create-job-btn:hover {
+    background-color: #d97a3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 139, 72, 0.3);
+}
+
 /*  Filter Panel  */
 .filter-panel {
     display: none;

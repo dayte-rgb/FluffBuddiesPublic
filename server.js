@@ -217,13 +217,54 @@ app.get('/leaderboard-test', (req, res) => {
   });
 });
 
-app.get('/review-test', (req, res) => {
-  res.render('review', {
-    worker_name: 'Rex',
-    job_title: 'Dog Walking',
-    job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
-  });
+// Handle signup render
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+// Handle signup submission
+app.post('/signup', (req, res) => {
+  const { username, email, password, phone_number, zipcode, account_type } = req.body;
+
+  // Validate required fields
+  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
+    logger.write(`[INFO] Signup attempt with missing fields`);
+    return res.render('signup', { error: 'All fields are required.' });
+  }
+
+  // Validate account_type
+  const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
+  if (!validAccountTypes.includes(account_type)) {
+    logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
+    return res.render('signup', { error: 'Invalid account type selected.' });
+  }
+
+  try {
+    // Check if username already exists
+    const existingUser = user.getByUsername(username);
+    if (existingUser) {
+      logger.write(`[INFO] Signup attempt with existing username: ${username}`);
+      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
+    }
+
+    // Check if email already exists
+    const existingEmail = user.getByEmail(email);
+    if (existingEmail) {
+      logger.write(`[INFO] Signup attempt with existing email: ${email}`);
+      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
+    }
+
+    // Create new user
+    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
+    logger.write(`[INFO] New user created: ${newUser.username}`);
+
+    // Signup successful - render login page with success message
+    res.render('login', { success: 'Account created successfully! Please log in.' });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    logger.write(`[ERROR] Signup error: ${error.message}`);
+    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
+  }
 });
 
 function write_res_log(res){
@@ -240,6 +281,78 @@ app.post('/api/reviews', (req, res) => {
   } catch (error) {
     console.error('Error saving review:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Display the create job form
+app.get('/create-job', (req, res) => {
+  res.render('create-job', { error: null, success: null });
+});
+
+// Handle job creation
+app.post('/create-job', (req, res) => {
+  const { description, datetime, duration, zipcode, employee_num, job_filled } = req.body;
+
+  // Validate required fields
+  if (!description || !datetime || !duration || !zipcode || !employee_num) {
+    logger.write(`[INFO] Create job attempt with missing fields`);
+    return res.render('create-job', { 
+      error: 'All required fields must be filled out.',
+      success: null 
+    });
+  }
+
+  try {
+    // Convert checkbox value (unchecked = undefined, so default to 0)
+    const job_filled_value = job_filled ? 1 : 0;
+    const job_completed = 0;
+
+    // Validate numeric fields
+    const durationNum = parseInt(duration);
+    const employeeNum = parseInt(employee_num);
+
+    if (isNaN(durationNum) || durationNum <= 0) {
+      logger.write(`[INFO] Create job attempt with invalid duration: ${duration}`);
+      return res.render('create-job', {
+        error: 'Duration must be a positive number.',
+        success: null
+      });
+    }
+
+    if (isNaN(employeeNum) || employeeNum <= 0) {
+      logger.write(`[INFO] Create job attempt with invalid employee ID: ${employee_num}`);
+      return res.render('create-job', {
+        error: 'Employee ID must be a positive number.',
+        success: null
+      });
+    }
+
+    // Create the new job
+    const newJob = jobContent.create(
+      description,
+      datetime,
+      durationNum,
+      zipcode,
+      employeeNum,
+      job_filled_value,
+      job_completed
+    );
+
+    logger.write(`[INFO] New job created with ID: ${newJob.id}`);
+
+    // Render success page
+    res.render('create-job', {
+      error: null,
+      success: `Job created successfully with ID: ${newJob.id}! Redirecting to job search...`
+    });
+
+  } catch (error) {
+    console.error('Error creating job:', error);
+    logger.write(`[ERROR] Create job error: ${error.message}`);
+    res.render('create-job', {
+      error: 'An error occurred while creating the job. Please try again.',
+      success: null
+    });
   }
 });
 
