@@ -35,4 +35,4 @@ class certificationContentModel {
   }
 }
 
-module.exports = certificationContentModel;
+module.exports = leaderboardModel;
