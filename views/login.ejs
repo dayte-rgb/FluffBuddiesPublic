@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login - Paw Patrol</title>
+    <link rel="stylesheet" href="/css/default_stylesheet.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="main-content">
+        <% if (typeof error !== 'undefined') { %>
+            <div class="error-message" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-family: 'Nunito', sans-serif;">
+                <%= error %>
+            </div>
+        <% } %>
+        
+        <form action="/login" method="POST" class="search-form" id="search-form">
+            <!-- Username/Email input -->
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-user search-icon"></i>
+                <input type="text" name="username" placeholder="Username or Email" class="search-input" required>
+            </div>
+            
+            <!-- Password input -->
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-lock search-icon"></i>
+                <input type="password" name="password" placeholder="Password" class="search-input" required>
+            </div>
+            
+            <button type="submit" class="search-submit-btn">Submit</button>
+            
+            <div class="forgot-password-link">
+                <a href="/forgot-password" id="forgot-password-link">Forgot password?</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

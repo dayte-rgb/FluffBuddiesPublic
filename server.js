@@ -112,6 +112,50 @@ app.post('/booking/:job_id', (req, res) => {
   }
 });
 
+// Handle login render
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+// Handle login submission
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // Authenticate user using UserModel
+  const authenticatedUser = user.authenticate(username, password);
+
+  if (authenticatedUser) {
+    // TEMPORARY UNTIL LANDING PAGE IS CREATED
+    logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
+    const jobCategories = jobCategory.getAll();
+    const skillCategories = skillCategory.getAll();
+    res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
+  } else {
+    // Login failed - redirect back to login with error
+    logger.write(`[INFO] Failed login attempt for identifier: ${username}`);
+    res.render('login', { error: 'Invalid username/email or password' });
+  }
+});
+
+// Handle forgot password render
+app.get('/forgot-password', (req, res) => {
+  res.render('forgot-password');
+});
+
+// Handle forgot password submission
+app.post('/forgot-password', (req, res) => {
+  const { email } = req.body;
+
+  // TODO: Implement actual password reset logic
+  // As of now it just shows a successful message.
+  logger.write(`[INFO] Password reset requested for email: ${email}`);
+
+  res.json({
+    success: true,
+    message: 'If an account with that email exists, a password reset link has been sent.'
+  });
+});
+
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
