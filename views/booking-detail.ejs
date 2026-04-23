@@ -65,39 +65,32 @@
             <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>">
                 Book This Job
             </button>
+
+            <!-- Review -->
+            <% if(reviewData != null) { %>
+                <h2 class="job-title">Reviews</h2>
+
+                <div class="info-row">
+                    <span class="info-label">Punctuality</span>
+                    <span class="info-value"><%= reviewData.punctuality %> </span>
+                    <span class="info-label">Quality</span>
+                    <span class="info-value"><%= reviewData.quality %> </span>
+                    <span class="info-label">Friendliness</span>
+                    <span class="info-value"><%= reviewData.friendliness %> </span>
+                    <span class="info-label">Comment</span>
+                    <span class="info-value"><%= reviewData.comments %> </span>
+                    <span class="info-label">Creation Date</span>
+                    <span class="info-value"><%= reviewData.datetime %> </span>
+                    <% if (reviewData.verified == 1) { %>
+                        <p> This review has been verified. </p>
+                    <% } %>
+                </div>
+            <% } %>
         </div>
 
         <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
     </div>
 
-    <!-- <h1>Job Listing: <%= jobData.description %></h1>
-    
-    <p>Date & Time: <%= jobData.datetime %></p>
-
-    <p>Zip Code: <%= jobData.zipcode %></p>
-
-    <p>Duration: <%= jobData.duration %></p>
-
-    <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>"> Click to book this job. </button>
-
-    <% if(reviewData.length > 0 && reviewData) { %>
-        <h1>Reviews</h1>
-
-        <% reviewData.forEach(review => { %>
-            <div class="review">
-                <p>Punctuality: <%= review.punctuality %></p>
-                <p>Quality: <%= review.quality %></p>
-                <p>Friendliness: <%= review.friendliness %></p>
-                <p><%= review.comments %></p>
-                <p>Creation Date: <%= review.datetime %></p>
-                <% if (review.verified == 1) { %>
-                    <p> This review has been verified. </p>
-                <% } %>
-            </div>
-        <% }); %>
-    <% } %>
-
-    <a href="/">Back to Landing Page</a> -->
     <script src="/js/booking-detail.js"></script>
 </body>
 </html>
