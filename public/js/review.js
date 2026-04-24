@@ -47,18 +47,16 @@ document.getElementById('review-form').addEventListener('submit', function (e) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reviewData)
   })
-    .then(function (response) {
-      if (!response.ok) { throw new Error('Server error: ' + response.status); }
-      return response.json();
-    })
-    .then(function (data) {
-      console.log('Review saved with ID:', data.review_id);
-      // Hide the form and show the success message
-      document.getElementById('review-form').style.display = 'none';
-      document.getElementById('success').style.display = 'block';
-    })
-    .catch(function (err) {
-      alert('Something went wrong. Please try again.');
-      console.error(err);
-    });
+  .then(function (response) {
+    if (!response.ok) {
+      return response.json().then(function(data) {
+        throw new Error(data.error || 'Server error: ' + response.status);
+      });
+    }
+    return response.json();
+  })
+  .catch(function (err) {
+    alert(err.message);  // Now shows the actual error reason
+    console.error(err);
+  });
 });

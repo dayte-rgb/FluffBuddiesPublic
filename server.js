@@ -232,7 +232,7 @@ app.get('/review-test', (req, res) => {
     worker_name: 'Rex',
     job_title: 'Dog Walking',
     job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
+    job_id: 4
   });
 });
 
@@ -305,19 +305,29 @@ function write_res_log(res){
 
 app.post('/api/reviews', (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
+  console.log('Incoming job_id:', job_id, typeof job_id); // ADD THIS
 
+  const existing = jobReview.getByJobId(job_id);
+  console.log('Existing review found:', existing); // ADD THIS
+
+  if (existing) {
+    return res.status(400).json({ error: 'A review for this job already exists.' });
+  }
   try {
-    // Save the review content
+    // Check if this job already has a review
+    const existing = jobReview.getByJobId(job_id);
+    if (existing) {
+      return res.status(400).json({ error: 'A review for this job already exists.' });
+    }
+
     const newReview = reviewContent.create(
       punctuality, quality, friendliness, comments,
       new Date().toISOString(), 0
     );
     const review_id = newReview.id;
 
-    // Link review → job
     jobReview.create(review_id, job_id);
 
-    // Link review → worker 
     const jobData = jobContent.getById(job_id);
     if (jobData && jobData.employee_num) {
       userReview.create(review_id, jobData.employee_num);
@@ -325,7 +335,7 @@ app.post('/api/reviews', (req, res) => {
 
     res.json({ review_id });
   } catch (error) {
-    console.error('Error saving review:', error);
+    console.error('Full review error:', error);
     res.status(500).json({ error: error.message });
   }
 });
