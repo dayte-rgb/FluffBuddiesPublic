@@ -220,10 +220,9 @@ app.get('/leaderboard', (req, res) => {
   const leaderboard = leaderboardContent.getCurrentLeaderboard();
   
   if (!leaderboard) {
-    return res.render('leaderboard', { 
-      leaderboard: null, 
-      entries: [] 
-    });
+    const all = leaderboardContent.getAll();
+    const fallback = all[all.length - 1] || null;
+    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
   }
 
   const entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
