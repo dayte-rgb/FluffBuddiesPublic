@@ -55,8 +55,11 @@ document.getElementById('review-form').addEventListener('submit', function (e) {
     }
     return response.json();
   })
+  .then(function() {
+    document.getElementById('review-form').style.display = 'none';
+    document.getElementById('success').style.display = 'block';  // ← show success
+  })
   .catch(function (err) {
-    alert(err.message);  // Now shows the actual error reason
-    console.error(err);
+    alert(err.message);
   });
 });

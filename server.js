@@ -216,15 +216,18 @@ app.post('/signup', (req, res) => {
   }
 });
 
-app.get('/leaderboard-test', (req, res) => {
-  res.render('leaderboard', {
-    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
-    entries: [
-      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
-      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
-      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
-    ]
-  });
+app.get('/leaderboard', (req, res) => {
+  const leaderboard = leaderboardContent.getCurrentLeaderboard();
+  
+  if (!leaderboard) {
+    return res.render('leaderboard', { 
+      leaderboard: null, 
+      entries: [] 
+    });
+  }
+
+  const entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+  res.render('leaderboard', { leaderboard, entries });
 });
 
 app.get('/review-test', (req, res) => {
@@ -303,19 +306,11 @@ function write_res_log(res){
   return;
 }
 
-app.post('/api/reviews', (req, res) => {
+app.post('/api/reviews', async (req, res) => {   
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
-  console.log('Incoming job_id:', job_id, typeof job_id); // ADD THIS
 
-  const existing = jobReview.getByJobId(job_id);
-  console.log('Existing review found:', existing); // ADD THIS
-
-  if (existing) {
-    return res.status(400).json({ error: 'A review for this job already exists.' });
-  }
   try {
-    // Check if this job already has a review
-    const existing = jobReview.getByJobId(job_id);
+    const existing = await jobReview.getByJobId(job_id); 
     if (existing) {
       return res.status(400).json({ error: 'A review for this job already exists.' });
     }
@@ -324,16 +319,15 @@ app.post('/api/reviews', (req, res) => {
       punctuality, quality, friendliness, comments,
       new Date().toISOString(), 0
     );
-    const review_id = newReview.id;
 
-    jobReview.create(review_id, job_id);
+    jobReview.create(newReview.id, job_id);
 
-    const jobData = jobContent.getById(job_id);
-    if (jobData && jobData.employee_num) {
-      userReview.create(review_id, jobData.employee_num);
+    const jobData = await jobContent.getById(job_id);
+    if (jobData?.employee_num) {
+      userReview.create(newReview.id, jobData.employee_num);
     }
 
-    res.json({ review_id });
+    res.json({ review_id: newReview.id });
   } catch (error) {
     console.error('Full review error:', error);
     res.status(500).json({ error: error.message });
