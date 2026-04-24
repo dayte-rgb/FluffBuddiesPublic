@@ -1,6 +1,6 @@
 const { connectToDatabase } = require('../database');
 
-class certificationContentModel {
+class leaderboardModel {
   constructor() {
     this.db = connectToDatabase();
 
