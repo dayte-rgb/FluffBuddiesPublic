@@ -24,6 +24,17 @@ const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
 const user = new userModel();
+const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js');
+const skillCategoriesByJob = new skillCategoriesByJobModel();
+const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
+const jobCategoriesByJob = new jobCategoriesByJobModel();
+const leaderboardContentModel = require('./models/leaderboardContentModel.js');
+const leaderboardContent = new leaderboardContentModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboardM = new leaderboardModel();
+const userReviewModel = require('./models/userReviewModel.js');
+const userReview = new userReviewModel();
+
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -210,18 +221,45 @@ app.post('/signup', (req, res) => {
   }
 });
 
-app.get('/leaderboard-test', (req, res) => {
-  most_jobs = leaderboard.getTopKMostJobs(5);
-  highest_rating = leaderboard.getTopKHighestAvgRating(5);
+app.get('/leaderboard', (req, res) => {
+  const leaderboard = leaderboardContent.getCurrentLeaderboard();
 
-  res.render('leaderboard', {
-    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
-    entries: [
-      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
-      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
-      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
-    ]
-  });
+  if (!leaderboard) {
+    const all = leaderboardContent.getAll();
+    const fallback = all[all.length - 1] || null;
+    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
+  }
+
+  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+
+  // If no entries in period, fall back to leaderboardModel which has no date filter
+  if (!entries || entries.length === 0) {
+    const topByJobs   = leaderboardM.getTopKMostJobs(50);
+    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
+
+    const map = {};
+    topByJobs.forEach(row => {
+      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
+    });
+    topByRating.forEach(row => {
+      if (map[row.user_id]) {
+        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
+      } else {
+        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
+      }
+    });
+
+    entries = Object.values(map).map(e => {
+      const userData = user.getById(e.user_id);
+      return {
+        worker_name:    userData ? userData.username : `User ${e.user_id}`,
+        avg_rating:     e.avg_rating,
+        jobs_completed: e.jobs_completed,
+      };
+    });
+  }
+
+  res.render('leaderboard', { leaderboard, entries });
 });
 
 app.get('/review-test', (req, res) => {
@@ -229,7 +267,19 @@ app.get('/review-test', (req, res) => {
     worker_name: 'Rex',
     job_title: 'Dog Walking',
     job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
+    job_id: 4
+  });
+});
+
+app.get('/review/:job_id', async (req, res) => {
+  const jobData = await jobContent.getById(req.params.job_id);
+  const userData = await user.getById(jobData.employee_num);
+
+  res.render('review', {
+    worker_name: userData.username,
+    job_title: jobData.description,
+    job_date: jobData.datetime,
+    job_id: req.params.job_id
   });
 });
 
@@ -288,14 +338,30 @@ function write_res_log(res){
   return;
 }
 
-app.post('/api/reviews', (req, res) => {
+app.post('/api/reviews', async (req, res) => {   
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
 
   try {
-    const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
+    const existing = await jobReview.getByJobId(job_id); 
+    if (existing) {
+      return res.status(400).json({ error: 'A review for this job already exists.' });
+    }
+
+    const newReview = reviewContent.create(
+      punctuality, quality, friendliness, comments,
+      new Date().toISOString(), 0
+    );
+
+    jobReview.create(newReview.id, job_id);
+
+    const jobData = await jobContent.getById(job_id);
+    if (jobData?.employee_num) {
+      userReview.create(newReview.id, jobData.employee_num);
+    }
+
     res.json({ review_id: newReview.id });
   } catch (error) {
-    console.error('Error saving review:', error);
+    console.error('Full review error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -360,6 +426,10 @@ app.post('/create-job', (req, res) => {
       job_id,
       user_id
     );
+
+    // TO BE CHANGED, BANDAID FIX UNTIL CATEGORIES CAN BE ASSIGNED ON PAGE
+    skillCategoriesByJob.create(newJob.id, 1);
+    jobCategoriesByJob.create(newJob.id, 1);
 
     logger.write(`[INFO] New job created with ID: ${newJob.id}`);
     // Render success page
