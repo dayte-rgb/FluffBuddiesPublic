@@ -18,6 +18,8 @@ const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboard = new leaderboardModel();
 const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
@@ -209,6 +211,9 @@ app.post('/signup', (req, res) => {
 });
 
 app.get('/leaderboard-test', (req, res) => {
+  most_jobs = leaderboard.getTopKMostJobs(5);
+  highest_rating = leaderboard.getTopKHighestAvgRating(5);
+
   res.render('leaderboard', {
     leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
     entries: [
