@@ -1,4 +1,4 @@
-/* ── review.css — Paw Patrol themed ── */
+/*  review.css — Paw Patrol themed  */
 
 * {
   box-sizing: border-box;
@@ -12,7 +12,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Sidebar ── */
+/*  Sidebar  */
 .sidebar {
     width: 80px;
     background-color: #fff;
@@ -63,7 +63,7 @@ body {
   color: #e05555;
 }
 
-/* ── Main content ── */
+/*  Main content  */
 .main-content {
   margin-left: 70px;
   flex: 1;
@@ -74,7 +74,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Review card ── */
+/*  Review card  */
 .review-main {
   margin-left: 80px;
   width: calc(100% - 80px);
@@ -117,7 +117,7 @@ body {
   margin-right: 4px;
 }
 
-/* ── Metrics ── */
+/*  Metrics  */
 .metric {
   margin-bottom: 1.4rem;
 }
@@ -136,7 +136,7 @@ body {
   width: 16px;
 }
 
-/* ── Stars ── */
+/*  Stars  */
 .stars {
   display: flex;
   flex-direction: row-reverse;
@@ -167,7 +167,7 @@ body {
   color: #e87722;
 }
 
-/* ── Textarea ── */
+/*  Textarea  */
 textarea {
   width: 100%;
   padding: 12px 14px;
@@ -191,7 +191,7 @@ textarea::placeholder {
   color: #c5b5a5;
 }
 
-/* ── Error ── */
+/*  Error  */
 .error-msg {
   color: #c0392b;
   font-size: 13px;
@@ -200,7 +200,7 @@ textarea::placeholder {
   display: none;
 }
 
-/* ── Submit button ── */
+/*  Submit button  */
 .submit-btn {
   width: 100%;
   padding: 14px;
@@ -224,7 +224,7 @@ textarea::placeholder {
   transform: translateY(0);
 }
 
-/* ── Success state ── */
+/*  Success state  */
 #success {
   text-align: center;
   padding: 1.5rem 0;

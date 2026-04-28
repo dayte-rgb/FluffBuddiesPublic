@@ -11,7 +11,7 @@ body {
     min-height: 100vh;
 }
 
-/* ── Sidebar ── */
+/*  Sidebar  */
 .sidebar {
     width: 80px;
     background-color: #fff;
@@ -52,7 +52,7 @@ body {
     transform: scale(1.15);
 }
 
-/* ── Main content ── */
+/*  Main content  */
 .leaderboard-main {
     margin-left: 80px;
     width: calc(100% - 80px);
@@ -62,7 +62,7 @@ body {
     gap: 24px;
 }
 
-/* ── Header ── */
+/*  Header  */
 .leaderboard-header h1 {
     font-family: 'Fredoka One', cursive;
     font-size: 32px;
@@ -75,7 +75,7 @@ body {
 }
 
 
-/* ── Sort controls ── */
+/*  Sort controls  */
 .sort-controls {
     display: flex;
     align-items: center;
@@ -105,7 +105,7 @@ body {
     border-color: #f48b48;
 }
 
-/* ── Table wrapper ── */
+/*  Table wrapper  */
 .table-wrapper {
     background: #fff;
     border: 2px solid #f0ece4;
@@ -152,7 +152,7 @@ tbody td {
     font-weight: 600;
 }
 
-/* ── Rank medals ── */
+/*  Rank medals  */
 .rank {
     font-family: 'Fredoka One', cursive;
     font-size: 16px;
@@ -175,7 +175,7 @@ tbody td {
 .silver { background: #b0b8c1; }
 .bronze { background: #cd7f32; }
 
-/* ── Worker name ── */
+/*  Worker name  */
 .worker-name {
     font-weight: 700;
     color: #444;
@@ -187,7 +187,7 @@ tbody td {
     font-size: 13px;
 }
 
-/* ── Stars ── */
+/*  Stars  */
 .rating-cell {
     display: flex;
     align-items: center;
@@ -200,7 +200,7 @@ tbody td {
     letter-spacing: 1px;
 }
 
-/* ── Empty state ── */
+/*  Empty state  */
 .empty {
     text-align: center;
     color: #ccc;

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Job Listing - Paw Patrol</title>
     <link rel="stylesheet" href="/css/default_stylesheet.css">
     <link rel="stylesheet" href="/css/booking-detail.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
@@ -20,76 +22,96 @@
         </nav>
     </div>
 
-     <div class="main-content">
+    <div class="main-content">
         <div class="card">
 
             <!-- Profile Section -->
             <div class="profile-pic-wrapper">
                 <% if(userData && userData.profile_picture_link) { %>
                     <img src="<%= userData.profile_picture_link %>" alt="Profile Picture" class="profile-pic">
-                <% } else { %>
-                    <div class="profile-pic-placeholder">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                <% } %>
-                <% if(userData) { %>
-                    <p class="username">@<%= userData.username %></p>
-                <% } %>
+                    <% } else { %>
+                        <div class="profile-pic-placeholder">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <% } %>
+                            <% if(userData) { %>
+                                <p class="username">@<%= userData.username %>
+                                </p>
+                                <% } %>
             </div>
 
             <!-- Job Info -->
-            <h2 class="job-title"><%= jobData.description %></h2>
+            <h2 class="job-title">
+                <%= jobData.description %>
+            </h2>
             <div class="info-row">
                 <i class="fa-solid fa-calendar info-icon"></i>
                 <div>
                     <span class="info-label">Date & Time</span>
-                    <span class="info-value"><%= jobData.datetime %></span>
+                    <span class="info-value">
+                        <%= jobData.datetime %>
+                    </span>
                 </div>
             </div>
             <div class="info-row">
                 <i class="fa-solid fa-location-dot info-icon"></i>
                 <div>
                     <span class="info-label">Zip Code</span>
-                    <span class="info-value"><%= jobData.zipcode %></span>
+                    <span class="info-value">
+                        <%= jobData.zipcode %>
+                    </span>
                 </div>
             </div>
             <div class="info-row">
                 <i class="fa-solid fa-clock info-icon"></i>
                 <div>
                     <span class="info-label">Duration</span>
-                    <span class="info-value"><%= jobData.duration %> mins</span>
+                    <span class="info-value">
+                        <%= jobData.duration %> mins
+                    </span>
                 </div>
             </div>
 
             <!-- Book Button -->
-            <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>">
+            <button id="book-job-button" data-job_id="<%= jobData.job_id %>"
+                data-employee_id="<%= jobData.employee_num %>">
                 Book This Job
             </button>
 
             <!-- Review -->
-            <% if(reviewData != null) { %>
+            <% if(reviewData !=null) { %>
                 <h2 class="job-title">Reviews</h2>
 
                 <div class="info-row">
                     <span class="info-label">Punctuality</span>
-                    
+
                     <span class="info-label">Quality</span>
-                    <span class="info-value"><%= reviewData.quality %> </span>
+                    <span class="info-value">
+                        <%= reviewData.quality %>
+                    </span>
                     <span class="info-label">Friendliness</span>
-                    <span class="info-value"><%= reviewData.friendliness %> </span>
+                    <span class="info-value">
+                        <%= reviewData.friendliness %>
+                    </span>
                     <span class="info-label">Comment</span>
-                    <span class="info-value"><%= reviewData.comments %> </span>
+                    <span class="info-value">
+                        <%= reviewData.comments %>
+                    </span>
                     <span class="info-label">Creation Date</span>
-                    <span class="info-value"><%= reviewData.datetime %> </span>
-                    <% if (reviewData.verified == 1) { %>
+                    <span class="info-value">
+                        <%= reviewData.datetime %>
+                    </span>
+                    <% if (reviewData.verified==1) { %>
                         <p> This review has been verified. </p>
-                    <% } %>
+                        <% } %>
                 </div>
 
                 <div>
-                    <span class="info-value"><%= reviewData.punctuality %> </span>   
+                    <span class="info-value">
+                        <%= reviewData.punctuality %>
+                    </span>
                 </div>
-            <% } %>
+                <% } %>
         </div>
 
         <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
@@ -97,4 +119,5 @@
 
     <script src="/js/booking-detail.js"></script>
 </body>
+
 </html>
