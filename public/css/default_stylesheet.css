@@ -121,3 +121,13 @@ h1 {
     background-color: #d97a3a;
     transform: scale(1.05);
 }
+
+#search-button {
+    text-decoration: none;
+}
+
+#review-button,
+#leaderboard-button {
+    display: flex;
+    justify-content: center;
+}
