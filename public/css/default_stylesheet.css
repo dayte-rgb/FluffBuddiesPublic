@@ -1,13 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Fredoka+One&display=swap');
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Fredoka+One&display=swap');
-
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -64,7 +58,8 @@ h1 {
     gap: 30px;
 }
 
-#login-button, #signup-button {
+#login-button,
+#signup-button {
     font-family: 'Nunito', sans-serif;
     border-radius: 50px;
     background-color: #f48b48;
@@ -78,7 +73,8 @@ h1 {
     transition: all 0.2s ease;
 }
 
-#login-button:hover, #signup-button:hover {
+#login-button:hover,
+#signup-button:hover {
     background-color: #d97a3a;
     transform: scale(1.05);
 }
@@ -96,7 +92,9 @@ h1 {
     width: 120px;
     transition: all 0.2s ease;
 }
-#review-button, #leaderboard-button {
+
+#review-button,
+#leaderboard-button {
     font-family: 'Nunito', sans-serif;
     border-radius: 50px;
     background-color: #f48b48;
@@ -109,13 +107,16 @@ h1 {
     width: 120px;
     transition: all 0.2s ease;
     text-decoration: none;
-  }
-  
-  #review-button:hover, #leaderboard-button:hover {
+    align-items: center;
+
+}
+
+#review-button:hover,
+#leaderboard-button:hover {
     background-color: #d97a3a;
     transform: scale(1.05);
-  }
-  
+}
+
 #search-button:hover {
     background-color: #d97a3a;
     transform: scale(1.05);
