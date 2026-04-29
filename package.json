@@ -23,6 +23,7 @@
     "better-sqlite3": "^12.9.0",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "slim-select": "^3.4.3"
   }
 }

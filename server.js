@@ -18,6 +18,9 @@ const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboard = new leaderboardModel();
+const session = require('express-session');
 const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
@@ -28,7 +31,6 @@ const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
 const jobCategoriesByJob = new jobCategoriesByJobModel();
 const leaderboardContentModel = require('./models/leaderboardContentModel.js');
 const leaderboardContent = new leaderboardContentModel();
-const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 const userReviewModel = require('./models/userReviewModel.js');
 const userReview = new userReviewModel();
@@ -50,6 +52,13 @@ app.use(function (req, res, next) {
   logger.write(`[INFO] Route: ${req.url} Method: ${req.method}`);
   next();
 });
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fluff_buddies_website_secret',
+  resave: false, //reset session cookie for each connection
+  saveUninitialized: false, // session is only stored here in this file (I believe)
+  cookie: {secure: false} // not in https
+}));
 
 // Middleware for handling static files
 app.use(express.static('public'));
@@ -142,6 +151,15 @@ app.post('/login', (req, res) => {
     logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
     const jobCategories = jobCategory.getAll();
     const skillCategories = skillCategory.getAll();
+
+    // store info in cookie
+    const userInfo = user.getByUsername(username);
+    req.session.user = {
+      id: userInfo.user_id,
+      username: userInfo.username,
+      account_type: userInfo.account_type
+    }
+
     res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
   } else {
     // Login failed - redirect back to login with error
