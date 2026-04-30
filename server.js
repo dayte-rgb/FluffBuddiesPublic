@@ -566,7 +566,7 @@ wss.on('connection', (ws) => {
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
   console.log(`Websocket server running on ws://localhost:${PORT}`);
 });
