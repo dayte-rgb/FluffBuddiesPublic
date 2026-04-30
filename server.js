@@ -506,6 +506,7 @@ wss.on('connection', (ws) => {
         switch(type) {
             case 'JOIN': {
                 const {userId} = payload;
+                console.log(`[INFO] WebSocket on server side, ${ws}, userid: ${ws.userId}`);
                 connections.registerUser(userId, ws);
                 ws.userId = userId; //storing this for close
                 console.log("User successfully joined the map");
@@ -561,8 +562,6 @@ wss.on('connection', (ws) => {
                 console.log("oh no");
             }
         }
-
-        ws.send(`Interaction complete`);
     });
 });
 
