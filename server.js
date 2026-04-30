@@ -55,7 +55,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server }); // attach to same server
 
 // Define a constant for the port number on which the server will listen.
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware for parsing HTTP responses
 app.use(express.urlencoded({ extended: true }));
