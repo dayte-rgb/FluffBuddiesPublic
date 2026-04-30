@@ -3,6 +3,7 @@ const userMap = new Map();
 
 function registerUser(userId, socket){
     userMap.set(userId, socket);
+    console.log(`[INFO] USER MAP: ${userMap}`);
 };
 
 function removeUser(userId){
