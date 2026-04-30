@@ -14,7 +14,7 @@ const userId = document.body.dataset.userId;
 
 // Connect to the WebSocket server
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const wss = new WebSocket(`${protocol}//${window.location.host}`);
+const ws = new WebSocket(`${protocol}//${window.location.host}`);
 
 // Connection opened
 ws.onopen = () => {
