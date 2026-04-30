@@ -35,6 +35,21 @@ class employeeJobModel {
     return info;
   }
 
+  getBookingsByEmployeeId(employee_id) {
+    const query = `
+      SELECT jc.*, ej.employee_id, u.username AS employer_username, u.email AS employer_email
+      FROM EmployeeJob ej
+      JOIN JobContent jc ON ej.job_id = jc.job_id
+      JOIN EmployerJob em ON em.job_id = jc.job_id
+      JOIN User u ON em.employer_id = u.user_id
+      WHERE ej.employee_id = ?
+      ORDER BY jc.datetime ASC
+    `;
+
+    const stmt = this.db.prepare(query);
+    return stmt.all(employee_id);
+  }
+
   delete(job_id, employee_id){
     const query = "DELETE FROM EmployeeJob WHERE job_id = ? AND employee_id = ?";
 
