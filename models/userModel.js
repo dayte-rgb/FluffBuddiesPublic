@@ -10,7 +10,7 @@ class userModel {
   async create(username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = 'INSERT INTO User (user_id, username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)';
-    
+
     // The `prepare()` method compiles the SQL query, making it ready to execute.
     const stmt = this.db.prepare(query);
 
@@ -81,17 +81,17 @@ class userModel {
   async authenticate(identifier, password) {
     // First try to find by username
     let user = this.getByUsername(identifier);
-    
+
     // If not found by username, try by email
     if (!user) {
       user = this.getByEmail(identifier);
     }
-    
+
     // Check if user exists and password matches
     if (user && await bcrypt.compare(password, user.password)) {
       return user;
     }
-    
+
     return null;
   }
 
@@ -104,8 +104,8 @@ class userModel {
 
     return info;
   }
-  
-  
+
+
   update(user_id, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) {
     const query = 'UPDATE User SET password = ?, phone_number = ?, email = ?, zipcode = ?, profile_description = ?, account_type = ?, profile_picture_link = ? WHERE user_id = ?';
 
