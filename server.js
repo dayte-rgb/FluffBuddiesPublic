@@ -52,9 +52,7 @@ const app = express();
 
 // create websockets server
 const server = http.createServer(app);
-//const wss = new WebSocket.Server({ server }); // attach to same server
-const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const wss = new WebSocket(`${protocol}//${window.location.host}`);
+const wss = new WebSocket.Server({ server }); // attach to same server
 
 // Define a constant for the port number on which the server will listen.
 const PORT = process.env.PORT || 3000;
