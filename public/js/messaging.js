@@ -54,7 +54,7 @@ ws.onmessage = (event) => {
     switch(type){
         case 'NEW_MESSAGE':{
             const {content, datetime} = payload;
-            displayMsg(content, datetime);
+            displayReceivedMsg(content, datetime);
             break;
         }
         case 'HISTORY_RET': {
@@ -133,6 +133,18 @@ function displayMsg(msg, datetime){
     textElement.id = `historyText${messageId}`;
     messageId += 1;
     textElement.textContent = `[${datetime}] You: ${msg}`;
+    
+    textBox.append(textElement);
+    textBox.scrollTop = textBox.scrollHeight;
+}
+
+function displayReceivedMsg(msg, datetime){
+    // create the text box and add to the DOM
+    const textElement = document.createElement('p');
+
+    textElement.id = `historyText${messageId}`;
+    messageId += 1;
+    textElement.textContent = `[${datetime}] Received: ${msg}`;
     
     textBox.append(textElement);
     textBox.scrollTop = textBox.scrollHeight;
