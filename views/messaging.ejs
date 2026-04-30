@@ -4,7 +4,8 @@
   <title>Inbox</title>
   <link rel="stylesheet" href="/css/messaging.css">
 </head>
-<body>
+<%# Store the user id in document.body.dataset.userId for use in the .js file %>
+<body data-user-id = "<%= userId %>"">
   <h1>Inbox</h1>
   <div id="status">Connecting to server...</div>
 
@@ -23,9 +24,7 @@
     <button id="send">Send</button>
   </div>
   <div id="messages"></div>
-
-  <%# Store the user id in document.body.dataset.userId for use in the .js file %>
-  <body data-user-id = "<%= userId %>"">
+  
 
   <script src="/js/messaging.js"></script>
 </body>
