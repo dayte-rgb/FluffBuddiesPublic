@@ -1,8 +1,6 @@
 // Import the Express module, which is a framework for building web applications in Node.js.
 const express = require('express');
 const path = require('path');
-const http = require('http');
-const WebSocket = require('ws');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
 const bcrypt = require('bcrypt');
@@ -26,9 +24,6 @@ const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
-const leaderboardModel = require('./models/leaderboardModel.js');
-const leaderboard = new leaderboardModel();
-const session = require('express-session');
 const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
@@ -41,26 +36,9 @@ const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js
 const skillCategoriesByJob = new skillCategoriesByJobModel();
 const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
 const jobCategoriesByJob = new jobCategoriesByJobModel();
-const leaderboardContentModel = require('./models/leaderboardContentModel.js');
-const leaderboardContent = new leaderboardContentModel();
-const leaderboardM = new leaderboardModel();
-const userReviewModel = require('./models/userReviewModel.js');
-const userReview = new userReviewModel();
-const MessageModel = require('./models/messageContentModel.js');
-const MessagingModel = require('./models/messagingModel.js');
-const UserMessageModel = require('./models/userMessageModel.js');
-const connections = require('./socket_connections.js');
-const messageModel = new MessageModel();
-const messagingModel = new MessagingModel();
-const userMessageModel = new UserMessageModel();
-
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
-
-// create websockets server
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server }); // attach to same server
 
 // Define a constant for the port number on which the server will listen.
 const PORT = 3000;
@@ -84,15 +62,6 @@ app.use(function (req, res, next) {
   logger.write(`[INFO] Route: ${req.url} Method: ${req.method}`);
   next();
 });
-
-// sets up cookie
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'fluff_buddies_website_secret',
-  resave: false, //reset session cookie for each connection
-  saveUninitialized: false, // session is only stored here in this file (I believe)
-  cookie: {secure: false} // not in https
-}));
-
 
 // Middleware for handling static files
 app.use(express.static('public'));
@@ -120,19 +89,19 @@ app.get('/default', (req, res) => {
 app.get('/job-search', isAuthenticated, (req, res) => {
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
-  
+
   res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
 });
 
 // Handles execution of search query
 app.post('/job-search', isAuthenticated, (req, res) => {
   let { zipcode, keyword, job_categories, skill_categories } = req.body;
-  
+
   let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
-  
+
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
-  
+
   res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_categories, skill_categories } });
 });
 
@@ -190,11 +159,11 @@ app.get('/login', isNotAuthenticated, (req, res) => {
 });
 
 // Handle login submission
-app.post('/login', isNotAuthenticated, (req, res) => {
+app.post('/login', isNotAuthenticated, async (req, res) => {
   const { username, password } = req.body;
 
   // Authenticate user using UserModel
-  const authenticatedUser = user.authenticate(username, password);
+  const authenticatedUser = await user.authenticate(username, password);
 
   if (authenticatedUser) {
     // Create session for user
@@ -206,15 +175,6 @@ app.post('/login', isNotAuthenticated, (req, res) => {
     logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
     const jobCategories = jobCategory.getAll();
     const skillCategories = skillCategory.getAll();
-
-    // store info in cookie
-    const userInfo = user.getByUsername(username);
-    req.session.user = {
-      id: userInfo.user_id,
-      username: userInfo.username,
-      account_type: userInfo.account_type
-    }
-
     res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
   } else {
     // Login failed - redirect back to login with error
@@ -324,50 +284,15 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
   }
 });
 
-app.get('/inbox', (req, res) => {
-  res.status(200);
-  res.render('messaging', {userId: req.session.user.id});
-});
-
-app.get('/leaderboard', (req, res) => {
-  const leaderboard = leaderboardContent.getCurrentLeaderboard();
-
-  if (!leaderboard) {
-    const all = leaderboardContent.getAll();
-    const fallback = all[all.length - 1] || null;
-    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
-  }
-
-  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
-
-  // If no entries in period, fall back to leaderboardModel which has no date filter
-  if (!entries || entries.length === 0) {
-    const topByJobs   = leaderboardM.getTopKMostJobs(50);
-    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
-
-    const map = {};
-    topByJobs.forEach(row => {
-      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
-    });
-    topByRating.forEach(row => {
-      if (map[row.user_id]) {
-        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
-      } else {
-        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
-      }
-    });
-
-    entries = Object.values(map).map(e => {
-      const userData = user.getById(e.user_id);
-      return {
-        worker_name:    userData ? userData.username : `User ${e.user_id}`,
-        avg_rating:     e.avg_rating,
-        jobs_completed: e.jobs_completed,
-      };
-    });
-  }
-
-  res.render('leaderboard', { leaderboard, entries });
+app.get('/leaderboard-test', (req, res) => {
+  res.render('leaderboard', {
+    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
+    entries: [
+      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
+      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
+      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
+    ]
+  });
 });
 
 app.get('/review-test', (req, res) => {
@@ -388,26 +313,10 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
 
   try {
-    const existing = await jobReview.getByJobId(job_id); 
-    if (existing) {
-      return res.status(400).json({ error: 'A review for this job already exists.' });
-    }
-
-    const newReview = reviewContent.create(
-      punctuality, quality, friendliness, comments,
-      new Date().toISOString(), 0
-    );
-
-    jobReview.create(newReview.id, job_id);
-
-    const jobData = await jobContent.getById(job_id);
-    if (jobData?.employee_num) {
-      userReview.create(newReview.id, jobData.employee_num);
-    }
-
+    const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
     res.json({ review_id: newReview.id });
   } catch (error) {
-    console.error('Full review error:', error);
+    console.error('Error saving review:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -558,85 +467,10 @@ app.get('/schedule', isAuthenticated, (req, res) => {
     scheduledJobs,
     bookedJobs
   });
-// -------------------------------------------------------------------------------------------------------------------
-// WebSockets logic for messaging
-
-wss.on('connection', (ws) => {
-
-    ws.on('close', () => {
-      connections.removeUser(ws.userId);
-      console.log('Client disconnected');
-    });
-
-    console.log('New client connected');
-
-    ws.on('message', (message) => {
-        const {type, ...payload} = JSON.parse(message.toString()); //otherwise, you will get just the raw bytes
-        
-        switch(type) {
-            case 'JOIN': {
-                const {userId} = payload;
-                connections.registerUser(userId, ws);
-                ws.userId = userId; //storing this for close
-                console.log("User successfully joined the map");
-
-                break;
-            }
-            case 'SEND_MESSAGE':{
-                const {userId, toUserId, content} = payload;
-
-                const toUserSocket = connections.getSocket(toUserId);
-
-                //insert the message into the database
-                const messageInfo = messageModel.create(content);
-                userMessageModel.create(messageInfo.message_id, userId, toUserId);
-
-                if(toUserSocket){
-                    toUserSocket.send(JSON.stringify({type: "NEW_MESSAGE", content: content, datetime: messageInfo.datetime}));
-                    console.log("Sent message successfully");
-                } else{
-                    console.log("Message not sent, user is offline");
-                }
-
-                break;
-            }
-            case 'HISTORY':{
-                const {userId, toUserId} = payload;
-                //load entire history between these 2 and send back to the DOM
-                const history = messagingModel.getHistory(userId, toUserId);
-                ws.send(JSON.stringify({type: 'HISTORY_RET', history: history, userId: userId}));
-                break;
-            }
-            case 'DISCONNECT': {
-                const {userId} = payload;
-
-                connections.removeUser(userId);
-                ws.send("User removed from mapping");
-            }
-            case 'GET_CONV_IDS': {
-                const {userId} = payload;
-
-                const ids = messagingModel.getConversationIds(userId);
-                ws.send(JSON.stringify({type: "RET_CONV_IDS", userId: userId, ids: ids}));
-                break;
-            }
-            case 'GET_USER_ID': {
-                const {username} = payload;
-                ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
-                break;
-            }
-            default: {
-                console.log("oh no");
-            }
-        }
-
-        ws.send(`Interaction complete`);
-    });
 });
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
-  console.log(`Websocket server running on ws://localhost:${PORT}`);
 });

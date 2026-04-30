@@ -20,10 +20,13 @@
   },
   "homepage": "https://github.com/cs205-sp-26/final-project-fluff-buddies#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.9.0",
+    "connect-sqlite3": "^0.9.16",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "slim-select": "^3.4.3"
+    "slim-select": "^3.4.3",
+    "ws": "^8.20.0"
   }
 }
