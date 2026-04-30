@@ -38,11 +38,11 @@ class skillCategoriesByJobModel {
   delete(job_id, skill_category_id){
     const query = "DELETE FROM SkillCategoriesByJob WHERE job_id = ? AND skill_category_id = ?";
 
-    const deleted_info = this.getByIds(job_id);
+    const deleted_info = this.getByIds(job_id, skill_category_id);
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(job_id, skill_category_id);
+    stmt.run(job_id, skill_category_id);
 
     return deleted_info;
   }

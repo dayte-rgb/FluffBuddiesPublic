@@ -3,7 +3,13 @@ const express = require('express');
 const path = require('path');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
+const bcrypt = require('bcrypt');
 const logger = new Log('requests.log', true);
+
+// Session and authentication imports
+const { sessionMiddleware } = require('./config/sessionConfig.js');
+const { isAuthenticated, isNotAuthenticated } = require('./middleware/authMiddleware.js');
+
 const jobContentModel = require('./models/jobContentModel');
 const jobContent = new jobContentModel();
 const jobReviewModel = require('./models/jobReviewModel.js');
@@ -22,6 +28,10 @@ const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
 const user = new userModel();
+const securityQuestionModel = require('./models/securityQuestionModel.js');
+const securityQuestion = new securityQuestionModel();
+const userSecurityAnswerModel = require('./models/userSecurityAnswerModel.js');
+const userSecurityAnswer = new userSecurityAnswerModel();
 const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js');
 const skillCategoriesByJob = new skillCategoriesByJobModel();
 const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
@@ -36,6 +46,15 @@ const PORT = 3000;
 // Middleware for parsing HTTP responses
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Session middleware
+app.use(sessionMiddleware);
+
+// Pass session data to all views
+app.use((req, res, next) => {
+  res.locals.user = req.session ? req.session : null;
+  next();
+});
 
 // Middleware for logging
 app.use(function (req, res, next) {
@@ -67,7 +86,7 @@ app.get('/default', (req, res) => {
 });
 
 // Displays job search query page
-app.get('/job-search', (req, res) => {
+app.get('/job-search', isAuthenticated, (req, res) => {
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
   
@@ -75,7 +94,7 @@ app.get('/job-search', (req, res) => {
 });
 
 // Handles execution of search query
-app.post('/job-search', (req, res) => {
+app.post('/job-search', isAuthenticated, (req, res) => {
   let { zipcode, keyword, job_categories, skill_categories } = req.body;
   
   let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
@@ -87,7 +106,7 @@ app.post('/job-search', (req, res) => {
 });
 
 // Display a page with details of a selected job listing
-app.get('/booking/:job_id', async (req, res) => {
+app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
   const review = await jobReview.getByJobId(req.params.job_id);
 
@@ -106,11 +125,27 @@ app.get('/booking/:job_id', async (req, res) => {
 });
 
 // Handle booking a job
-app.post('/booking/:job_id', (req, res) => { 
-  const employee_id = req.body.employee_id;
-  
+app.post('/booking/:job_id', isAuthenticated, (req, res) => {
+  const employee_id = req.session.userId;
+  const job_id = req.params.job_id;
+
   try {
-    employeeJob.create(req.params.job_id, employee_id);
+    const jobData = jobContent.getById(job_id);
+    if (!jobData) {
+      return res.status(404).json({ success: false, message: 'Job not found.' });
+    }
+
+    const employerLink = employerJob.getById(job_id);
+    if (employerLink && employerLink.employer_id === employee_id) {
+      return res.status(400).json({ success: false, message: 'You cannot book your own job.' });
+    }
+
+    const existingBooking = employeeJob.getByIds(job_id, employee_id);
+    if (existingBooking) {
+      return res.status(400).json({ success: false, message: 'You have already booked this job.' });
+    }
+
+    employeeJob.create(job_id, employee_id);
     res.json({ success: true, message: 'Job booked successfully!' });
   } catch (error) {
     console.error('Error booking job:', error);
@@ -119,19 +154,24 @@ app.post('/booking/:job_id', (req, res) => {
 });
 
 // Handle login render
-app.get('/login', (req, res) => {
+app.get('/login', isNotAuthenticated, (req, res) => {
   res.render('login');
 });
 
 // Handle login submission
-app.post('/login', (req, res) => {
+app.post('/login', isNotAuthenticated, (req, res) => {
   const { username, password } = req.body;
 
   // Authenticate user using UserModel
   const authenticatedUser = user.authenticate(username, password);
 
   if (authenticatedUser) {
-    // TEMPORARY UNTIL LANDING PAGE IS CREATED
+    // Create session for user
+    req.session.userId = authenticatedUser.user_id;
+    req.session.username = authenticatedUser.username;
+    req.session.email = authenticatedUser.email;
+    req.session.accountType = authenticatedUser.account_type;
+
     logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
     const jobCategories = jobCategory.getAll();
     const skillCategories = skillCategory.getAll();
@@ -144,12 +184,12 @@ app.post('/login', (req, res) => {
 });
 
 // Handle forgot password render
-app.get('/forgot-password', (req, res) => {
+app.get('/forgot-password', isNotAuthenticated, (req, res) => {
   res.render('forgot-password');
 });
 
 // Handle forgot password submission
-app.post('/forgot-password', (req, res) => {
+app.post('/forgot-password', isNotAuthenticated, (req, res) => {
   const { email } = req.body;
 
   // TODO: Implement actual password reset logic
@@ -162,26 +202,41 @@ app.post('/forgot-password', (req, res) => {
   });
 });
 
+// Handle logout
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      logger.write(`[ERROR] Error destroying session: ${err.message}`);
+      return res.status(500).send('Error logging out.');
+    }
+    logger.write(`[INFO] User logged out successfully`);
+    res.redirect('/');
+  });
+});
+
 // Handle signup render
-app.get('/signup', (req, res) => {
-  res.render('signup');
+app.get('/signup', isNotAuthenticated, (req, res) => {
+  const securityQuestions = securityQuestion.getAll();
+  res.render('signup', { securityQuestions });
 });
 
 // Handle signup submission
-app.post('/signup', (req, res) => {
-  const { username, email, password, phone_number, zipcode, account_type } = req.body;
+app.post('/signup', isNotAuthenticated, async (req, res) => {
+  const { username, email, password, phone_number, zipcode, account_type, security_question_id, security_answer } = req.body;
 
   // Validate required fields
-  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
+  if (!username || !email || !password || !phone_number || !zipcode || !account_type || !security_question_id || !security_answer) {
     logger.write(`[INFO] Signup attempt with missing fields`);
-    return res.render('signup', { error: 'All fields are required.' });
+    const securityQuestions = securityQuestion.getAll();
+    return res.render('signup', { error: 'All fields are required.', securityQuestions });
   }
 
   // Validate account_type
   const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
   if (!validAccountTypes.includes(account_type)) {
     logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
-    return res.render('signup', { error: 'Invalid account type selected.' });
+    const securityQuestions = securityQuestion.getAll();
+    return res.render('signup', { error: 'Invalid account type selected.', securityQuestions });
   }
 
   try {
@@ -189,26 +244,43 @@ app.post('/signup', (req, res) => {
     const existingUser = user.getByUsername(username);
     if (existingUser) {
       logger.write(`[INFO] Signup attempt with existing username: ${username}`);
-      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
+      const securityQuestions = securityQuestion.getAll();
+      return res.render('signup', { error: 'Username already exists. Please choose a different one.', securityQuestions });
     }
 
     // Check if email already exists
     const existingEmail = user.getByEmail(email);
     if (existingEmail) {
       logger.write(`[INFO] Signup attempt with existing email: ${email}`);
-      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
+      const securityQuestions = securityQuestion.getAll();
+      return res.render('signup', { error: 'Email already exists. Please use a different one.', securityQuestions });
     }
 
     // Create new user
-    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
+    const newUser = await user.create(username, password, phone_number, email, zipcode, '', account_type, null);
     logger.write(`[INFO] New user created: ${newUser.username}`);
 
-    // Signup successful - render login page with success message
-    res.render('login', { success: 'Account created successfully! Please log in.' });
+    // Hash the security answer
+    const hashedAnswer = await bcrypt.hash(security_answer, 10);
+
+    // Create security answer
+    userSecurityAnswer.create(newUser.id, security_question_id, hashedAnswer);
+
+    // Create session for new user
+    req.session.userId = newUser.id;
+    req.session.username = newUser.username;
+    req.session.email = newUser.email;
+    req.session.accountType = newUser.account_type;
+
+    // Automatically log in after signup
+    const jobCategories = jobCategory.getAll();
+    const skillCategories = skillCategory.getAll();
+    res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
   } catch (error) {
     console.error('Error creating user:', error);
     logger.write(`[ERROR] Signup error: ${error.message}`);
-    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
+    const securityQuestions = securityQuestion.getAll();
+    res.render('signup', { error: 'An error occurred during signup. Please try again.', securityQuestions });
   }
 });
 
@@ -232,62 +304,12 @@ app.get('/review-test', (req, res) => {
   });
 });
 
-// Handle signup render
-app.get('/signup', (req, res) => {
-  res.render('signup');
-});
-
-// Handle signup submission
-app.post('/signup', (req, res) => {
-  const { username, email, password, phone_number, zipcode, account_type } = req.body;
-
-  // Validate required fields
-  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
-    logger.write(`[INFO] Signup attempt with missing fields`);
-    return res.render('signup', { error: 'All fields are required.' });
-  }
-
-  // Validate account_type
-  const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
-  if (!validAccountTypes.includes(account_type)) {
-    logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
-    return res.render('signup', { error: 'Invalid account type selected.' });
-  }
-
-  try {
-    // Check if username already exists
-    const existingUser = user.getByUsername(username);
-    if (existingUser) {
-      logger.write(`[INFO] Signup attempt with existing username: ${username}`);
-      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
-    }
-
-    // Check if email already exists
-    const existingEmail = user.getByEmail(email);
-    if (existingEmail) {
-      logger.write(`[INFO] Signup attempt with existing email: ${email}`);
-      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
-    }
-
-    // Create new user
-    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
-    logger.write(`[INFO] New user created: ${newUser.username}`);
-
-    // Signup successful - render login page with success message
-    res.render('login', { success: 'Account created successfully! Please log in.' });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    logger.write(`[ERROR] Signup error: ${error.message}`);
-    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
-  }
-});
-
 function write_res_log(res){
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
 }
 
-app.post('/api/reviews', (req, res) => {
+app.post('/api/reviews', isAuthenticated, (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
 
   try {
@@ -300,20 +322,37 @@ app.post('/api/reviews', (req, res) => {
 });
 
 // Display the create job form
-app.get('/create-job', (req, res) => {
-  res.render('create-job', { error: null, success: null });
+app.get('/create-job', isAuthenticated, (req, res) => {
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
+
+  res.render('create-job', {
+    error: null,
+    success: null,
+    jobCategories,
+    skillCategories,
+    job_categories: [],
+    skill_categories: []
+  });
 });
 
 // Handle job creation
-app.post('/create-job', (req, res) => {
-  const { description, datetime, duration, zipcode, employee_num, job_filled, username } = req.body;
+app.post('/create-job', isAuthenticated, (req, res) => {
+  const { description, datetime, duration, zipcode, employee_num, job_filled, username, job_categories, skill_categories } = req.body;
+
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
 
   // Validate required fields
   if (!description || !datetime || !duration || !zipcode || !employee_num || !username) {
     logger.write(`[INFO] Create job attempt with missing fields`);
     return res.render('create-job', { 
       error: 'All required fields must be filled out.',
-      success: null 
+      success: null,
+      jobCategories,
+      skillCategories,
+      job_categories,
+      skill_categories
     });
   }
 
@@ -331,7 +370,11 @@ app.post('/create-job', (req, res) => {
       logger.write(`[INFO] Create job attempt with invalid duration: ${duration}`);
       return res.render('create-job', {
         error: 'Duration must be a positive number.',
-        success: null
+        success: null,
+        jobCategories,
+        skillCategories,
+        job_categories,
+        skill_categories
       });
     }
 
@@ -339,7 +382,11 @@ app.post('/create-job', (req, res) => {
       logger.write(`[INFO] Create job attempt with invalid number of employees: ${employee_num}`);
       return res.render('create-job', {
         error: 'Number of Employees must be a positive number.',
-        success: null
+        success: null,
+        jobCategories,
+        skillCategories,
+        job_categories,
+        skill_categories
       });
     }
 
@@ -360,15 +407,40 @@ app.post('/create-job', (req, res) => {
       user_id
     );
 
-    // TO BE CHANGED, BANDAID FIX UNTIL CATEGORIES CAN BE ASSIGNED ON PAGE
-    skillCategoriesByJob.create(newJob.id, 1);
-    jobCategoriesByJob.create(newJob.id, 1);
+    const selectedJobCategories = job_categories
+      ? Array.isArray(job_categories)
+        ? job_categories
+        : [job_categories]
+      : [];
+    const selectedSkillCategories = skill_categories
+      ? Array.isArray(skill_categories)
+        ? skill_categories
+        : [skill_categories]
+      : [];
+
+    selectedJobCategories.forEach(categoryId => {
+      const parsedCategoryId = parseInt(categoryId, 10);
+      if (!Number.isNaN(parsedCategoryId)) {
+        jobCategoriesByJob.create(job_id, parsedCategoryId);
+      }
+    });
+
+    selectedSkillCategories.forEach(skillId => {
+      const parsedSkillId = parseInt(skillId, 10);
+      if (!Number.isNaN(parsedSkillId)) {
+        skillCategoriesByJob.create(job_id, parsedSkillId);
+      }
+    });
 
     logger.write(`[INFO] New job created with ID: ${newJob.id}`);
     // Render success page
     res.render('create-job', {
       error: null,
-      success: `Job created successfully with ID: ${newJob.id}! Redirecting to job search...`
+      success: `Job created successfully with ID: ${newJob.id}! Redirecting to job search...`,
+      jobCategories,
+      skillCategories,
+      job_categories,
+      skill_categories
     });
 
   } catch (error) {
@@ -376,9 +448,25 @@ app.post('/create-job', (req, res) => {
     logger.write(`[ERROR] Create job error: ${error.message}`);
     res.render('create-job', {
       error: 'An error occurred while creating the job. Please try again.',
-      success: null
+      success: null,
+      jobCategories,
+      skillCategories,
+      job_categories,
+      skill_categories
     });
   }
+});
+
+// Display the current user's schedule and bookings
+app.get('/schedule', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  const scheduledJobs = employerJob.getJobsByEmployerId(userId);
+  const bookedJobs = employeeJob.getBookingsByEmployeeId(userId);
+
+  res.render('schedule', {
+    scheduledJobs,
+    bookedJobs
+  });
 });
 
 // Start the server and make it listen on the specified port.

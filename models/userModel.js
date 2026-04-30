@@ -1,4 +1,5 @@
 const { connectToDatabase } = require('../database');
+const bcrypt = require('bcrypt');
 
 class userModel {
   constructor() {
@@ -6,17 +7,18 @@ class userModel {
   }
 
   // Create a new user
-  create(username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) {
+  async create(username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) {
+    const hashedPassword = await bcrypt.hash(password, 10);
     const query = 'INSERT INTO User (user_id, username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)';
     
     // The `prepare()` method compiles the SQL query, making it ready to execute.
     const stmt = this.db.prepare(query);
 
     // The `run()` method executes the prepared query, replacing the `?` placeholders with actual values.
-    const info = stmt.run(username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link);
+    const info = stmt.run(username, hashedPassword, phone_number, email, zipcode, profile_description, account_type, profile_picture_link);
 
     // Returning the new user data, including the generated user ID and the creation timestamp.
-    return { id: info.lastInsertRowid, username, password, phone_number, email, zipcode, profile_description, account_type, profile_picture_link };
+    return { id: info.lastInsertRowid, username, password: hashedPassword, phone_number, email, zipcode, profile_description, account_type, profile_picture_link };
   }
 
   delete(user_id){
@@ -76,7 +78,7 @@ class userModel {
   }
 
   // Authenticate user by username or email and password
-  authenticate(identifier, password) {
+  async authenticate(identifier, password) {
     // First try to find by username
     let user = this.getByUsername(identifier);
     
@@ -86,7 +88,7 @@ class userModel {
     }
     
     // Check if user exists and password matches
-    if (user && user.password === password) {
+    if (user && await bcrypt.compare(password, user.password)) {
       return user;
     }
     

@@ -1,4 +1,5 @@
 const { connectToDatabase } = require('../database');
+const bcrypt = require('bcrypt');
 
 class userSecurityAnswerModel {
   constructor() {
@@ -13,6 +14,20 @@ class userSecurityAnswerModel {
     const info = stmt.run(user_id, question_id, answer_text);
 
     return {user_id, question_id, answer_text};
+  }
+
+  async verify(user_id, question_id, answer_text){
+    const query = "SELECT answer_text FROM UserSecurityAnswer WHERE user_id = ? AND question_id = ?";
+
+    const stmt = this.db.prepare(query);
+
+    const row = stmt.get(user_id, question_id);
+
+    if (row) {
+      return await bcrypt.compare(answer_text, row.answer_text);
+    }
+
+    return false;
   }
 
   getByIds(user_id, question_id){
