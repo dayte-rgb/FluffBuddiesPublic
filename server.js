@@ -1,6 +1,8 @@
 // Import the Express module, which is a framework for building web applications in Node.js.
 const express = require('express');
 const path = require('path');
+const http = require('http');
+const WebSocket = require('ws');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
 const bcrypt = require('bcrypt');
@@ -24,6 +26,9 @@ const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboard = new leaderboardModel();
+const session = require('express-session');
 const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
@@ -38,14 +43,24 @@ const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
 const jobCategoriesByJob = new jobCategoriesByJobModel();
 const leaderboardContentModel = require('./models/leaderboardContentModel.js');
 const leaderboardContent = new leaderboardContentModel();
-const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 const userReviewModel = require('./models/userReviewModel.js');
 const userReview = new userReviewModel();
+const MessageModel = require('./models/messageContentModel.js');
+const MessagingModel = require('./models/messagingModel.js');
+const UserMessageModel = require('./models/userMessageModel.js');
+const connections = require('./socket_connections.js');
+const messageModel = new MessageModel();
+const messagingModel = new MessagingModel();
+const userMessageModel = new UserMessageModel();
 
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
+
+// create websockets server
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server }); // attach to same server
 
 // Define a constant for the port number on which the server will listen.
 const PORT = 3000;
@@ -69,6 +84,15 @@ app.use(function (req, res, next) {
   logger.write(`[INFO] Route: ${req.url} Method: ${req.method}`);
   next();
 });
+
+// sets up cookie
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fluff_buddies_website_secret',
+  resave: false, //reset session cookie for each connection
+  saveUninitialized: false, // session is only stored here in this file (I believe)
+  cookie: {secure: false} // not in https
+}));
+
 
 // Middleware for handling static files
 app.use(express.static('public'));
@@ -182,6 +206,15 @@ app.post('/login', isNotAuthenticated, (req, res) => {
     logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
     const jobCategories = jobCategory.getAll();
     const skillCategories = skillCategory.getAll();
+
+    // store info in cookie
+    const userInfo = user.getByUsername(username);
+    req.session.user = {
+      id: userInfo.user_id,
+      username: userInfo.username,
+      account_type: userInfo.account_type
+    }
+
     res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
   } else {
     // Login failed - redirect back to login with error
@@ -289,6 +322,11 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
     const securityQuestions = securityQuestion.getAll();
     res.render('signup', { error: 'An error occurred during signup. Please try again.', securityQuestions });
   }
+});
+
+app.get('/inbox', (req, res) => {
+  res.status(200);
+  res.render('messaging', {userId: req.session.user.id});
 });
 
 app.get('/leaderboard', (req, res) => {
@@ -520,10 +558,85 @@ app.get('/schedule', isAuthenticated, (req, res) => {
     scheduledJobs,
     bookedJobs
   });
+// -------------------------------------------------------------------------------------------------------------------
+// WebSockets logic for messaging
+
+wss.on('connection', (ws) => {
+
+    ws.on('close', () => {
+      connections.removeUser(ws.userId);
+      console.log('Client disconnected');
+    });
+
+    console.log('New client connected');
+
+    ws.on('message', (message) => {
+        const {type, ...payload} = JSON.parse(message.toString()); //otherwise, you will get just the raw bytes
+        
+        switch(type) {
+            case 'JOIN': {
+                const {userId} = payload;
+                connections.registerUser(userId, ws);
+                ws.userId = userId; //storing this for close
+                console.log("User successfully joined the map");
+
+                break;
+            }
+            case 'SEND_MESSAGE':{
+                const {userId, toUserId, content} = payload;
+
+                const toUserSocket = connections.getSocket(toUserId);
+
+                //insert the message into the database
+                const messageInfo = messageModel.create(content);
+                userMessageModel.create(messageInfo.message_id, userId, toUserId);
+
+                if(toUserSocket){
+                    toUserSocket.send(JSON.stringify({type: "NEW_MESSAGE", content: content, datetime: messageInfo.datetime}));
+                    console.log("Sent message successfully");
+                } else{
+                    console.log("Message not sent, user is offline");
+                }
+
+                break;
+            }
+            case 'HISTORY':{
+                const {userId, toUserId} = payload;
+                //load entire history between these 2 and send back to the DOM
+                const history = messagingModel.getHistory(userId, toUserId);
+                ws.send(JSON.stringify({type: 'HISTORY_RET', history: history, userId: userId}));
+                break;
+            }
+            case 'DISCONNECT': {
+                const {userId} = payload;
+
+                connections.removeUser(userId);
+                ws.send("User removed from mapping");
+            }
+            case 'GET_CONV_IDS': {
+                const {userId} = payload;
+
+                const ids = messagingModel.getConversationIds(userId);
+                ws.send(JSON.stringify({type: "RET_CONV_IDS", userId: userId, ids: ids}));
+                break;
+            }
+            case 'GET_USER_ID': {
+                const {username} = payload;
+                ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
+                break;
+            }
+            default: {
+                console.log("oh no");
+            }
+        }
+
+        ws.send(`Interaction complete`);
+    });
 });
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Websocket server running on ws://localhost:${PORT}`);
 });
