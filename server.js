@@ -516,6 +516,8 @@ wss.on('connection', (ws) => {
                 const {userId, toUserId, content} = payload;
 
                 const toUserSocket = connections.getSocket(toUserId);
+                console.log(`[INFO] TO USER ID: ${toUserId}`);
+                console.log(`[INFO] TO USER SOCKET: ${toUserSocket}`);
 
                 //insert the message into the database
                 const messageInfo = messageModel.create(content);

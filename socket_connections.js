@@ -10,6 +10,7 @@ function removeUser(userId){
 };
 
 function getSocket(userId){
+    console.log(`[INFO] SOCKET CONNECTIONS TO USER SOCKET: ${userMap.get(userId)}`);
     return userMap.get(userId);
 };
 
