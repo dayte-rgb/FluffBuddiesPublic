@@ -48,7 +48,7 @@ class reviewContentModel {
   delete(review_id){
     const query = "DELETE FROM ReviewContent WHERE review_id = ?";
 
-    const old_info = this.getbyId(review_id);
+    const old_info = this.getById(review_id);
 
     const stmt = this.db.prepare(query);
 

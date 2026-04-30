@@ -7,8 +7,9 @@
 <body>
   <div class="card">
     <h1>🐾 Leaderboard</h1>
-    <p class="subtitle">Period: <%= leaderboard.start_time %> — <%= leaderboard.end_time %></p>
-
+    <% if (leaderboard) { %>
+      <p class="subtitle">Period: <%= leaderboard.start_time %> — <%= leaderboard.end_time %></p>
+    <% } %>
     <div class="sort-controls">
       <span>Sort by:</span>
       <button id="btn-rating" class="sort-btn">⭐ Avg Rating</button>

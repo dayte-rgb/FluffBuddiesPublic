@@ -36,6 +36,13 @@ const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js
 const skillCategoriesByJob = new skillCategoriesByJobModel();
 const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
 const jobCategoriesByJob = new jobCategoriesByJobModel();
+const leaderboardContentModel = require('./models/leaderboardContentModel.js');
+const leaderboardContent = new leaderboardContentModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboardM = new leaderboardModel();
+const userReviewModel = require('./models/userReviewModel.js');
+const userReview = new userReviewModel();
+
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -284,15 +291,45 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
   }
 });
 
-app.get('/leaderboard-test', (req, res) => {
-  res.render('leaderboard', {
-    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
-    entries: [
-      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
-      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
-      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
-    ]
-  });
+app.get('/leaderboard', (req, res) => {
+  const leaderboard = leaderboardContent.getCurrentLeaderboard();
+
+  if (!leaderboard) {
+    const all = leaderboardContent.getAll();
+    const fallback = all[all.length - 1] || null;
+    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
+  }
+
+  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+
+  // If no entries in period, fall back to leaderboardModel which has no date filter
+  if (!entries || entries.length === 0) {
+    const topByJobs   = leaderboardM.getTopKMostJobs(50);
+    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
+
+    const map = {};
+    topByJobs.forEach(row => {
+      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
+    });
+    topByRating.forEach(row => {
+      if (map[row.user_id]) {
+        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
+      } else {
+        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
+      }
+    });
+
+    entries = Object.values(map).map(e => {
+      const userData = user.getById(e.user_id);
+      return {
+        worker_name:    userData ? userData.username : `User ${e.user_id}`,
+        avg_rating:     e.avg_rating,
+        jobs_completed: e.jobs_completed,
+      };
+    });
+  }
+
+  res.render('leaderboard', { leaderboard, entries });
 });
 
 app.get('/review-test', (req, res) => {
@@ -313,10 +350,26 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
 
   try {
-    const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
+    const existing = await jobReview.getByJobId(job_id); 
+    if (existing) {
+      return res.status(400).json({ error: 'A review for this job already exists.' });
+    }
+
+    const newReview = reviewContent.create(
+      punctuality, quality, friendliness, comments,
+      new Date().toISOString(), 0
+    );
+
+    jobReview.create(newReview.id, job_id);
+
+    const jobData = await jobContent.getById(job_id);
+    if (jobData?.employee_num) {
+      userReview.create(newReview.id, jobData.employee_num);
+    }
+
     res.json({ review_id: newReview.id });
   } catch (error) {
-    console.error('Error saving review:', error);
+    console.error('Full review error:', error);
     res.status(500).json({ error: error.message });
   }
 });

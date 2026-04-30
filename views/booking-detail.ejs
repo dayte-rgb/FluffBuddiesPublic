@@ -70,25 +70,28 @@
             </button>
 
             <!-- Review -->
-            <% if(reviewData != null) { %>
-                <h2 class="job-title">Reviews</h2>
-
+            <% if (reviewData) { %>
+                <h2 class="job-title">Review</h2>
                 <div class="info-row">
-                    <span class="info-label">Punctuality</span>
-                    <span class="info-value"><%= reviewData.punctuality %> </span>
-                    <span class="info-label">Quality</span>
-                    <span class="info-value"><%= reviewData.quality %> </span>
-                    <span class="info-label">Friendliness</span>
-                    <span class="info-value"><%= reviewData.friendliness %> </span>
-                    <span class="info-label">Comment</span>
-                    <span class="info-value"><%= reviewData.comments %> </span>
-                    <span class="info-label">Creation Date</span>
-                    <span class="info-value"><%= reviewData.datetime %> </span>
-                    <% if (reviewData.verified == 1) { %>
-                        <p> This review has been verified. </p>
-                    <% } %>
+                  <span class="info-label">Punctuality</span>
+                  <span class="info-value"><%= reviewData.punctuality %>/5</span>
+                  <span class="info-label">Quality</span>
+                  <span class="info-value"><%= reviewData.quality %>/5</span>
+                  <span class="info-label">Friendliness</span>
+                  <span class="info-value"><%= reviewData.friendliness %>/5</span>
+                  <span class="info-label">Comment</span>
+                  <span class="info-value"><%= reviewData.comments %></span>
+                  <span class="info-label">Date</span>
+                  <span class="info-value"><%= reviewData.datetime %></span>
+                  <% if (reviewData.verified == 1) { %>
+                    <p>This review has been verified.</p>
+                  <% } %>
                 </div>
-            <% } %>
+              <% } else { %>
+                <a href="/review/<%= jobData.job_id %>" class="review-link-btn">
+                  Leave a Review
+                </a>
+              <% } %>
         </div>
 
         <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
