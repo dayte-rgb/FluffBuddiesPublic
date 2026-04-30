@@ -7,11 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
+    <%- include('_navbar') %>
+    
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
         <nav class="sidebar-nav">
             <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
             <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
             <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
             <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
@@ -62,7 +65,7 @@
             </div>
 
             <!-- Book Button -->
-            <button id="book-job-button" data-job_id="<%= jobData.job_id %>" data-employee_id="<%= jobData.employee_num %>">
+            <button id="book-job-button" data-job_id="<%= jobData.job_id %>">
                 Book This Job
             </button>
 

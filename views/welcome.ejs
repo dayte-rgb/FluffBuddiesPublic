@@ -4,27 +4,30 @@
 <head>
     <title>Welcome to Paw Patrol!</title>
     <link rel="stylesheet" href="/css/default_stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
+    <%- include('_navbar') %>
+    
     <div class="container">
         <img id="logo" src="/images/logo.png" alt="Paw Patrol Logo" class="logo">
-        <h1>Welcome!</h1>
-        <div class="button-container">
-            <button id="login-button">Login</button>
-            <button id="signup-button">Sign-Up</button>
-        </div>
+        <h1>Welcome<% if (user && user.userId) { %>, <%= user.username %><% } %>!</h1>
+        
+        <% if (!user || !user.userId) { %>
+            <div class="button-container">
+                <button id="login-button">Login</button>
+                <button id="signup-button">Sign-Up</button>
+            </div>
+        <% } %>
 
         <div class="button-container">
-            <a href="job-search" class="button" id="search-button">Search for Jobs</a>
+            <a href="<% if (user && user.userId) { %>job-search<% } else { %>login<% } %>" class="button" id="search-button">
+                <% if (user && user.userId) { %>Search for Jobs<% } else { %>Get Started<% } %>
+            </a>
         </div>
-
-        <div class="button-container">
-            <a href="/review-test" class="button" id="review-button">Leave a Review</a>
-            <a href="/leaderboard-test" class="button" id="leaderboard-button">Leaderboard</a>
     </div>
 
     <script src="/js/welcome.js"></script>
 </body>
-
 </html>

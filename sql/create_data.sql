@@ -87,7 +87,7 @@ INSERT INTO JobContent VALUES
 (NULL, "Dog bath and brush out for large breed", "2026-05-18 13:00:00", 90, 32232, 1, FALSE, FALSE),
 (NULL, "Evening dog walk for senior labrador", "2026-05-20 17:00:00", 45, 18042, 1, FALSE, FALSE),
 (NULL, "Cat feeding and litter box service for long weekend", "2026-05-22 09:00:00", 4320, 18045, 1, FALSE, FALSE),
-(NULL, "Eating spare leaves from my garden", "2026-05-20 14:00:00", 4500, 17432, 1, FALSE, FALSE)
+(NULL, "Eating spare leaves from my garden", "2026-05-20 14:00:00", 4500, 17432, 1, FALSE, FALSE),
 (NULL, "Hamster care and cage cleaning", "2026-05-25 10:00:00", 60, 71129, 1, FALSE, FALSE);
 
 -- insert data into JobCategoriesByJob

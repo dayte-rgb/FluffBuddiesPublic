@@ -1,6 +1,6 @@
 const { connectToDatabase } = require('../database');
 
-class userMessageModel {
+class UserMessageModel {
   constructor() {
     this.db = connectToDatabase();
   }
@@ -10,7 +10,7 @@ class userMessageModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(message_id, sender_id, recipient_id);
+    const info = stmt.run(message_id, sender_id, recipient_id);
 
     return {message_id, sender_id, recipient_id};
   }
@@ -58,4 +58,4 @@ class userMessageModel {
   }
 }
 
-module.exports = userMessageModel;
+module.exports = UserMessageModel;
