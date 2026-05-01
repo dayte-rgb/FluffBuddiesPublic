@@ -5,14 +5,14 @@ class messageContentModel {
     this.db = connectToDatabase();
   }
 
-  create(message_content, datetime){
-    const query = "INSERT INTO MessageContent (message_id, message_content, datetime) VALUES (NULL, ?, ?)";
+  create(message_content){
+    const query = "INSERT INTO MessageContent (message_id, message_content, datetime) VALUES (NULL, ?, datetime('now', 'localtime'))";
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(message_content, datetime);
+    const info = stmt.run(message_content);
 
-    return {id: info.lastInsertRowid, message_content, datetime};
+    return this.getById(info.lastInsertRowid);
   }
 
   getById(message_id){

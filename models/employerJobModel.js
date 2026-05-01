@@ -25,6 +25,19 @@ class employerJobModel {
     return info;
   }
 
+  getJobsByEmployerId(employer_id) {
+    const query = `
+      SELECT jc.*, em.employer_id
+      FROM EmployerJob em
+      JOIN JobContent jc ON em.job_id = jc.job_id
+      WHERE em.employer_id = ?
+      ORDER BY jc.datetime ASC
+    `;
+
+    const stmt = this.db.prepare(query);
+    return stmt.all(employer_id);
+  }
+
   getAll(){
     const query = 'SELECT * FROM EmployerJob';
 
