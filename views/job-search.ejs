@@ -12,15 +12,22 @@
 
 
 <body>
+    <%- include('_navbar') %>
+    
     <div class="sidebar">
         <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
         <nav class="sidebar-nav">
             <a href="/job-search" class="nav-icon active" title="Search"><i
                     class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
             <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
             <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
             <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+<<<<<<< HEAD
             <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
+=======
+            <a href="/leaderboard-test" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-clipboard-list"></i></a>
+>>>>>>> ef87e32673077f56028e479e25d93a8246a04f7e
             <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
         </nav>
     </div>
@@ -49,9 +56,14 @@
                         <i class="fa-solid fa-user"></i> Users
                     </button> -->
                 </div>
-                <button type="button" class="filter-toggle" id="filter-toggle-btn" onclick="toggleFilters()">
-                    <i class="fa-solid fa-sliders"></i>
-                </button>
+                <div class="search-action-buttons">
+                    <a href="/create-job" class="create-job-btn" title="Create a New Job">
+                        <i class="fa-solid fa-plus"></i> Create Job
+                    </a>
+                    <button type="button" class="filter-toggle" id="filter-toggle-btn" onclick="toggleFilters()">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Filter panel -->
@@ -63,7 +75,7 @@
                             value="<%= searchParams ? searchParams.zipcode : '' %>">
                     </div>
                     <div class="filter-group">
-                        
+
                         <label for="job_category">Job Category:</label>
                         <select id="job_category" name="job_categories[]" multiple>
                             <% jobCategories.forEach(cat => { %>
@@ -126,7 +138,7 @@
         </div>
 
     </div>
-    
+
     <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
     <script>
         new SlimSelect({
@@ -170,6 +182,3 @@
         }
     </script>
 </body>
-
-
-</html>

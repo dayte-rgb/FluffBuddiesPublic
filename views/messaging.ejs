@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Inbox</title>
+  <link rel="stylesheet" href="/css/messaging.css">
+</head>
+<body>
+  <h1>Inbox</h1>
+  <div id="status">Connecting to server...</div>
+
+  <h2>Start New Conversation</h2>
+  <div>
+    <input type="text" id="newConversationInput" placeholder="Type their username">
+    <button id="newConversationButton">Start New Conversation</button>
+  </div>
+
+  <h2>Choose User</h2>
+  <div id="history"></div>
+
+  <h2>Send Message</h2>
+  <div>
+    <input type="text" id="messageInput" placeholder="Type your message">
+    <button id="send">Send</button>
+  </div>
+  <div id="messages"></div>
+
+  <%# Store the user id in document.body.dataset.userId for use in the .js file %>
+  <body data-user-id = "<%= userId %>"">
+
+  <script src="/js/messaging.js"></script>
+</body>
+</html>

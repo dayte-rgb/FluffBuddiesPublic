@@ -2,15 +2,17 @@
 <html lang="en">
 
 <head>
-    <title>Leave a Review – <%= worker_name %>
-    </title>
-    <link rel="stylesheet" href="/css/review.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap"
-        rel="stylesheet">
+  <title>Review – <%= worker_name %></title>
+  <link rel="stylesheet" href="/css/review.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
+  <%- include('_navbar') %>
+  
+  <div class="card">
+    <h1>Leave a Review</h1>
+    <p class="subtitle">Job: <%= job_title %> — <%= job_date %></p>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -95,5 +97,4 @@
 
     <script src="/js/review.js"></script>
 </body>
-
 </html>

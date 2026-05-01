@@ -5,7 +5,8 @@
     <title>Badges – Paw Patrol</title>
     <link rel="stylesheet" href="/css/badges.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
@@ -33,22 +34,26 @@
         </div>
 
         <div class="badges-grid">
-            <% if (earnedBadges && earnedBadges.length > 0) { %>
-                <% earnedBadges.forEach(badge => { %>
+            <% if (earnedBadges && earnedBadges.length> 0) { %>
+                <% earnedBadges.forEach(badge=> { %>
                     <div class="badge-card earned">
                         <div class="badge-icon" style="background-color: <%= badge.color %>">
                             <i class="<%= badge.icon %>"></i>
                         </div>
-                        <p class="badge-name"><%= badge.name %></p>
-                        <p class="badge-desc"><%= badge.description %></p>
+                        <p class="badge-name">
+                            <%= badge.name %>
+                        </p>
+                        <p class="badge-desc">
+                            <%= badge.description %>
+                        </p>
                     </div>
-                <% }) %>
-            <% } else { %>
-                <div class="empty-state">
-                    <i class="fa-solid fa-paw"></i>
-                    <p>No badges yet — complete your first job to get started!</p>
-                </div>
-            <% } %>
+                    <% }) %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fa-solid fa-paw"></i>
+                                <p>No badges yet — complete your first job to get started!</p>
+                            </div>
+                            <% } %>
         </div>
 
         <div class="divider"></div>
@@ -60,17 +65,21 @@
         </div>
 
         <div class="badges-grid">
-            <% if (lockedBadges && lockedBadges.length > 0) { %>
-                <% lockedBadges.forEach(badge => { %>
+            <% if (lockedBadges && lockedBadges.length> 0) { %>
+                <% lockedBadges.forEach(badge=> { %>
                     <div class="badge-card">
                         <div class="badge-icon" style="background-color: <%= badge.color %>">
                             <i class="<%= badge.icon %>"></i>
                         </div>
-                        <p class="badge-name"><%= badge.name %></p>
-                        <p class="badge-desc"><%= badge.description %></p>
+                        <p class="badge-name">
+                            <%= badge.name %>
+                        </p>
+                        <p class="badge-desc">
+                            <%= badge.description %>
+                        </p>
                     </div>
-                <% }) %>
-            <% } %>
+                    <% }) %>
+                        <% } %>
         </div>
 
     </div>
