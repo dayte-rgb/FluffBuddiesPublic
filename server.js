@@ -46,6 +46,8 @@ const connections = require('./socket_connections.js');
 const messageModel = new MessageModel();
 const messagingModel = new MessagingModel();
 const userMessageModel = new UserMessageModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboardM = new leaderboardModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -303,15 +305,46 @@ app.get('/inbox', (req, res) => {
   res.render('messaging', {userId: req.session.userId});
 });
 
-app.get('/leaderboard-test', (req, res) => {
-  res.render('leaderboard', {
-    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
-    entries: [
-      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
-      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
-      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
-    ]
-  });
+app.get('/leaderboard', (req, res) => {
+  const leaderboard = leaderboardContent.getCurrentLeaderboard();
+  
+
+  if (!leaderboard) {
+    const all = leaderboardContent.getAll();
+    const fallback = all[all.length - 1] || null;
+    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
+  }
+
+  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+
+  // If no entries in period, fall back to leaderboardModel which has no date filter
+  if (!entries || entries.length === 0) {
+    const topByJobs   = leaderboardM.getTopKMostJobs(50);
+    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
+
+    const map = {};
+    topByJobs.forEach(row => {
+      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
+    });
+    topByRating.forEach(row => {
+      if (map[row.user_id]) {
+        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
+      } else {
+        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
+      }
+    });
+
+    entries = Object.values(map).map(e => {
+      const userData = user.getById(e.user_id);
+      return {
+        worker_name:    userData ? userData.username : `User ${e.user_id}`,
+        avg_rating:     e.avg_rating,
+        jobs_completed: e.jobs_completed,
+      };
+    });
+  }
+
+  res.render('leaderboard', { leaderboard, entries });
 });
 
 app.get('/review-test', (req, res) => {
