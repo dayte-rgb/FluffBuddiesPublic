@@ -191,9 +191,9 @@ INSERT INTO EmployerJob VALUES
 -- insert data into LeaderboardContent
 -- (NULL, <reward_badge_id>, <start_time>, <end_time>)
 INSERT INTO LeaderboardContent VALUES
-(NULL, 1, "2026-03-01 00:00:00", "2026-03-31 23:59:59", 3, 1),
-(NULL, 2, "2026-04-01 00:00:00", "2026-04-30 23:59:59", 2, 1),
-(NULL, 4, "2026-05-01 00:00:00", "2026-05-31 23:59:59", 3, 1);
+(NULL, "2026-03-01 00:00:00", "2026-03-31 23:59:59", 3, 1),
+(NULL, "2026-04-01 00:00:00", "2026-04-30 23:59:59", 2, 2),
+(NULL, "2026-05-01 00:00:00", "2026-05-31 23:59:59", 3, 4);
 
 -- insert data into CertificationContent
 -- (NULL, <certification_name>, <company>)
