@@ -308,34 +308,33 @@ app.get('/inbox', (req, res) => {
 });
 
 app.get('/leaderboard', (req, res) => {
-  const leaderboard = leaderboardM.getCurrentLeaderboard();
+  // Get the current leaderboard that is stored in the database
+  let leaderboard = leaderboardM.getCurrentLeaderboard();
   
-
+  // if there is no leaderboard, create one!
   if (!leaderboard) {
-    const all = leaderboardContent.getAll();
-    const fallback = all[all.length - 1] || null;
-    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
+    //NOTE: GO BACK AND FIGURE OUT THE BADGE AND METRIC IDS
+    const lb_info = leaderboardContent.create(new Date().toLocaleString(), null, 1, 1);
+    leaderboard = leaderboardContent.getById(lb_info.id);
   }
 
-  let entries = leaderboardM.getEntriesByAvgRating(leaderboard.leaderboard_id);
+  // Get all stats between the start and end date of the leaderboard
+  const start_time = leaderboard.start_time;
+  const end_time = leaderboard.end_time;
+  let entries = leaderboardM.getLeaderboardStats(start_time, end_time, 10);
 
   // If no entries in period, fall back to leaderboardModel which has no date filter
   if (!entries || entries.length === 0) {
-    const topByJobs   = leaderboardM.getTopKMostJobs(50);
-    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
+    const alltime_entries   = leaderboardM.getLeaderboardStats();
 
     const map = {};
-    topByJobs.forEach(row => {
-      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
-    });
-    topByRating.forEach(row => {
-      if (map[row.user_id]) {
-        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
-      } else {
-        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
-      }
+
+    // map the rows onto another map? might not be needed
+    alltime_entries.forEach(row => {
+      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: row.user_avg_rating };
     });
 
+    //map the map to the correct entries format that the ejs file expects
     entries = Object.values(map).map(e => {
       const userData = user.getById(e.user_id);
       return {
