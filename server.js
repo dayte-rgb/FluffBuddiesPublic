@@ -609,6 +609,18 @@ wss.on('connection', (ws) => {
     });
 });
 
+//-----------------------------------------------------------------------------------------------------------------------------------
+// setInterval function that checks for end of leaderboard
+const INTERVAL = 1000 * 60 * 60; // an hour
+setInterval(() => {
+  //get most recent leaderboard
+  //check if curr time is after the end time
+  //if so, run distributeBadges()
+
+  // check all achievements for each user
+  // if a user has completed an achievement, add the badge to their profile
+}, INTERVAL)
+
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
 server.listen(PORT, () => {
