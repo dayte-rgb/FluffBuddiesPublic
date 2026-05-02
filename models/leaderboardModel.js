@@ -6,10 +6,9 @@ class leaderboardModel {
 
     this._getLeaderboardStats = this.db.prepare(`
         SELECT 
-          u.user_id, 
-          u.username, 
-          COUNT(*) as user_total, 
-          ROUND(AVG(r.punctuality + r.quality + r.friendliness), 2) as user_avg_rating
+          u.username as worker_name, 
+          COUNT(*) as jobs_completed, 
+          ROUND(AVG(r.punctuality + r.quality + r.friendliness) / 3.0, 2) as avg_rating
         FROM EmployeeJob ej
         JOIN JobContent jc ON ej.job_id = jc.job_id
         JOIN User u ON u.user_id = ej.employee_id
@@ -18,7 +17,7 @@ class leaderboardModel {
         WHERE jc.job_completed = 1 
         AND (@start IS NULL AND @end IS NULL OR jc.datetime BETWEEN @start AND @end)
         GROUP BY u.user_id
-        ORDER BY user_total DESC, user_avg_rating DESC
+        ORDER BY jobs_completed DESC, avg_rating DESC
         LIMIT @k;
     `);
 
