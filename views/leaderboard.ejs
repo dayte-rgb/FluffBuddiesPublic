@@ -1,55 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Leaderboard</title>
-  <link rel="stylesheet" href="/css/leaderboard.css" />
+<title>Leaderboard – Paw Patrol</title>
+    <link rel="stylesheet" href="/css/leaderboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-  <div class="card">
-    <h1>🐾 Leaderboard</h1>
-    <% if (leaderboard) { %>
-      <p class="subtitle">Period: <%= leaderboard.start_time %> — <%= leaderboard.end_time %></p>
-    <% } %>
-    <div class="sort-controls">
-      <span>Sort by:</span>
-      <button id="btn-rating" class="sort-btn">⭐ Avg Rating</button>
-      <button id="btn-jobs"   class="sort-btn">✅ Jobs Completed</button>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+        <nav class="sidebar-nav">
+            <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+            <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+            <a href="/leaderboard" class="nav-icon active" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
+            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+        </nav>
     </div>
 
-    <table id="leaderboard-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Worker</th>
-          <th>Avg Rating</th>
-          <th>Jobs Completed</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body">
-        <% if (!entries || entries.length === 0) { %>
-          <tr>
-            <td colspan="4" class="empty">No entries yet for this period.</td>
-          </tr>
-        <% } else { %>
-          <% entries.forEach(function(entry, index) { %>
-            <tr data-worker="<%= entry.worker_name %>" data-rating="<%= entry.avg_rating !== null ? entry.avg_rating : '' %>" data-jobs="<%= entry.jobs_completed %>">
-              <td class="rank"><%= index + 1 %></td>
-              <td class="worker-name"><%= entry.worker_name %></td>
-              <td class="rating-cell">
-                <%= entry.avg_rating !== null ? parseFloat(entry.avg_rating).toFixed(2) : '—' %>
-                <span class="stars">
-                  <%= entry.avg_rating !== null ? '★'.repeat(Math.round(entry.avg_rating)) : '' %>
-                </span>
-              </td>
-              <td class="jobs-cell"><%= entry.jobs_completed %></td>
-            </tr>
-          <% }); %>
-        <% } %>
-      </tbody>
-    </table>
-
-    
-  </div>
+    <!-- Main content -->
+    <div class="leaderboard-main">
 
         <div class="leaderboard-header">
             <h1> Leaderboard</h1>
@@ -110,8 +84,8 @@
         </div>
 
     </div>
-
     <script src="/js/leaderboard.js"></script>
+    
 </body>
 
 </html>
