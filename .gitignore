@@ -23,3 +23,10 @@ package-lock.json
 
 # Log file
 requests.log
+
+# Markdown files
+.md
+
+# Sessions
+sessions.db-shm
+sessions.db-wal

@@ -1,11 +1,18 @@
 // Import the Express module, which is a framework for building web applications in Node.js.
 const express = require('express');
 const path = require('path');
-const http = require('http');
-const WebSocket = require('ws');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
+const bcrypt = require('bcrypt');
 const logger = new Log('requests.log', true);
+
+// Session and authentication imports
+const { sessionMiddleware } = require('./config/sessionConfig.js');
+const { isAuthenticated, isNotAuthenticated } = require('./middleware/authMiddleware.js');
+
+const http = require('http');
+const WebSocket = require('ws');
+
 const jobContentModel = require('./models/jobContentModel');
 const jobContent = new jobContentModel();
 const jobReviewModel = require('./models/jobReviewModel.js');
@@ -20,22 +27,18 @@ const JobSearchModel = require('./models/jobSearchModel.js');
 const jobSearch = new JobSearchModel();
 const jobCategoryModel = require('./models/jobCategoryModel');
 const jobCategory = new jobCategoryModel();
-const leaderboardModel = require('./models/leaderboardModel.js');
-const leaderboard = new leaderboardModel();
-const session = require('express-session');
 const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
 const user = new userModel();
+const securityQuestionModel = require('./models/securityQuestionModel.js');
+const securityQuestion = new securityQuestionModel();
+const userSecurityAnswerModel = require('./models/userSecurityAnswerModel.js');
+const userSecurityAnswer = new userSecurityAnswerModel();
 const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js');
 const skillCategoriesByJob = new skillCategoriesByJobModel();
 const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
 const jobCategoriesByJob = new jobCategoriesByJobModel();
-const leaderboardContentModel = require('./models/leaderboardContentModel.js');
-const leaderboardContent = new leaderboardContentModel();
-const leaderboardM = new leaderboardModel();
-const userReviewModel = require('./models/userReviewModel.js');
-const userReview = new userReviewModel();
 const MessageModel = require('./models/messageContentModel.js');
 const MessagingModel = require('./models/messagingModel.js');
 const UserMessageModel = require('./models/userMessageModel.js');
@@ -43,7 +46,6 @@ const connections = require('./socket_connections.js');
 const messageModel = new MessageModel();
 const messagingModel = new MessagingModel();
 const userMessageModel = new UserMessageModel();
-
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -59,21 +61,21 @@ const PORT = 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Session middleware
+app.use(sessionMiddleware);
+
+// Pass session data to all views
+app.use((req, res, next) => {
+  res.locals.user = req.session ? req.session : null;
+  next();
+});
+
 // Middleware for logging
 app.use(function (req, res, next) {
   const startTime = Date.now();
   logger.write(`[INFO] Route: ${req.url} Method: ${req.method}`);
   next();
 });
-
-// sets up cookie
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'fluff_buddies_website_secret',
-  resave: false, //reset session cookie for each connection
-  saveUninitialized: false, // session is only stored here in this file (I believe)
-  cookie: {secure: false} // not in https
-}));
-
 
 // Middleware for handling static files
 app.use(express.static('public'));
@@ -98,27 +100,27 @@ app.get('/default', (req, res) => {
 });
 
 // Displays job search query page
-app.get('/job-search', (req, res) => {
+app.get('/job-search', isAuthenticated, (req, res) => {
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
-  
+
   res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
 });
 
 // Handles execution of search query
-app.post('/job-search', (req, res) => {
+app.post('/job-search', isAuthenticated, (req, res) => {
   let { zipcode, keyword, job_categories, skill_categories } = req.body;
-  
+
   let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
-  
+
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
-  
+
   res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_categories, skill_categories } });
 });
 
 // Display a page with details of a selected job listing
-app.get('/booking/:job_id', async (req, res) => {
+app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
   const review = await jobReview.getByJobId(req.params.job_id);
 
@@ -137,11 +139,27 @@ app.get('/booking/:job_id', async (req, res) => {
 });
 
 // Handle booking a job
-app.post('/booking/:job_id', (req, res) => { 
-  const employee_id = req.body.employee_id;
-  
+app.post('/booking/:job_id', isAuthenticated, (req, res) => {
+  const employee_id = req.session.userId;
+  const job_id = req.params.job_id;
+
   try {
-    employeeJob.create(req.params.job_id, employee_id);
+    const jobData = jobContent.getById(job_id);
+    if (!jobData) {
+      return res.status(404).json({ success: false, message: 'Job not found.' });
+    }
+
+    const employerLink = employerJob.getById(job_id);
+    if (employerLink && employerLink.employer_id === employee_id) {
+      return res.status(400).json({ success: false, message: 'You cannot book your own job.' });
+    }
+
+    const existingBooking = employeeJob.getByIds(job_id, employee_id);
+    if (existingBooking) {
+      return res.status(400).json({ success: false, message: 'You have already booked this job.' });
+    }
+
+    employeeJob.create(job_id, employee_id);
     res.json({ success: true, message: 'Job booked successfully!' });
   } catch (error) {
     console.error('Error booking job:', error);
@@ -150,31 +168,27 @@ app.post('/booking/:job_id', (req, res) => {
 });
 
 // Handle login render
-app.get('/login', (req, res) => {
+app.get('/login', isNotAuthenticated, (req, res) => {
   res.render('login');
 });
 
 // Handle login submission
-app.post('/login', (req, res) => {
+app.post('/login', isNotAuthenticated, async (req, res) => {
   const { username, password } = req.body;
 
   // Authenticate user using UserModel
-  const authenticatedUser = user.authenticate(username, password);
+  const authenticatedUser = await user.authenticate(username, password);
 
   if (authenticatedUser) {
-    // TEMPORARY UNTIL LANDING PAGE IS CREATED
+    // Create session for user
+    req.session.userId = authenticatedUser.user_id;
+    req.session.username = authenticatedUser.username;
+    req.session.email = authenticatedUser.email;
+    req.session.accountType = authenticatedUser.account_type;
+
     logger.write(`[INFO] User ${authenticatedUser.username} logged in successfully`);
     const jobCategories = jobCategory.getAll();
     const skillCategories = skillCategory.getAll();
-
-    // store info in cookie
-    const userInfo = user.getByUsername(username);
-    req.session.user = {
-      id: userInfo.user_id,
-      username: userInfo.username,
-      account_type: userInfo.account_type
-    }
-
     res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
   } else {
     // Login failed - redirect back to login with error
@@ -184,12 +198,12 @@ app.post('/login', (req, res) => {
 });
 
 // Handle forgot password render
-app.get('/forgot-password', (req, res) => {
+app.get('/forgot-password', isNotAuthenticated, (req, res) => {
   res.render('forgot-password');
 });
 
 // Handle forgot password submission
-app.post('/forgot-password', (req, res) => {
+app.post('/forgot-password', isNotAuthenticated, (req, res) => {
   const { email } = req.body;
 
   // TODO: Implement actual password reset logic
@@ -202,26 +216,41 @@ app.post('/forgot-password', (req, res) => {
   });
 });
 
+// Handle logout
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      logger.write(`[ERROR] Error destroying session: ${err.message}`);
+      return res.status(500).send('Error logging out.');
+    }
+    logger.write(`[INFO] User logged out successfully`);
+    res.redirect('/');
+  });
+});
+
 // Handle signup render
-app.get('/signup', (req, res) => {
-  res.render('signup');
+app.get('/signup', isNotAuthenticated, (req, res) => {
+  const securityQuestions = securityQuestion.getAll();
+  res.render('signup', { securityQuestions });
 });
 
 // Handle signup submission
-app.post('/signup', (req, res) => {
-  const { username, email, password, phone_number, zipcode, account_type } = req.body;
+app.post('/signup', isNotAuthenticated, async (req, res) => {
+  const { username, email, password, phone_number, zipcode, account_type, security_question_id, security_answer } = req.body;
 
   // Validate required fields
-  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
+  if (!username || !email || !password || !phone_number || !zipcode || !account_type || !security_question_id || !security_answer) {
     logger.write(`[INFO] Signup attempt with missing fields`);
-    return res.render('signup', { error: 'All fields are required.' });
+    const securityQuestions = securityQuestion.getAll();
+    return res.render('signup', { error: 'All fields are required.', securityQuestions });
   }
 
   // Validate account_type
   const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
   if (!validAccountTypes.includes(account_type)) {
     logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
-    return res.render('signup', { error: 'Invalid account type selected.' });
+    const securityQuestions = securityQuestion.getAll();
+    return res.render('signup', { error: 'Invalid account type selected.', securityQuestions });
   }
 
   try {
@@ -229,73 +258,60 @@ app.post('/signup', (req, res) => {
     const existingUser = user.getByUsername(username);
     if (existingUser) {
       logger.write(`[INFO] Signup attempt with existing username: ${username}`);
-      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
+      const securityQuestions = securityQuestion.getAll();
+      return res.render('signup', { error: 'Username already exists. Please choose a different one.', securityQuestions });
     }
 
     // Check if email already exists
     const existingEmail = user.getByEmail(email);
     if (existingEmail) {
       logger.write(`[INFO] Signup attempt with existing email: ${email}`);
-      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
+      const securityQuestions = securityQuestion.getAll();
+      return res.render('signup', { error: 'Email already exists. Please use a different one.', securityQuestions });
     }
 
     // Create new user
-    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
+    const newUser = await user.create(username, password, phone_number, email, zipcode, '', account_type, null);
     logger.write(`[INFO] New user created: ${newUser.username}`);
 
-    // Signup successful - render login page with success message
-    res.render('login', { success: 'Account created successfully! Please log in.' });
+    // Hash the security answer
+    const hashedAnswer = await bcrypt.hash(security_answer, 10);
+
+    // Create security answer
+    userSecurityAnswer.create(newUser.id, security_question_id, hashedAnswer);
+
+    // Create session for new user
+    req.session.userId = newUser.id;
+    req.session.username = newUser.username;
+    req.session.email = newUser.email;
+    req.session.accountType = newUser.account_type;
+
+    // Automatically log in after signup
+    const jobCategories = jobCategory.getAll();
+    const skillCategories = skillCategory.getAll();
+    res.render('job-search', { jobCategories, skillCategories, results: null, searchParams: null });
   } catch (error) {
     console.error('Error creating user:', error);
     logger.write(`[ERROR] Signup error: ${error.message}`);
-    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
+    const securityQuestions = securityQuestion.getAll();
+    res.render('signup', { error: 'An error occurred during signup. Please try again.', securityQuestions });
   }
 });
 
 app.get('/inbox', (req, res) => {
   res.status(200);
-  res.render('messaging', {userId: req.session.user.id});
+  res.render('messaging', {userId: req.session.userId});
 });
 
-app.get('/leaderboard', (req, res) => {
-  const leaderboard = leaderboardContent.getCurrentLeaderboard();
-
-  if (!leaderboard) {
-    const all = leaderboardContent.getAll();
-    const fallback = all[all.length - 1] || null;
-    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
-  }
-
-  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
-
-  // If no entries in period, fall back to leaderboardModel which has no date filter
-  if (!entries || entries.length === 0) {
-    const topByJobs   = leaderboardM.getTopKMostJobs(50);
-    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
-
-    const map = {};
-    topByJobs.forEach(row => {
-      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
-    });
-    topByRating.forEach(row => {
-      if (map[row.user_id]) {
-        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
-      } else {
-        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
-      }
-    });
-
-    entries = Object.values(map).map(e => {
-      const userData = user.getById(e.user_id);
-      return {
-        worker_name:    userData ? userData.username : `User ${e.user_id}`,
-        avg_rating:     e.avg_rating,
-        jobs_completed: e.jobs_completed,
-      };
-    });
-  }
-
-  res.render('leaderboard', { leaderboard, entries });
+app.get('/leaderboard-test', (req, res) => {
+  res.render('leaderboard', {
+    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
+    entries: [
+      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
+      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
+      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
+    ]
+  });
 });
 
 app.get('/review-test', (req, res) => {
@@ -303,70 +319,8 @@ app.get('/review-test', (req, res) => {
     worker_name: 'Rex',
     job_title: 'Dog Walking',
     job_date: '2025-04-01',
-    job_id: 4
+    job_id: 99  // changed from 1 to 99
   });
-});
-
-app.get('/review/:job_id', async (req, res) => {
-  const jobData = await jobContent.getById(req.params.job_id);
-  const userData = await user.getById(jobData.employee_num);
-
-  res.render('review', {
-    worker_name: userData.username,
-    job_title: jobData.description,
-    job_date: jobData.datetime,
-    job_id: req.params.job_id
-  });
-});
-
-// Handle signup render
-app.get('/signup', (req, res) => {
-  res.render('signup');
-});
-
-// Handle signup submission
-app.post('/signup', (req, res) => {
-  const { username, email, password, phone_number, zipcode, account_type } = req.body;
-
-  // Validate required fields
-  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
-    logger.write(`[INFO] Signup attempt with missing fields`);
-    return res.render('signup', { error: 'All fields are required.' });
-  }
-
-  // Validate account_type
-  const validAccountTypes = ['pet', 'owner', 'organization', 'user'];
-  if (!validAccountTypes.includes(account_type)) {
-    logger.write(`[INFO] Signup attempt with invalid account type: ${account_type}`);
-    return res.render('signup', { error: 'Invalid account type selected.' });
-  }
-
-  try {
-    // Check if username already exists
-    const existingUser = user.getByUsername(username);
-    if (existingUser) {
-      logger.write(`[INFO] Signup attempt with existing username: ${username}`);
-      return res.render('signup', { error: 'Username already exists. Please choose a different one.' });
-    }
-
-    // Check if email already exists
-    const existingEmail = user.getByEmail(email);
-    if (existingEmail) {
-      logger.write(`[INFO] Signup attempt with existing email: ${email}`);
-      return res.render('signup', { error: 'Email already exists. Please use a different one.' });
-    }
-
-    // Create new user
-    const newUser = user.create(username, password, phone_number, email, zipcode, '', account_type, null);
-    logger.write(`[INFO] New user created: ${newUser.username}`);
-
-    // Signup successful - render login page with success message
-    res.render('login', { success: 'Account created successfully! Please log in.' });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    logger.write(`[ERROR] Signup error: ${error.message}`);
-    res.render('signup', { error: 'An error occurred during signup. Please try again.' });
-  }
 });
 
 function write_res_log(res){
@@ -374,49 +328,50 @@ function write_res_log(res){
   return;
 }
 
-app.post('/api/reviews', async (req, res) => {   
+app.post('/api/reviews', isAuthenticated, (req, res) => {
   const { job_id, punctuality, quality, friendliness, comments } = req.body;
 
   try {
-    const existing = await jobReview.getByJobId(job_id); 
-    if (existing) {
-      return res.status(400).json({ error: 'A review for this job already exists.' });
-    }
-
-    const newReview = reviewContent.create(
-      punctuality, quality, friendliness, comments,
-      new Date().toISOString(), 0
-    );
-
-    jobReview.create(newReview.id, job_id);
-
-    const jobData = await jobContent.getById(job_id);
-    if (jobData?.employee_num) {
-      userReview.create(newReview.id, jobData.employee_num);
-    }
-
+    const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
     res.json({ review_id: newReview.id });
   } catch (error) {
-    console.error('Full review error:', error);
+    console.error('Error saving review:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Display the create job form
-app.get('/create-job', (req, res) => {
-  res.render('create-job', { error: null, success: null });
+app.get('/create-job', isAuthenticated, (req, res) => {
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
+
+  res.render('create-job', {
+    error: null,
+    success: null,
+    jobCategories,
+    skillCategories,
+    job_categories: [],
+    skill_categories: []
+  });
 });
 
 // Handle job creation
-app.post('/create-job', (req, res) => {
-  const { description, datetime, duration, zipcode, employee_num, job_filled, username } = req.body;
+app.post('/create-job', isAuthenticated, (req, res) => {
+  const { description, datetime, duration, zipcode, employee_num, job_filled, username, job_categories, skill_categories } = req.body;
+
+  const jobCategories = jobCategory.getAll();
+  const skillCategories = skillCategory.getAll();
 
   // Validate required fields
   if (!description || !datetime || !duration || !zipcode || !employee_num || !username) {
     logger.write(`[INFO] Create job attempt with missing fields`);
     return res.render('create-job', { 
       error: 'All required fields must be filled out.',
-      success: null 
+      success: null,
+      jobCategories,
+      skillCategories,
+      job_categories,
+      skill_categories
     });
   }
 
@@ -434,7 +389,11 @@ app.post('/create-job', (req, res) => {
       logger.write(`[INFO] Create job attempt with invalid duration: ${duration}`);
       return res.render('create-job', {
         error: 'Duration must be a positive number.',
-        success: null
+        success: null,
+        jobCategories,
+        skillCategories,
+        job_categories,
+        skill_categories
       });
     }
 
@@ -442,7 +401,11 @@ app.post('/create-job', (req, res) => {
       logger.write(`[INFO] Create job attempt with invalid number of employees: ${employee_num}`);
       return res.render('create-job', {
         error: 'Number of Employees must be a positive number.',
-        success: null
+        success: null,
+        jobCategories,
+        skillCategories,
+        job_categories,
+        skill_categories
       });
     }
 
@@ -463,15 +426,40 @@ app.post('/create-job', (req, res) => {
       user_id
     );
 
-    // TO BE CHANGED, BANDAID FIX UNTIL CATEGORIES CAN BE ASSIGNED ON PAGE
-    skillCategoriesByJob.create(newJob.id, 1);
-    jobCategoriesByJob.create(newJob.id, 1);
+    const selectedJobCategories = job_categories
+      ? Array.isArray(job_categories)
+        ? job_categories
+        : [job_categories]
+      : [];
+    const selectedSkillCategories = skill_categories
+      ? Array.isArray(skill_categories)
+        ? skill_categories
+        : [skill_categories]
+      : [];
+
+    selectedJobCategories.forEach(categoryId => {
+      const parsedCategoryId = parseInt(categoryId, 10);
+      if (!Number.isNaN(parsedCategoryId)) {
+        jobCategoriesByJob.create(job_id, parsedCategoryId);
+      }
+    });
+
+    selectedSkillCategories.forEach(skillId => {
+      const parsedSkillId = parseInt(skillId, 10);
+      if (!Number.isNaN(parsedSkillId)) {
+        skillCategoriesByJob.create(job_id, parsedSkillId);
+      }
+    });
 
     logger.write(`[INFO] New job created with ID: ${newJob.id}`);
     // Render success page
     res.render('create-job', {
       error: null,
-      success: `Job created successfully with ID: ${newJob.id}! Redirecting to job search...`
+      success: `Job created successfully with ID: ${newJob.id}! Redirecting to job search...`,
+      jobCategories,
+      skillCategories,
+      job_categories,
+      skill_categories
     });
 
   } catch (error) {
@@ -479,9 +467,25 @@ app.post('/create-job', (req, res) => {
     logger.write(`[ERROR] Create job error: ${error.message}`);
     res.render('create-job', {
       error: 'An error occurred while creating the job. Please try again.',
-      success: null
+      success: null,
+      jobCategories,
+      skillCategories,
+      job_categories,
+      skill_categories
     });
   }
+});
+
+// Display the current user's schedule and bookings
+app.get('/schedule', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  const scheduledJobs = employerJob.getJobsByEmployerId(userId);
+  const bookedJobs = employeeJob.getBookingsByEmployeeId(userId);
+
+  res.render('schedule', {
+    scheduledJobs,
+    bookedJobs
+  });
 });
 
 // -------------------------------------------------------------------------------------------------------------------
