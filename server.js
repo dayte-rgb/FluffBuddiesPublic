@@ -323,26 +323,9 @@ app.get('/leaderboard', (req, res) => {
   const end_time = leaderboard.end_time;
   let entries = leaderboardM.getLeaderboardStats(start_time, end_time, 10);
 
-  // If no entries in period, fall back to leaderboardModel which has no date filter
+  // If no entries in period, fall back to no filter for dates and default k = 10
   if (!entries || entries.length === 0) {
-    const alltime_entries   = leaderboardM.getLeaderboardStats();
-
-    const map = {};
-
-    // map the rows onto another map? might not be needed
-    alltime_entries.forEach(row => {
-      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: row.user_avg_rating };
-    });
-
-    //map the map to the correct entries format that the ejs file expects
-    entries = Object.values(map).map(e => {
-      const userData = user.getById(e.user_id);
-      return {
-        worker_name:    userData ? userData.username : `User ${e.user_id}`,
-        avg_rating:     e.avg_rating,
-        jobs_completed: e.jobs_completed,
-      };
-    });
+    entries = leaderboardM.getLeaderboardStats();
   }
 
   res.render('leaderboard', { leaderboard, entries });
