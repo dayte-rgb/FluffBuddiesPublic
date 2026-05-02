@@ -46,6 +46,8 @@ const connections = require('./socket_connections.js');
 const messageModel = new MessageModel();
 const messagingModel = new MessagingModel();
 const userMessageModel = new UserMessageModel();
+const LeaderboardContent = require('./models/leaderboardContentModel.js')
+const leaderboardContent = new LeaderboardContent();
 const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 
@@ -306,7 +308,7 @@ app.get('/inbox', (req, res) => {
 });
 
 app.get('/leaderboard', (req, res) => {
-  const leaderboard = leaderboardContent.getCurrentLeaderboard();
+  const leaderboard = leaderboardM.getCurrentLeaderboard();
   
 
   if (!leaderboard) {
@@ -315,7 +317,7 @@ app.get('/leaderboard', (req, res) => {
     return res.render('leaderboard', { leaderboard: fallback, entries: [] });
   }
 
-  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+  let entries = leaderboardM.getEntriesByAvgRating(leaderboard.leaderboard_id);
 
   // If no entries in period, fall back to leaderboardModel which has no date filter
   if (!entries || entries.length === 0) {

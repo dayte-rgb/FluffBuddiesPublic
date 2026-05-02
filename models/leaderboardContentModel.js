@@ -56,32 +56,6 @@ class leaderboardContentModel {
 
     return old_info;
   }
-
-  getCurrentLeaderboard() {
-    const now = new Date().toISOString();
-    const query = `SELECT * FROM LeaderboardContent 
-                   WHERE start_time <= ? AND end_time >= ? 
-                   ORDER BY leaderboard_id DESC LIMIT 1`;
-    return this.db.prepare(query).get(now, now);
-  }
-
-  getEntriesByAvgRating(leaderboard_id) {
-    // Get the leaderboard period for filtering
-    const lb = this.getById(leaderboard_id);
-    return this.db.prepare(`
-      SELECT u.username as worker_name,
-             ROUND(AVG((r.punctuality + r.quality + r.friendliness) / 3.0), 2) as avg_rating,
-             COUNT(DISTINCT ej.job_id) as jobs_completed
-      FROM EmployeeJob ej
-      JOIN User u ON u.user_id = ej.employee_id
-      JOIN JobContent jc ON jc.job_id = ej.job_id
-      LEFT JOIN JobReview jr ON jr.job_id = ej.job_id
-      LEFT JOIN ReviewContent r ON r.review_id = jr.review_id
-      WHERE jc.datetime BETWEEN ? AND ?
-      GROUP BY u.user_id
-      ORDER BY avg_rating DESC
-    `).all(lb.start_time, lb.end_time);
-  }
 }
 
 module.exports = leaderboardContentModel;
