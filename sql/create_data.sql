@@ -65,25 +65,25 @@ INSERT INTO PaymentContent VALUES
 (3, "Daily"),
 (4, "Per Visit");
 
--- insert data into JobContent  (must come before JobPayment and EmployerJob)
--- (NULL, <description>, <datetime>, <duration>, <zipcode>, <employee_num>, <job_filled>)
+-- insert data into JobContent
+-- (NULL, <description>, <datetime>, <duration>, <zipcode>, <employee_num>, <job_filled>, <job_completed>)
 INSERT INTO JobContent VALUES
 (NULL, "Need someone to walk my golden retriever every weekday morning", "2026-04-01 08:00:00", 60, 18042, 1, FALSE, FALSE),
 (NULL, "Looking for a pet sitter for a weekend while I travel", "2026-04-10 09:00:00", 2880, 18045, 1, FALSE, FALSE),
 (NULL, "Dog grooming needed before a show", "2026-04-05 14:00:00", 120, 18101, 1, TRUE, FALSE),
 (NULL, "Help needed caring for 3 cats while owner is away", "2026-04-15 10:00:00", 1440, 12967, 1, FALSE, FALSE),
-(NULL, "Weekend dog walking for energetic husky", "2026-04-20 07:00:00", 90, 35234, 2, FALSE, TRUE),
-(NULL, "Cat sitting needed for vacation", "2026-04-25 08:00:00", 3563646, 17221, 2, FALSE, TRUE),
-(NULL, "Dog training sessions for obedience", "2026-04-18 16:00:00", 123312, 18042, 3, FALSE, TRUE),
-(NULL, "Bird cage cleaning and feeding", "2026-04-22 10:00:00", 6764332, 18045, 4, FALSE, TRUE),
-(NULL, "Horse grooming and exercise", "2026-04-28 06:00:00", 9999, 25452, 4, FALSE, TRUE),
-(NULL, "General pet care help needed for busy week", "2026-05-01 09:00:00", 480, 18042, 1, FALSE, FALSE),
-(NULL, "Looking for experienced sitter for two rabbits", "2026-05-05 10:00:00", 1440, 18045, 1, FALSE, FALSE),
-(NULL, "Need someone to clean and maintain a fish tank", "2026-05-08 11:00:00", 90, 18101, 1, FALSE, FALSE),
-(NULL, "Overnight pet sitting for two dogs and a cat", "2026-05-10 18:00:00", 720, 18042, 1, FALSE, FALSE),
-(NULL, "Daily feeding and care for backyard chickens", "2026-05-12 07:00:00", 30, 18045, 1, FALSE, FALSE),
-(NULL, "Help socializing a shy rescue dog", "2026-05-14 10:00:00", 120, 18101, 2, FALSE, FALSE),
-(NULL, "Guinea pig care while on business trip", "2026-05-16 08:00:00", 2880, 12871, 1, FALSE, FALSE),
+(NULL, "Weekend dog walking for energetic husky", "2026-04-20 07:00:00", 90, 35234, 2, TRUE, TRUE),
+(NULL, "Cat sitting needed for vacation", "2026-04-25 08:00:00", 3563646, 17221, 2, TRUE, TRUE),
+(NULL, "Dog training sessions for obedience", "2026-04-18 16:00:00", 123312, 18042, 3, TRUE, TRUE),
+(NULL, "Bird cage cleaning and feeding", "2026-04-22 10:00:00", 6764332, 18045, 4, TRUE, TRUE),
+(NULL, "Horse grooming and exercise", "2026-04-28 06:00:00", 9999, 25452, 4, TRUE, TRUE),
+(NULL, "General pet care help needed for busy week", "2026-05-01 09:00:00", 480, 18042, 1, TRUE, TRUE),
+(NULL, "Looking for experienced sitter for two rabbits", "2026-05-05 10:00:00", 1440, 18045, 1, TRUE, TRUE),
+(NULL, "Need someone to clean and maintain a fish tank", "2026-05-08 11:00:00", 90, 18101, 1, TRUE, TRUE),
+(NULL, "Overnight pet sitting for two dogs and a cat", "2026-05-10 18:00:00", 720, 18042, 1, TRUE, TRUE),
+(NULL, "Daily feeding and care for backyard chickens", "2026-05-12 07:00:00", 30, 18045, 1, TRUE, TRUE),
+(NULL, "Help socializing a shy rescue dog", "2026-05-14 10:00:00", 120, 18101, 2, TRUE, TRUE),
+(NULL, "Guinea pig care while on business trip", "2026-05-16 08:00:00", 2880, 12871, 1, TRUE, TRUE),
 (NULL, "Dog bath and brush out for large breed", "2026-05-18 13:00:00", 90, 32232, 1, FALSE, FALSE),
 (NULL, "Evening dog walk for senior labrador", "2026-05-20 17:00:00", 45, 18042, 1, FALSE, FALSE),
 (NULL, "Cat feeding and litter box service for long weekend", "2026-05-22 09:00:00", 4320, 18045, 1, FALSE, FALSE),
@@ -188,12 +188,34 @@ INSERT INTO EmployerJob VALUES
 (19, 5),
 (20, 8);
 
+-- insert data into EmployeeJob
+-- (<job_id>, <employee_id>)
+-- Jobs 5-11 assigned to mike_walker (user 6) - 7 completed jobs, lower avg rating
+-- Jobs 12-16 assigned to lisa_sitter (user 7) - 5 completed jobs, higher avg rating
+-- Jobs 1-4 are not completed and have no reviews
+INSERT INTO EmployeeJob VALUES
+(1, 6),
+(2, 7),
+(3, 6),
+(4, 7),
+(5, 6),
+(6, 6),
+(7, 6),
+(8, 6),
+(9, 6),
+(10, 6),
+(11, 6),
+(12, 7),
+(13, 7),
+(14, 7),
+(15, 7),
+(16, 7);
+
 -- insert data into LeaderboardContent
--- (NULL, <reward_badge_id>, <start_time>, <end_time>)
+-- (NULL, <start_time>, <end_time>, <reward_badge_id>, <metric_id>)
 INSERT INTO LeaderboardContent VALUES
-(NULL, 1, "2026-03-01 00:00:00", "2026-03-31 23:59:59", 3, 1),
-(NULL, 2, "2026-04-01 00:00:00", "2026-04-30 23:59:59", 2, 1),
-(NULL, 4, "2026-05-01 00:00:00", "2026-05-31 23:59:59", 3, 1);
+(NULL, "2026-03-01 00:00:00", "2026-03-31 23:59:59", 3, 1),
+(NULL, "2026-04-01 00:00:00", "2026-07-30 23:59:59", 2, 2);
 
 -- insert data into CertificationContent
 -- (NULL, <certification_name>, <company>)
@@ -205,7 +227,7 @@ INSERT INTO CertificationContent VALUES
 (NULL, "Exotic Animal Care", "National Association of Professional Pet Sitters"),
 (NULL, "Reptile Husbandry Fundamentals", "Herpetological Society");
 
--- insert data into ReviewContent  (must come before JobReview and UserReview)
+-- insert data into ReviewContent
 -- (NULL, <punctuality>, <quality>, <friendliness>, <comments>, <datetime>, <verified>)
 INSERT INTO ReviewContent VALUES
 (NULL, 5, 5, 4, "Showed up on time and Fluffy loved them!", "2026-03-15 12:00:00", TRUE),
@@ -227,25 +249,23 @@ INSERT INTO ReviewContent VALUES
 
 -- insert data into JobReview
 -- (<review_id>, <job_id>)
+-- mike's jobs (5-11): reviews 3,6,9,11,14,2,16 -> lower scores -> avg ~3.2
+-- lisa's jobs (12-16): reviews 1,4,7,8,12       -> higher scores -> avg ~4.5
 INSERT INTO JobReview VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5),
+(3, 5),
 (6, 6),
-(7, 7),
-(8, 8),
-(9, 9),
-(10, 10),
-(11, 11),
-(12, 12),
-(13, 13),
-(14, 14),
-(15, 15),
-(16, 16);
+(9, 7),
+(11, 8),
+(14, 9),
+(2, 10),
+(16, 11),
+(1, 12),
+(4, 13),
+(7, 14),
+(8, 15),
+(12, 16);
 
--- insert data into MessageContent  (must come before UserMessage)
+-- insert data into MessageContent
 -- (NULL, <message_content>, <datetime>)
 INSERT INTO MessageContent VALUES
 (NULL, "Hi, are you available to walk my dog next Monday?", "2026-03-25 10:00:00"),
@@ -283,23 +303,21 @@ INSERT INTO UserSpecies VALUES
 
 -- insert data into UserReview
 -- (<review_id>, <user_id>)
+-- mike (user 6): reviews 3,6,9,11,14,2,16 -> avg ~3.2
+-- lisa (user 7): reviews 1,4,7,8,12        -> avg ~4.5
 INSERT INTO UserReview VALUES
-(1, 3),
-(2, 3),
-(3, 5),
-(4, 6),
-(5, 7),
+(3, 6),
 (6, 6),
+(9, 6),
+(11, 6),
+(14, 6),
+(2, 6),
+(16, 6),
+(1, 7),
+(4, 7),
 (7, 7),
-(8, 6),
-(9, 7),
-(10, 6),
-(11, 7),
-(12, 7),
-(13, 6),
-(14, 7),
-(15, 7),
-(16, 6);
+(8, 7),
+(12, 7);
 
 -- insert data into SecurityQuestion
 -- (<question_id>, <question_text>)
