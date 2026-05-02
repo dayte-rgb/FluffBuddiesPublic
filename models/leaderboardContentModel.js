@@ -5,14 +5,14 @@ class leaderboardContentModel {
     this.db = connectToDatabase();
   }
 
-  create(reward_badge_id, start_time, end_time, metric_id, badge_id){
-    const query = "INSERT INTO LeaderboardContent (leaderboard_id, reward_badge_id, start_time, end_time, metric_id, badge_id) VALUES (NULL, ?, ?, ?, ?, ?)";
+  create(start_time, end_time, metric_id, badge_id){
+    const query = "INSERT INTO LeaderboardContent (leaderboard_id, start_time, end_time, metric_id, badge_id) VALUES (NULL, ?, ?, ?, ?)";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(reward_badge_id, start_time, end_time, metric_id, badge_id);
+    const info = stmt.run(start_time, end_time, metric_id, badge_id);
 
-    return {id: info.lastInsertRowid, reward_badge_id, start_time, end_time, metric_id, badge_id};
+    return {id: info.lastInsertRowid, start_time, end_time, metric_id, badge_id};
   }
 
   getById(leaderboard_id){
@@ -35,12 +35,12 @@ class leaderboardContentModel {
     return info;
   }
 
-  update(leaderboard_id, reward_badge_id, start_time, end_time, metric_id, badge_id){
-    const query = "UPDATE LeaderboardContent SET reward_badge_id = ?, start_time = ?, end_time = ?, metric_id = ?, badge_id = ? WHERE leaderboard_id = ?";
+  update(leaderboard_id, start_time, end_time, metric_id, badge_id){
+    const query = "UPDATE LeaderboardContent SET start_time = ?, end_time = ?, metric_id = ?, badge_id = ? WHERE leaderboard_id = ?";
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(reward_badge_id, start_time, end_time, metric_id, badge_id, leaderboard_id);
+    const info = stmt.run(start_time, end_time, metric_id, badge_id, leaderboard_id);
 
     return this.getById(leaderboard_id);
   }
