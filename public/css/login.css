@@ -1,88 +1,62 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Fredoka+One&display=swap');
 
-
 html {
-    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-y: scroll;
 }
 
 body {
-    display: flex;
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
     font-family: 'Nunito', sans-serif;
-    overflow-x: hidden;
-    align-items: flex-start;
-}
-
-/* Sidebar Menu */
-.sidebar {
-    width: 80px;
     background-color: #fff;
-    border-right: 2px solid #f48a486f;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    gap: 10px;
 }
 
-.sidebar-logo {
-    width: 55px;
-    margin-bottom: 20px;
+.logo {
+    width: 160px;
+    display: block;
+    margin: 0 auto 20px;
 }
 
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    align-items: center;
+h1 {
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 42px;
+    color: #665931;
+    margin: 0 0 20px 0;
 }
 
-.nav-icon {
-    color: #7a7878;
-    font-size: 22px;
-    text-decoration: none;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.nav-icon:hover, .nav-icon.active {
-    color: #f48b48;
-    transform: scale(1.15);
-}
-
-/*  Main Content  */
 .main-content {
-    margin-left: 80px;
-    padding: 40px;
-    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    align-self: flex-start;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 20px;
+    margin: 0 auto;
+    font-family: 'Nunito', sans-serif;
 }
 
 .search-form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
 }
 
-/* Search type + filter button row */
 .search-input-wrapper {
     display: flex;
     align-items: center;
-    background: #fff;
+    width: 100%;
+    padding: 14px 20px;
     border: 2px solid #f0ece4;
-    border-radius: 50px;
-    padding: 10px 20px;
+    border-radius: 12px;
     gap: 10px;
-    flex: 1;
+    box-sizing: border-box;
 }
 
-/* Search magnifying glass icon */
 .search-icon {
     color: #aaa;
     font-size: 16px;
@@ -97,96 +71,17 @@ body {
     color: #444;
 }
 
-/* Filter sliders button */
-.filter-toggle {
-    background: #fff;
-    border: 2px solid #f0ece4;
-    border-radius: 50%;
-    width: 46px;
-    height: 46px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
-    color: #7a7878;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.filter-toggle:hover {
-    border-color: #f48b48;
-    color: #f48b48;
-}
-/*  Filter Panel  */
-.filter-panel {
-    display: none;
-    flex-direction: column;
-    gap: 16px;
-    background: #fff;
-    border: 2px solid #f0ece4;
-    border-radius: 16px;
-    padding: 20px;
-}
-
-/* Show when toggled */
-.filter-panel.open {
-    display: flex;
-}
-
-.filter-row {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
-    min-width: 150px;
-}
-
-.filter-group label {
-    font-size: 12px;
-    color: #aaa;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.filter-group input,
-.filter-group select {
-    border: 2px solid #f0ece4;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 14px;
-    color: #444;
-    outline: none;
-}
-
-
-
-.search-bottom {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Search submit button */
 .search-submit-btn {
     font-family: 'Nunito', sans-serif;
     background-color: #f48b48;
     color: white;
     border: none;
     border-radius: 50px;
-    padding: 10px 28px;
-    font-size: 15px;
+    padding: 12px 48px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    align-self: flex-start;
+    text-decoration: underline;
     transition: all 0.2s ease;
 }
 
@@ -195,168 +90,14 @@ body {
     transform: scale(1.05);
 }
 
-/* Forgot password link */
-.forgot-password-link {
-    align-self: flex-start;
-    margin-top: 10px;
-}
-
 .forgot-password-link a {
-    color: #f48b48;
-    text-decoration: none;
     font-family: 'Nunito', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    color: #444;
+    text-decoration: underline;
     transition: color 0.2s ease;
 }
 
 .forgot-password-link a:hover {
-    color: #d97a3a;
-    text-decoration: underline;
-}
-
-/*  Job Cards  */
-.results-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 750px;
-}
-
-/* Each job result card */
-.job-card {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background: #fff;
-    border: 2px solid #f0ece4;
-    border-radius: 16px;
-    padding: 20px;
-    transition: border-color 0.2s ease;
-}
-
-.job-card:hover {
-    border-color: #f48b48;
-}
-
-/* Profile pic on the left */
-.job-card-pic .profile-pic-placeholder {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background-color: #f0ece4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    color: #aaa;
-    border: 3px solid #f48b48;
-    flex-shrink: 0;
-}
-
-/* Job info in the middle */
-.job-card-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-}
-
-/* Username */
-.job-card-name {
-    font-family: 'Fredoka One', sans-serif;
-    font-size: 16px;
-    color: #665931;
-    margin: 0;
-}
-
-/* Job title */
-.job-card-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #444;
-    margin: 0;
-}
-
-/* Detail lines (loc, duration, date) */
-.job-card-detail {
-    font-size: 13px;
-    color: #888;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.job-card-detail i {
-    color: #f48b48;
-    width: 14px;
-}
-
-/* Book Now button on the right */
-.job-card-action {
-    flex-shrink: 0;
-}
-
-.book-now-btn {
-    font-family: 'Nunito', sans-serif;
-    background-color: #f48b48;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 10px 22px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    display: inline-block;
-}
-
-.book-now-btn:hover {
-    background-color: #d97a3a;
-    transform: scale(1.05);
-}
-
-/* No results message */
-.no-results {
-    font-size: 16px;
-    color: #aaa;
-    text-align: center;
-    margin-top: 40px;
-}
-
-/*  Search Type Toggle  */
-.search-toggle {
-    display: flex;
-    gap: 10px;
-}
-
-/* Toggle buttons for switching between jobs and users */
-.toggle-btn {
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 10px 24px;
-    border-radius: 50px;
-    border: 2px solid #f0ece4;
-    background: #fff;
-    color: #aaa;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Active toggle state */
-.toggle-btn.active {
-    background-color: #f48b48;
-    color: white;
-    border-color: #f48b48;
-}
-
-.toggle-btn:hover:not(.active) {
-    border-color: #f48b48;
     color: #f48b48;
 }

@@ -46,6 +46,8 @@ const connections = require('./socket_connections.js');
 const messageModel = new MessageModel();
 const messagingModel = new MessagingModel();
 const userMessageModel = new UserMessageModel();
+const leaderboardModel = require('./models/leaderboardModel.js');
+const leaderboardM = new leaderboardModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -55,7 +57,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server }); // attach to same server
 
 // Define a constant for the port number on which the server will listen.
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware for parsing HTTP responses
 app.use(express.urlencoded({ extended: true }));
@@ -303,15 +305,46 @@ app.get('/inbox', (req, res) => {
   res.render('messaging', {userId: req.session.userId});
 });
 
-app.get('/leaderboard-test', (req, res) => {
-  res.render('leaderboard', {
-    leaderboard: { start_time: '2025-04-01', end_time: '2025-04-30' },
-    entries: [
-      { worker_name: 'Rex', avg_rating: 4.5, jobs_completed: 10 },
-      { worker_name: 'Bella', avg_rating: 3.8, jobs_completed: 15 },
-      { worker_name: 'Max', avg_rating: null, jobs_completed: 5 }
-    ]
-  });
+app.get('/leaderboard', (req, res) => {
+  const leaderboard = leaderboardContent.getCurrentLeaderboard();
+  
+
+  if (!leaderboard) {
+    const all = leaderboardContent.getAll();
+    const fallback = all[all.length - 1] || null;
+    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
+  }
+
+  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+
+  // If no entries in period, fall back to leaderboardModel which has no date filter
+  if (!entries || entries.length === 0) {
+    const topByJobs   = leaderboardM.getTopKMostJobs(50);
+    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
+
+    const map = {};
+    topByJobs.forEach(row => {
+      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
+    });
+    topByRating.forEach(row => {
+      if (map[row.user_id]) {
+        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
+      } else {
+        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
+      }
+    });
+
+    entries = Object.values(map).map(e => {
+      const userData = user.getById(e.user_id);
+      return {
+        worker_name:    userData ? userData.username : `User ${e.user_id}`,
+        avg_rating:     e.avg_rating,
+        jobs_completed: e.jobs_completed,
+      };
+    });
+  }
+
+  res.render('leaderboard', { leaderboard, entries });
 });
 
 app.get('/review-test', (req, res) => {
@@ -338,6 +371,34 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
     console.error('Error saving review:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+app.get('/badges', (req, res) => {
+  const ALL_BADGES = [
+    { id: 'first_job', name: 'First Step', description: 'Complete your first job', icon: 'fa-solid fa-paw', color: '#f48b48' },
+    { id: 'five_jobs', name: 'Rising Paw', description: 'Complete 5 jobs', icon: 'fa-solid fa-star', color: '#f4c448' },
+    { id: 'ten_jobs', name: 'All Star', description: 'Complete 10 jobs', icon: 'fa-solid fa-crown', color: '#a855f7' },
+    { id: 'twenty_five_jobs', name: 'Legend', description: 'Complete 25 jobs', icon: 'fa-solid fa-trophy', color: '#e87722' },
+    { id: 'five_star', name: 'Star Player', description: 'Receive a 5-star rating', icon: 'fa-solid fa-medal', color: '#3b82f6' },
+    { id: 'first_review', name: 'Critic', description: 'Leave your first review', icon: 'fa-solid fa-comment', color: '#10b981' },
+    { id: 'streak_5', name: 'On a Roll', description: 'Complete 5 jobs in a row', icon: 'fa-solid fa-fire', color: '#ef4444' },
+    { id: 'streak_10', name: 'Unstoppable', description: 'Complete 10 jobs in a row', icon: 'fa-solid fa-bolt', color: '#f97316' },
+    { id: 'top_leaderboard', name: 'Top of The Pack', description: 'Reach #1 on the leaderboard', icon: 'fa-solid fa-crown', color: '#f4c030' },
+    { id: 'first_booking', name: 'First Booking', description: 'Make your first booking', icon: 'fa-solid fa-handshake', color: '#06b6d4' },
+    { id: 'most_jobs_month', name: 'Hustler', description: 'Most jobs completed in a month', icon: 'fa-solid fa-calendar-check', color: '#8b5cf6' },
+];
+
+  const userJobCount = 3;
+  const userEarnedIds = [];
+  if (userJobCount >= 1) userEarnedIds.push('first_job');
+  if (userJobCount >= 5) userEarnedIds.push('five_jobs');
+  if (userJobCount >= 10) userEarnedIds.push('ten_jobs');
+  if (userJobCount >= 25) userEarnedIds.push('twenty_five_jobs');
+
+  const earnedBadges = ALL_BADGES.filter(b => userEarnedIds.includes(b.id));
+  const lockedBadges = ALL_BADGES.filter(b => !userEarnedIds.includes(b.id));
+
+  res.render('badges', { earnedBadges, lockedBadges });
 });
 
 // Display the create job form

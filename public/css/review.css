@@ -1,162 +1,283 @@
+/*  review.css — Paw Patrol themed  */
+
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f5f4f0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  display: flex;
+  min-height: 100vh;
+}
+
+/*  Sidebar  */
+.sidebar {
+    width: 80px;
+    background-color: #fff;
+    border-right: 2px solid #f48a486f;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
-  }
-  
-  .card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 2rem;
-    max-width: 480px;
-    width: 100%;
-    border: 1px solid #e0ddd8;
-  }
-  
-  h1 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 4px;
-  }
-  
-  .subtitle {
-    font-size: 13px;
-    color: #888;
-    margin-bottom: 1.5rem;
-  }
-  
-  .metric {
-    margin-bottom: 1.25rem;
-  }
-  
-  .metric label {
-    display: block;
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 6px;
-  }
-  
-  .stars {
+    padding: 20px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    gap: 10px;
+}
+
+.sidebar-logo {
+    width: 55px;
+    margin-bottom: 20px;
+}
+
+.sidebar-nav {
     display: flex;
-    flex-direction: row-reverse; 
-    justify-content: flex-end;
-    gap: 6px;
-  }
-  
-  .stars input[type="radio"] {
-    display: none; 
-  }
-  
-  .stars label {
-    font-size: 28px;
-    color: #ddd;
-    cursor: pointer;
-    transition: color 0.1s;
-    margin: 0;
-  }
-  
-  .stars input[type="radio"]:checked ~ label,
-  .stars label:hover,
-  .stars label:hover ~ label {
-    color: #f5a623;
-  }
-  
-  /* ── Overall average box ── */
-  .overall-box {
-    background: #f9f8f5;
-    border-radius: 10px;
-    padding: 12px 16px;
-    display: flex;
+    flex-direction: column;
+    gap: 24px;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .avg {
-    font-size: 26px;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-  
-  .avg-label {
-    font-size: 12px;
-    color: #888;
-  }
-  
-  #overall-stars {
-    font-size: 20px;
-    color: #f5a623;
+}
+
+.nav-icon {
+    color: #7a7878;
+    font-size: 22px;
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-icon:hover, .nav-icon.active {
+    color: #f48b48;
+    transform: scale(1.15);
+}
+
+.logout-icon {
+  margin-top: auto;
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+.logout-icon:hover {
+  background: #f48a486f;
+  color: #e05555;
+}
+
+/*  Main content  */
+.main-content {
+  margin-left: 70px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+/*  Review card  */
+.review-main {
+  margin-left: 80px;
+  width: calc(100% - 80px);
+  padding: 40px;
+  width: calc(100% - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.review-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 500px;
+  width: 100%;
+  border: 2px solid #f48a486f;
+  box-shadow: 0 4px 20px rgba(232, 119, 34, 0.08);
+}
+
+.review-header {
+  margin-bottom: 1.75rem;
+}
+
+.review-header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: #e87722;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #999;
+  font-weight: 600;
+}
+
+.subtitle i {
+  color: #e87722;
+  margin-right: 4px;
+}
+
+/*  Metrics  */
+.metric {
+  margin-bottom: 1.4rem;
+}
+
+.metric>label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #5a4a3a;
+  margin-bottom: 8px;
+}
+
+.metric>label i {
+  color: #e87722;
+  margin-right: 6px;
+  width: 16px;
+}
+
+/*  Stars  */
+.stars {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.stars input[type="radio"] {
+  display: none;
+}
+
+.stars label {
+  font-size: 32px;
+  color: #e0d5c5;
+  cursor: pointer;
+  transition: color 0.1s, transform 0.1s;
+  margin: 0;
+  line-height: 1;
+}
+
+.stars label:hover {
+  transform: scale(1.15);
+}
+
+.stars input[type="radio"]:checked~label,
+.stars label:hover,
+.stars label:hover~label {
+  color: #e87722;
+}
+
+/*  Textarea  */
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #f0e6d3;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'Nunito', sans-serif;
+  resize: vertical;
+  color: #3a2e25;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #ffffff;
+}
+
+textarea:focus {
+  border-color: #e87722;
+  background: #fff;
+}
+
+textarea::placeholder {
+  color: #c5b5a5;
+}
+
+/*  Error  */
+.error-msg {
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: none;
+}
+
+/*  Submit button  */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: #e87722;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Fredoka One', cursive;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.submit-btn:hover {
+  background: #d4681a;
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/*  Success state  */
+#success {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+#success .checkmark {
+  font-size: 52px;
+  color: #e87722;
+  margin-bottom: 16px;
+  animation: pawBounce 0.5s ease;
+}
+
+#success h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: #e87722;
+  margin-bottom: 10px;
+}
+
+#success p {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #e87722;
+  color: #fff;
+  border-radius: 12px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.back-btn:hover {
+  background: #d4681a;
+}
+
+@keyframes pawBounce {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
   }
 
-  textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: vertical;
-    color: #1a1a1a;
-    outline: none;
-    transition: border-color 0.15s;
+  70% {
+    transform: scale(1.2);
   }
-  
-  textarea:focus {
-    border-color: #aaa;
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
-  
-  button {
-    width: 100%;
-    padding: 12px;
-    background: #1a1a1a;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  
-  button:hover {
-    background: #333;
-  }
-  
-  #error-msg {
-    color: #c0392b;
-    font-size: 13px;
-    margin-top: 8px;
-    display: none;
-  }
-  
-  #success {
-    display: none;
-    text-align: center;
-    padding: 1rem 0;
-  }
-  
-  #success .checkmark {
-    font-size: 40px;
-    color: #27ae60;
-    margin-bottom: 12px;
-  }
-  
-  #success h1 {
-    margin-bottom: 8px;
-  }
-  
-  #success p {
-    font-size: 14px;
-    color: #555;
-  }
+}
