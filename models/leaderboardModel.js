@@ -8,14 +8,14 @@ class leaderboardModel {
         SELECT 
           u.username as worker_name, 
           COUNT(*) as jobs_completed, 
-          ROUND(AVG(r.punctuality + r.quality + r.friendliness) / 3.0, 2) as avg_rating
+          ROUND((AVG(r.punctuality) + AVG(r.quality) + AVG(r.friendliness)) / 3.0, 2) as avg_rating
         FROM EmployeeJob ej
         JOIN JobContent jc ON ej.job_id = jc.job_id
         JOIN User u ON u.user_id = ej.employee_id
         LEFT JOIN JobReview jr ON jr.job_id = jc.job_id
         LEFT JOIN ReviewContent r ON r.review_id = jr.review_id
         WHERE jc.job_completed = 1 
-        AND (@start IS NULL AND @end IS NULL OR jc.datetime BETWEEN @start AND @end)
+        AND ((@start IS NULL AND @end IS NULL) OR jc.datetime BETWEEN @start AND @end)
         GROUP BY u.user_id
         ORDER BY jobs_completed DESC, avg_rating DESC;
     `);
@@ -23,25 +23,28 @@ class leaderboardModel {
     this._getTopRating = this.db.prepare(`
         SELECT 
           u.user_id, 
-          ROUND(AVG(r.punctuality + r.quality + r.friendliness) / 3.0, 2) as avg_rating
-        FROM User u
-        JOIN UserReview ur ON u.user_id = ur.user_id
-        JOIN ReviewContent r ON r.review_id = jr.review_id
-        AND (@start IS NULL AND @end IS NULL OR jc.datetime BETWEEN @start AND @end)
+          ROUND((AVG(r.punctuality) + AVG(r.quality) + AVG(r.friendliness)) / 3.0, 2) as avg_rating
+        FROM EmployeeJob ej
+        JOIN JobContent jc ON ej.job_id = jc.job_id
+        JOIN User u ON u.user_id = ej.employee_id
+        LEFT JOIN JobReview jr ON jr.job_id = jc.job_id
+        LEFT JOIN ReviewContent r ON r.review_id = jr.review_id
+        WHERE jc.job_completed = 1
+        AND ((@start IS NULL AND @end IS NULL) OR jc.datetime BETWEEN @start AND @end)
         GROUP BY u.user_id
-        ORDER BY avg_rating DESC;
+        ORDER BY avg_rating DESC
         LIMIT @k;
     `);
 
     this._getTopJobs = this.db.prepare(`
         SELECT 
           u.user_id, 
-          COUNT(*) as jobs_completed, 
+          COUNT(*) as jobs_completed
         FROM EmployeeJob ej
         JOIN JobContent jc ON ej.job_id = jc.job_id
         JOIN User u ON u.user_id = ej.employee_id
         WHERE jc.job_completed = 1 
-        AND (@start IS NULL AND @end IS NULL OR jc.datetime BETWEEN @start AND @end)
+        AND (((@start IS NULL AND @end IS NULL) OR jc.datetime BETWEEN @start AND @end))
         GROUP BY u.user_id
         ORDER BY jobs_completed DESC
         LIMIT @k;
