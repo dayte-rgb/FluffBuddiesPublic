@@ -137,19 +137,22 @@ app.post('/job-search', isAuthenticated, (req, res) => {
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
-  const review = await jobReview.getByJobId(req.params.job_id);
+  let reviews = [];
+  const reviewIds = jobReview.getByJobId(req.params.job_id);
+  reviewIds.forEach(reviewIdElem => {
+    reviews.push(reviewContent.getById(reviewIdElem.review_id));
+  })
 
-  if(review){
-    const reviewId = await review.review_id;
-    const reviewData = await reviewContent.getById(reviewId);
-    const userData = await user.getById(jobData.employee_num);
+  console.log(reviews);
 
-    res.render('booking-detail', { jobData, reviewData, userData });
+  if(reviews){
+    const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
+
+    res.render('booking-detail', { jobData, reviews, userData });
   }else{
-    const reviewData = null;
-    const userData = await user.getById(jobData.employee_num);
+    const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
 
-    res.render('booking-detail', { jobData, reviewData, userData });
+    res.render('booking-detail', { jobData, reviews, userData });
   }
 });
 

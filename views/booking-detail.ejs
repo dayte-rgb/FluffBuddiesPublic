@@ -80,40 +80,47 @@
                 Book This Job
             </button>
 
-            <!-- Review -->
-            <% if(reviewData !=null) { %>
+            <!-- Reviews -->
+            <% if(reviews && reviews.length > 0) { %>
                 <h2 class="job-title">Reviews</h2>
-
-                <div class="info-row">
-                    <span class="info-label">Punctuality</span>
-
-                    <span class="info-label">Quality</span>
-                    <span class="info-value">
-                        <%= reviewData.quality %>
-                    </span>
-                    <span class="info-label">Friendliness</span>
-                    <span class="info-value">
-                        <%= reviewData.friendliness %>
-                    </span>
-                    <span class="info-label">Comment</span>
-                    <span class="info-value">
-                        <%= reviewData.comments %>
-                    </span>
-                    <span class="info-label">Creation Date</span>
-                    <span class="info-value">
-                        <%= reviewData.datetime %>
-                    </span>
-                    <% if (reviewData.verified==1) { %>
-                        <p> This review has been verified. </p>
+                <% reviews.forEach(review=> { %>
+                    <div class="info-row">
+                        <span class="info-label">Punctuality</span>
+                        <span class="info-value">
+                            <%= review.punctuality %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Quality</span>
+                        <span class="info-value">
+                            <%= review.quality %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Friendliness</span>
+                        <span class="info-value">
+                            <%= review.friendliness %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Comment</span>
+                        <span class="info-value">
+                            <%= review.comments %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Creation Date</span>
+                        <span class="info-value">
+                            <%= review.datetime %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <% if (review.verified==1) { %>
+                            <p> This review has been verified. </p>
                         <% } %>
-                </div>
-
-                <div>
-                    <span class="info-value">
-                        <%= reviewData.punctuality %>
-                    </span>
-                </div>
-                <% } %>
+                    </div>
+                <% }) %>
+            <% } %>
         </div>
 
         <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
