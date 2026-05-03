@@ -1,9 +1,11 @@
 // Import the Express module, which is a framework for building web applications in Node.js.
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 const logger = new Log('requests.log', true);
 
 // Session and authentication imports
@@ -31,6 +33,8 @@ const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
 const user = new userModel();
+const passwordResetModel = require('./models/passwordResetModel.js');
+const passwordReset = new passwordResetModel();
 const securityQuestionModel = require('./models/securityQuestionModel.js');
 const securityQuestion = new securityQuestionModel();
 const userSecurityAnswerModel = require('./models/userSecurityAnswerModel.js');
@@ -46,8 +50,8 @@ const connections = require('./socket_connections.js');
 const messageModel = new MessageModel();
 const messagingModel = new MessagingModel();
 const userMessageModel = new UserMessageModel();
-const LeaderboardContent = require('./models/leaderboardContentModel.js')
-const leaderboardContent = new LeaderboardContent();
+const leaderboardContentModel = require('./models/leaderboardContentModel.js');
+const leaderboardContent = new leaderboardContentModel();
 const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 const dateObj = new Date();
@@ -205,22 +209,119 @@ app.post('/login', isNotAuthenticated, async (req, res) => {
 });
 
 // Handle forgot password render
+async function createEmailTransporter() {
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+      secure: process.env.SMTP_PORT === '465',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+
+  // const testAccount = await nodemailer.createTestAccount();
+  // return nodemailer.createTransport({
+  //   host: testAccount.smtp.host,
+  //   port: testAccount.smtp.port,
+  //   secure: testAccount.smtp.secure,
+  //   auth: {
+  //     user: testAccount.user,
+  //     pass: testAccount.pass,
+  //   },
+  // });
+}
+
+async function sendPasswordResetEmail(email, code) {
+  try {
+    const transporter = await createEmailTransporter();
+    const mailOptions = {
+      from: process.env.RESET_EMAIL_FROM || 'Paw Patrol <no-reply@pawpatrol.com>',
+      to: email,
+      subject: 'Paw Patrol Password Reset Code',
+      text: `Your password reset code is ${code}. Use this code at http://localhost:${PORT}/reset-password to update your password. The code expires in 15 minutes.`,
+      html: `
+        <p>Hello,</p>
+        <p>We received a request to reset your Paw Patrol password.</p>
+        <p><strong>Your reset code is: ${code}</strong></p>
+        <p>Enter this code <a href="http://localhost:${PORT}/reset-password">here</a>.</p>
+        <p>The code expires in 15 minutes.</p>
+        <p>If you did not request this, you can ignore this email.</p>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    if (!process.env.SMTP_HOST) {
+      logger.write(`[INFO] Sent test password reset email for ${email}. Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    } else {
+      logger.write(`[INFO] Sent password reset email for ${email}`);
+    }
+    return true;
+  } catch (error) {
+    logger.write(`[ERROR] Failed to send password reset email to ${email}: ${error.message}`);
+    return false;
+  }
+}
+
 app.get('/forgot-password', isNotAuthenticated, (req, res) => {
   res.render('forgot-password');
 });
 
 // Handle forgot password submission
-app.post('/forgot-password', isNotAuthenticated, (req, res) => {
+app.post('/forgot-password', isNotAuthenticated, async (req, res) => {
   const { email } = req.body;
+  const normalizedEmail = email ? email.trim().toLowerCase() : '';
+  const existingUser = normalizedEmail ? user.getByEmail(normalizedEmail) : null;
 
-  // TODO: Implement actual password reset logic
-  // As of now it just shows a successful message.
-  logger.write(`[INFO] Password reset requested for email: ${email}`);
+  if (existingUser) {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    passwordReset.create(normalizedEmail, code, expiresAt);
+    await sendPasswordResetEmail(normalizedEmail, code);
+  } else {
+    logger.write(`[INFO] Password reset requested for non-existent email: ${normalizedEmail}`);
+  }
 
   res.json({
     success: true,
-    message: 'If an account with that email exists, a password reset link has been sent.'
+    message: 'If an account with that email exists, a password reset code has been sent. Check your email.'
   });
+});
+
+app.get('/reset-password', isNotAuthenticated, (req, res) => {
+  const email = req.query.email ? req.query.email.trim().toLowerCase() : '';
+  res.render('reset-password', { email, message: null, error: null });
+});
+
+app.post('/reset-password', isNotAuthenticated, async (req, res) => {
+  const { email, code, password, confirmPassword } = req.body;
+  const normalizedEmail = email ? email.trim().toLowerCase() : '';
+
+  if (!normalizedEmail || !code || !password || !confirmPassword) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'All fields are required.' });
+  }
+
+  if (password !== confirmPassword) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'Passwords do not match.' });
+  }
+
+  const resetEntry = passwordReset.getByEmail(normalizedEmail);
+  if (!resetEntry || resetEntry.code !== code || new Date(resetEntry.expires_at) < new Date()) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'Invalid or expired reset code.' });
+  }
+
+  const existingUser = user.getByEmail(normalizedEmail);
+  if (!existingUser) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'Unable to find an account for that email.' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.update(existingUser.user_id, hashedPassword, existingUser.phone_number, existingUser.email, existingUser.zipcode, existingUser.profile_description, existingUser.account_type, existingUser.profile_picture_link);
+  passwordReset.deleteByEmail(normalizedEmail);
+
+  res.render('login', { success: 'Your password has been reset. Please login with your new password.' });
 });
 
 // Handle logout

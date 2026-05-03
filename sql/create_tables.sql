@@ -19,6 +19,12 @@ CREATE TABLE IF NOT EXISTS User (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS PasswordResetToken (
+  email TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS UserMessage (
   message_id INTEGER PRIMARY KEY,
   sender_id INTEGER NOT NULL,
