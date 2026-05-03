@@ -38,65 +38,7 @@
                     <%= error %>
                 </div>
             <% } %>
-        <% if (user && user.userId) { %>
-            <div class="info-message" style="background-color: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; margin: 20px; text-align: center; font-family: 'Nunito', sans-serif; border: 1px solid #bee5eb;">
-                <p>You are already logged in as <strong><%= user.username %></strong></p>
-                <a href="/job-search" style="color: #0c5460; text-decoration: underline;">Go to Job Search</a>
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>
-        <% } else { %>
-            <a href="/" style="display: inline-flex; align-items: center; gap: 8px; color: #665931; text-decoration: none; margin-bottom: 20px; font-family: 'Nunito', sans-serif; font-weight: 600; transition: color 0.2s;">
-                <i class="fa-solid fa-arrow-left"></i> Back to Home
-            </a>
-            
-            <% if (typeof error !== 'undefined') { %>
-                <div class="error-message" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-family: 'Nunito', sans-serif;">
-                    <%= error %>
-                </div>
-            <% } %>
-
-            <% if (typeof success !== 'undefined') { %>
-                <div class="success-message" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-family: 'Nunito', sans-serif; border: 1px solid #c3e6cb;">
-                    <%= success %>
-                </div>
-            <% } %>
-            
-            <form action="/login" method="POST" class="search-form" id="search-form">
-                <!-- Username/Email input -->
-                <div class="search-input-wrapper">
-                    <i class="fa-solid fa-user search-icon"></i>
-                    <input type="text" name="username" placeholder="Username or Email" class="search-input" required>
-                </div>
-                
-                <!-- Password input -->
-                <div class="search-input-wrapper">
-                    <i class="fa-solid fa-lock search-icon"></i>
-                    <input type="password" name="password" placeholder="Password" class="search-input" required>
-                </div>
-                
-                <button type="submit" class="search-submit-btn">Submit</button>
-                
-                <div class="forgot-password-link">
-                    <a href="/forgot-password" id="forgot-password-link">Forgot password?</a>
-                </div>
-            </form>
-
-            <div style="text-align: center; margin-top: 20px;">
-                <p style="font-family: 'Nunito', sans-serif;">Don't have an account? <a href="/signup" style="color: #f48b48; text-decoration: underline;">Sign up here</a></p>
-            </div>
-        <% } %>
+        
             <% if (typeof success !== 'undefined') { %>
                 <div class="success-message" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-family: 'Nunito', sans-serif; border: 1px solid #c3e6cb;">
                     <%= success %>
