@@ -14,6 +14,8 @@
 <body>
     <%- include('_navbar') %>
     
+    <%- include('_navbar') %>
+    
     <div class="sidebar">
         <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
         <nav class="sidebar-nav">
@@ -22,8 +24,7 @@
             <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
             <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
             <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
-            <!-- <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a> -->
-            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-clipboard-list"></i></a>
+            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
             <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
         </nav>
     </div>
@@ -71,6 +72,7 @@
                             value="<%= searchParams ? searchParams.zipcode : '' %>">
                     </div>
                     <div class="filter-group">
+
 
                         <label for="job_category">Job Category:</label>
                         <select id="job_category" name="job_categories[]" multiple>
@@ -134,6 +136,7 @@
         </div>
 
     </div>
+
 
     <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
     <script>

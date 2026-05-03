@@ -94,9 +94,8 @@ CREATE TABLE IF NOT EXISTS JobCategoryByUser (
 
 CREATE TABLE IF NOT EXISTS LeaderboardContent (
   leaderboard_id INTEGER PRIMARY KEY ,
-  reward_badge_id INTEGER NOT NULL,
   start_time TEXT NOT NULL,
-  end_time TEXT NOT NULL,
+  end_time TEXT,
   metric_id INTEGER NOT NULL,
   badge_id INTEGER,
   FOREIGN KEY (badge_id)
