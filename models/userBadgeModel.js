@@ -20,9 +20,9 @@ class userBadgeModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(user_id, badge_id);
+    const info = stmt.get(user_id, badge_id);
 
-    return info
+    return info;
   }
 
   getAll(){
