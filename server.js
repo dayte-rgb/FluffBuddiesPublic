@@ -135,12 +135,12 @@ app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   if(review){
     const reviewId = await review.review_id;
     const reviewData = await reviewContent.getById(reviewId);
-    const userData = await user.getById(jobData.employee_num);
+    const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
 
     res.render('booking-detail', { jobData, reviewData, userData });
   }else{
     const reviewData = null;
-    const userData = await user.getById(jobData.employee_num);
+    const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
 
     res.render('booking-detail', { jobData, reviewData, userData });
   }
