@@ -29,12 +29,17 @@ INSERT INTO JobCategory VALUES
 -- insert data into BadgeContent
 -- (NULL, <badge_name>, <badge_image_link>)
 INSERT INTO BadgeContent VALUES
-(NULL, "Top Walker", "badge_top_walker.png"),
-(NULL, "Reliable Sitter", "badge_reliable_sitter.png"),
-(NULL, "5-Star Groomer", "badge_groomer.png"),
-(NULL, "Community Hero", "badge_community.png"),
-(NULL, "Reptile Specialist", "badge_reptile.png"),
-(NULL, "First Review", "badge_first_review.png");
+(NULL, "First Job", "job_1.png"),
+(NULL, "5 Jobs", "job_5.png"),
+(NULL, "10 Jobs", "job_10.png"),
+(NULL, "25 Jobs", "job_25.png"),
+(NULL, "1 Review Written", "review_write_1.png"),
+(NULL, "5 Reviews Written", "review_write_5.png"),
+(NULL, "Receive 1 Review", "review_1.png"),
+(NULL, "Receive 5 Reviews", "review_5.png"),
+(NULL, "Receive 10 Reviews", "review_10.png"),
+(NULL, "Receive 25 Reviews", "review_25.png"),
+(NULL, "Leaderboard 26 Q2", "leaderboard_badge.png");
 
 -- insert data into SkillCategory
 -- (<skill_category_id>, <category_name>)
@@ -53,9 +58,8 @@ INSERT INTO SkillCategory VALUES
 -- (<metric_id>, <metric_name>, <description>)
 INSERT INTO MetricContent VALUES
 (1, "Jobs Completed", "Total number of jobs successfully completed"),
-(2, "Age of Account", "Measures the age of the account"),
-(3, "Average Rating", "Compares the average rating of the user to a specific number"),
-(4, "Review Total", "Number of reviews an account has that other people have made");
+(2, "Reviews Written", "Number of reviews an account has written"),
+(3, "Review Total", "Number of reviews an account has that other people have made");
 
 -- insert data into PaymentContent
 -- (NULL, <payment_name>)
@@ -214,7 +218,6 @@ INSERT INTO EmployeeJob VALUES
 -- insert data into LeaderboardContent
 -- (NULL, <start_time>, <end_time>, <reward_badge_id>, <metric_id>)
 INSERT INTO LeaderboardContent VALUES
-(NULL, "2026-03-01 00:00:00", "2026-03-31 23:59:59", 3, 1),
 (NULL, "2026-04-01 00:00:00", "2026-07-30 23:59:59", 2, 2);
 
 -- insert data into CertificationContent
@@ -288,12 +291,16 @@ INSERT INTO UserMessage VALUES
 -- insert data into AchievementContent
 -- (NULL, <achievement_name>, <metric_id>, <badge_id>, <required_quantity>)
 INSERT INTO AchievementContent VALUES
-(NULL, "First Job", 1, 1, 1),
-(NULL, "Ten Jobs Milestone", 1, 2, 10),
-(NULL, "Five-Star Streak", 2, 3, 5),
-(NULL, "Dedicated Worker", 3, 4, 100),
-(NULL, "Exotic Caretaker", 1, 5, 3),
-(NULL, "First Review Received", 4, 6, 1);
+(NULL, "Complete your first job", 1, 1, 1),
+(NULL, "Complete 5 jobs", 1, 2, 5),
+(NULL, "Compelte 10 jobs", 1, 3, 10),
+(NULL, "Complete 25 jobs", 1, 4, 25),
+(NULL, "Leave your first review", 2, 5, 1),
+(NULL, "Write 5 reviews", 2, 6, 5),
+(NULL, "Receive your first review", 3, 7, 1),
+(NULL, "Receive 5 reviews", 3, 8, 5),
+(NULL, "Receive 10 reviews", 3, 9, 10),
+(NULL, "Receive 25 reviews", 3, 10, 25);
 
 -- insert data into UserSpecies
 -- (<user_id>, <species>)

@@ -7,6 +7,7 @@ const { start } = require('repl');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const logger = new Log('requests.log', true);
+const dateObj = new Date();
 
 // Session and authentication imports
 const { sessionMiddleware } = require('./config/sessionConfig.js');
@@ -54,6 +55,12 @@ const leaderboardContentModel = require('./models/leaderboardContentModel.js');
 const leaderboardContent = new leaderboardContentModel();
 const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
+const UserBadgeModel = require('./models/userBadgeModel.js');
+const userBadgeModel = new UserBadgeModel();
+const AchievementModel = require('./models/achievementModel.js');
+const achievementModel = new AchievementModel();
+const AchievementContentModel = require('./models/achievementContentModel.js');
+const achievementContentModel = new AchievementContentModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -415,14 +422,14 @@ app.get('/leaderboard', (req, res) => {
   // if there is no leaderboard, create one!
   if (!leaderboard) {
     //NOTE: GO BACK AND FIGURE OUT THE BADGE AND METRIC IDS
-    const lb_info = leaderboardContent.create(new Date().toLocaleString(), null, 1, 1);
+    const lb_info = leaderboardContent.create(new Date().toISOString().replace('T', ' ').slice(0, 19), null, 1, 1);
     leaderboard = leaderboardContent.getById(lb_info.id);
   }
 
   // Get all stats between the start and end date of the leaderboard
   const start_time = leaderboard.start_time;
   const end_time = leaderboard.end_time;
-  let entries = leaderboardM.getLeaderboardStats(start_time, end_time, 10);
+  let entries = leaderboardM.getLeaderboardStats(start_time, end_time);
 
   // If no entries in period, fall back to no filter for dates and default k = 10
   if (!entries || entries.length === 0) {
@@ -709,6 +716,78 @@ wss.on('connection', (ws) => {
         ws.send(`Interaction complete`);
     });
 });
+
+//-----------------------------------------------------------------------------------------------------------------------------------
+// setInterval function that checks for end of leaderboard
+const INTERVAL = 1000 * 60 * 60; // an hour
+setInterval(runBadgeJobs, INTERVAL);
+
+function runBadgeJobs() {
+//get most recent leaderboard
+  const currLeaderboard = leaderboardM.getCurrentLeaderboard();
+
+  if(currLeaderboard){
+    const currDatetime = dateObj.toISOString().replace('T', ' ').slice(0, 19);
+    const endDatetime = currLeaderboard.end_time;
+
+    if(currDatetime >= endDatetime){
+      distributeLeaderboardBadges(currLeaderboard)
+    }
+  };
+
+  // if a user has completed an achievement, add the badge to their profile
+  const num_jobs_by_user = achievementModel.getJobsCompleted();
+  const num_reviews_written_by_user = achievementModel.getReviewsWritten();
+  const num_reviews_received_by_user = achievementModel.getReviewsReceived();
+
+  const achievements = achievementContentModel.getAll();
+
+  //create a map of metrics and what the specific attribute to look at is
+  const metricMap = {
+    1: { data: num_jobs_by_user,            key: 'num_jobs' },
+    2: { data: num_reviews_written_by_user, key: 'num_reviews_written' },
+    3: { data: num_reviews_received_by_user, key: 'num_reviews_received' },
+  };
+
+  achievements.forEach(({ metric_id, required_quantity, badge_id }) => {
+    const metric = metricMap[metric_id];
+    if (!metric) return;
+    metric.data.forEach((user) => {
+      //if the user has above the quantity required and doesn't already have the badge, add it
+      if (user[metric.key] >= required_quantity && !userBadgeModel.getByIds(user.user_id, badge_id)) {
+        userBadgeModel.create(user.user_id, badge_id);
+      }
+    });
+  });
+}
+
+function distributeLeaderboardBadges(leaderboard){
+  const badge_id = leaderboard.badge_id;
+  const top_5_rating = leaderboardM.getTopKRating(leaderboard.start_time, leaderboard.end_time, 5);
+  const top_5_jobs = leaderboardM.getTopKJobs(leaderboard.start_time, leaderboard.end_time, 5);
+
+  top_5_rating.forEach((row) => {
+    try{
+      userBadgeModel.create(row.user_id, badge_id);
+    }catch(e){
+      logger.write(`[WARN] User with user_id ${row.user_id} already has badge with id ${badge_id}, unable to add again`);
+      logger.write(e);
+    }
+  });
+
+  top_5_jobs.forEach((row) => {
+    try{
+      userBadgeModel.create(row.user_id, badge_id);
+    }catch(e){
+      logger.write(`[WARN] User with user_id ${row.user_id} already has badge with id ${badge_id}, unable to add again`);
+      logger.write(e);
+    }
+  });
+}
+
+// run the jobs functions on startup
+runBadgeJobs();
+
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
