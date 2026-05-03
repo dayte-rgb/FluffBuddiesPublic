@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Profile – Paw Patrol</title>
+  <link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+  <%- include('_navbar') %>
+
+  <div class="main-content profile-main">
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <% if (userData.profile_picture_link) { %>
+        <img src="<%= userData.profile_picture_link %>" alt="Profile Picture" class="profile-pic">
+      <% } else { %>
+        <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+      <% } %>
+
+      <div class="profile-username">@<%= userData.username %></div>
+      <div class="profile-meta"><i class="fa-solid fa-envelope"></i> <%= userData.email %></div>
+      <div class="profile-meta"><i class="fa-solid fa-phone"></i> <%= userData.phone_number %></div>
+      <div class="profile-meta"><i class="fa-solid fa-location-dot"></i> <%= userData.zipcode %></div>
+      <% if (userData.profile_description) { %>
+        <p class="profile-description"><%= userData.profile_description %></p>
+      <% } %>
+
+      <div class="profile-stats">
+        <div class="stat-box">
+          <div class="stat-number"><%= numJobs %></div>
+          <div class="stat-label">Jobs Completed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number"><%= numReviews %></div>
+          <div class="stat-label">Reviews Received</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number"><%= earnedBadges.length %></div>
+          <div class="stat-label">Badges Earned</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="profile-card">
+      <div class="section-title"><i class="fa-solid fa-medal"></i> Badges</div>
+      <% if (earnedBadges.length > 0) { %>
+        <div class="badges-grid">
+          <% earnedBadges.forEach(badge => { %>
+            <div class="badge-item">
+              <i class="fa-solid fa-award"></i>
+              <div class="badge-name"><%= badge.badge_name %></div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p class="empty-state">No badges earned yet. Complete jobs to earn badges!</p>
+      <% } %>
+    </div>
+
+    <!-- Certifications -->
+    <div class="profile-card">
+      <div class="section-title"><i class="fa-solid fa-certificate"></i> Certifications</div>
+      <% if (certs.length > 0) { %>
+        <% certs.forEach(cert => { %>
+          <div class="cert-item">
+            <div class="cert-name"><%= cert.certification_name %></div>
+            <div class="cert-company"><%= cert.company %></div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="empty-state">No certifications added yet.</p>
+      <% } %>
+    </div>
+
+  </div>
+</body>
+</html>
