@@ -79,8 +79,8 @@ const wss = new WebSocket.Server({ server }); // attach to same server
 const PORT = process.env.PORT || 3000;
 
 // Middleware for parsing HTTP responses
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // Session middleware
 app.use(sessionMiddleware);
@@ -120,36 +120,32 @@ app.get('/default', (req, res) => {
     });
 });
 
+
+// GET /profile
 app.get('/profile', isAuthenticated, (req, res) => {
-  const userId = req.session.userId;
+  const userId   = req.session.userId;
   const userData = user.getById(userId);
+  if (!userData) return res.redirect('/login');
 
-  if (!userData) {
-    return res.redirect('/login');
-  }
+  const jobsCompleted   = achievementModel.getJobsCompleted().find(r => r.user_id === userId);
+  const numJobs         = jobsCompleted ? jobsCompleted.num_jobs : 0;
 
-  // Get jobs completed count
-  const jobsCompleted = achievementModel.getJobsCompleted()
-    .find(row => row.user_id === userId);
-  const numJobs = jobsCompleted ? jobsCompleted.num_jobs : 0;
+  const reviewsReceived = achievementModel.getReviewsReceived().find(r => r.user_id === userId);
+  const numReviews      = reviewsReceived ? reviewsReceived.num_reviews_received : 0;
 
-  // Get reviews received
-  const reviewsReceived = achievementModel.getReviewsReceived()
-    .find(row => row.user_id === userId);
-  const numReviews = reviewsReceived ? reviewsReceived.num_reviews_received : 0;
+  const allUserBadges   = userBadgeModel.getAll().filter(r => r.user_id === userId);
+  const earnedBadges    = allUserBadges.map(ub => badgeContent.getById(ub.badge_id)).filter(Boolean);
 
-  // Get earned badges
-  const allUserBadges = userBadgeModel.getAll()
-    .filter(row => row.user_id === userId);
-  const earnedBadges = allUserBadges.map(ub => badgeContent.getById(ub.badge_id)).filter(Boolean);
-
-  // Get achievements
   const allAchievements = achievementContentModel.getAll();
 
-  // Get certifications
-  const allUserCerts = userCertification.getAll()
-    .filter(row => row.user_id === userId);
-  const certs = allUserCerts.map(uc => certificationContent.getById(uc.certification_id)).filter(Boolean);
+  const allUserCerts    = userCertification.getAll().filter(r => r.user_id === userId);
+  const certs           = allUserCerts.map(uc => certificationContent.getById(uc.certification_id)).filter(Boolean);
+
+  // Pull flash messages set by the POST, then clear them
+  const successMessage = req.session.successMessage || null;
+  const errorMessage   = req.session.errorMessage   || null;
+  delete req.session.successMessage;
+  delete req.session.errorMessage;
 
   res.render('profile', {
     userData,
@@ -157,8 +153,42 @@ app.get('/profile', isAuthenticated, (req, res) => {
     numReviews,
     earnedBadges,
     allAchievements,
-    certs
+    certs,
+    successMessage,
+    errorMessage
   });
+});
+
+app.post('/profile/update', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+
+  try {
+    const { email, phone_number, zipcode, profile_description, profile_picture_base64 } = req.body;
+
+    const existing = user.getById(userId);  // use 'user' not 'userModel'
+
+    const updatedPicture = profile_picture_base64
+      ? profile_picture_base64
+      : existing.profile_picture_link;
+
+    user.update(
+      userId,
+      existing.password,
+      phone_number.trim(),
+      email.trim(),
+      zipcode.trim(),
+      (profile_description || '').trim(),
+      existing.account_type,
+      updatedPicture
+    );
+
+    req.session.successMessage = 'Profile updated successfully!';
+  } catch (err) {
+    console.error('Profile update error:', err);
+    req.session.errorMessage = 'Something went wrong. Please try again.';
+  }
+
+  res.redirect('/profile');
 });
 
 // Displays job search query page

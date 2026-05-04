@@ -1,78 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Profile – Paw Patrol</title>
-  <link rel="stylesheet" href="/css/profile.css">
+<title>Profile – Paw Patrol</title>
+<link rel="stylesheet" href="/css/profile.css">
 </head>
 <body>
-  <%- include('_navbar') %>
+<%- include('_navbar') %>
+<div class="main-content profile-main">
 
-  <div class="main-content profile-main">
+  <!-- Profile Card -->
+  <div class="profile-card">
 
-    <!-- Profile Card -->
-    <div class="profile-card">
-      <% if (userData.profile_picture_link) { %>
-        <img src="<%= userData.profile_picture_link %>" alt="Profile Picture" class="profile-pic">
-      <% } else { %>
-        <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
-      <% } %>
-
-      <div class="profile-username">@<%= userData.username %></div>
-      <div class="profile-meta"><i class="fa-solid fa-envelope"></i> <%= userData.email %></div>
-      <div class="profile-meta"><i class="fa-solid fa-phone"></i> <%= userData.phone_number %></div>
-      <div class="profile-meta"><i class="fa-solid fa-location-dot"></i> <%= userData.zipcode %></div>
-      <% if (userData.profile_description) { %>
-        <p class="profile-description"><%= userData.profile_description %></p>
-      <% } %>
-
-      <div class="profile-stats">
-        <div class="stat-box">
-          <div class="stat-number"><%= numJobs %></div>
-          <div class="stat-label">Jobs Completed</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number"><%= numReviews %></div>
-          <div class="stat-label">Reviews Received</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number"><%= earnedBadges.length %></div>
-          <div class="stat-label">Badges Earned</div>
-        </div>
+    <!-- Edit / Save / Cancel buttons -->
+    <div class="edit-actions">
+      <button id="editBtn" class="btn-edit" onclick="enableEdit()">
+        <i class="fa-solid fa-pen"></i> Edit Profile
+      </button>
+      <div id="saveCancel" style="display:none; gap:10px; display:none;">
+        <button class="btn-save" onclick="submitEdit()">
+          <i class="fa-solid fa-check"></i> Save
+        </button>
+        <button class="btn-cancel" onclick="cancelEdit()">
+          <i class="fa-solid fa-xmark"></i> Cancel
+        </button>
       </div>
     </div>
 
-    <!-- Badges -->
-    <div class="profile-card">
-      <div class="section-title"><i class="fa-solid fa-medal"></i> Badges</div>
-      <% if (earnedBadges.length > 0) { %>
-        <div class="badges-grid">
-          <% earnedBadges.forEach(badge => { %>
-            <div class="badge-item">
-              <i class="fa-solid fa-award"></i>
-              <div class="badge-name"><%= badge.badge_name %></div>
-            </div>
-          <% }); %>
-        </div>
-      <% } else { %>
-        <p class="empty-state">No badges earned yet. Complete jobs to earn badges!</p>
-      <% } %>
-    </div>
+    <form id="profileForm" action="/profile/update" method="POST">
 
-    <!-- Certifications -->
-    <div class="profile-card">
-      <div class="section-title"><i class="fa-solid fa-certificate"></i> Certifications</div>
-      <% if (certs.length > 0) { %>
-        <% certs.forEach(cert => { %>
-          <div class="cert-item">
-            <div class="cert-name"><%= cert.certification_name %></div>
-            <div class="cert-company"><%= cert.company %></div>
+      <!-- Profile Picture -->
+      <div class="profile-pic-wrapper">
+        <% if (userData.profile_picture_link) { %>
+          <img id="profilePicPreview" src="<%= userData.profile_picture_link %>" alt="Profile Picture" class="profile-pic">
+        <% } else { %>
+          <div id="profilePicPreview" class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+        <% } %>
+        <label id="picUploadLabel" class="pic-upload-label" style="display:none;">
+          <i class="fa-solid fa-camera"></i>
+          <input type="file" id="profilePicInput" accept="image/*" onchange="previewPic(this)" style="display:none;">
+        </label>
+      </div>
+      <input type="hidden" name="profile_picture_base64" id="profilePicBase64">
+
+      <div class="profile-username">@<%= userData.username %></div>
+
+      <!-- View Mode -->
+      <div id="viewMode">
+        <div class="profile-meta"><i class="fa-solid fa-envelope"></i> <%= userData.email %></div>
+        <div class="profile-meta"><i class="fa-solid fa-phone"></i> <%= userData.phone_number %></div>
+        <div class="profile-meta"><i class="fa-solid fa-location-dot"></i> <%= userData.zipcode %></div>
+        <% if (userData.profile_description) { %>
+          <p class="profile-description"><%= userData.profile_description %></p>
+        <% } else { %>
+          <p class="profile-description empty-bio">No bio yet.</p>
+        <% } %>
+      </div>
+
+      <!-- Edit Mode -->
+      <div id="editMode" style="display:none;">
+        <div class="edit-field">
+          <label><i class="fa-solid fa-envelope"></i> Email</label>
+          <input type="email" name="email" value="<%= userData.email %>" class="edit-input" required>
+        </div>
+        <div class="edit-field">
+          <label><i class="fa-solid fa-phone"></i> Phone</label>
+          <input type="tel" name="phone_number" value="<%= userData.phone_number %>" class="edit-input">
+        </div>
+        <div class="edit-field">
+          <label><i class="fa-solid fa-location-dot"></i> Zipcode</label>
+          <input type="text" name="zipcode" value="<%= userData.zipcode %>" class="edit-input" maxlength="10">
+        </div>
+        <div class="edit-field">
+          <label><i class="fa-solid fa-id-card"></i> Bio</label>
+          <textarea name="profile_description" class="edit-input edit-textarea" maxlength="300" placeholder="Tell people about yourself..."><%= userData.profile_description || '' %></textarea>
+          <div class="char-count"><span id="bioCount"><%= (userData.profile_description || '').length %></span>/300</div>
+        </div>
+      </div>
+
+    </form>
+
+    <% if (successMessage) { %>
+      <div class="alert-success"><i class="fa-solid fa-circle-check"></i> <%= successMessage %></div>
+    <% } %>
+    <% if (errorMessage) { %>
+      <div class="alert-error"><i class="fa-solid fa-circle-exclamation"></i> <%= errorMessage %></div>
+    <% } %>
+
+    <div class="profile-stats">
+      <div class="stat-box">
+        <div class="stat-number"><%= numJobs %></div>
+        <div class="stat-label">Jobs Completed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number"><%= numReviews %></div>
+        <div class="stat-label">Reviews Received</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number"><%= earnedBadges.length %></div>
+        <div class="stat-label">Badges Earned</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <div class="profile-card">
+    <div class="section-title"><i class="fa-solid fa-medal"></i> Badges</div>
+    <% if (earnedBadges.length > 0) { %>
+      <div class="badges-grid">
+        <% earnedBadges.forEach(badge => { %>
+          <div class="badge-item">
+            <i class="fa-solid fa-award"></i>
+            <div class="badge-name"><%= badge.badge_name %></div>
           </div>
         <% }); %>
-      <% } else { %>
-        <p class="empty-state">No certifications added yet.</p>
-      <% } %>
-    </div>
-
+      </div>
+    <% } else { %>
+      <p class="empty-state">No badges earned yet. Complete jobs to earn badges!</p>
+    <% } %>
   </div>
+
+  <!-- Certifications -->
+  <div class="profile-card">
+    <div class="section-title"><i class="fa-solid fa-certificate"></i> Certifications</div>
+    <% if (certs.length > 0) { %>
+      <% certs.forEach(cert => { %>
+        <div class="cert-item">
+          <div class="cert-name"><%= cert.certification_name %></div>
+          <div class="cert-company"><%= cert.company %></div>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <p class="empty-state">No certifications added yet.</p>
+    <% } %>
+  </div>
+
+</div>
+
+<script>
+  function enableEdit() {
+    document.getElementById('viewMode').style.display = 'none';
+    document.getElementById('editMode').style.display = 'block';
+    document.getElementById('editBtn').style.display = 'none';
+    document.getElementById('saveCancel').style.display = 'flex';
+    document.getElementById('picUploadLabel').style.display = 'flex';
+
+    // Bio char counter
+    const textarea = document.querySelector('textarea[name="profile_description"]');
+    textarea.addEventListener('input', () => {
+      document.getElementById('bioCount').textContent = textarea.value.length;
+    });
+  }
+
+  function cancelEdit() {
+    document.getElementById('viewMode').style.display = 'block';
+    document.getElementById('editMode').style.display = 'none';
+    document.getElementById('editBtn').style.display = 'inline-flex';
+    document.getElementById('saveCancel').style.display = 'none';
+    document.getElementById('picUploadLabel').style.display = 'none';
+  }
+
+  function submitEdit() {
+    document.getElementById('profileForm').submit();
+  }
+
+  function previewPic(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Resize via canvas before storing
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+
+        // Crop to square from center
+        const size = Math.min(img.width, img.height);
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+
+        const compressed = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+        document.getElementById('profilePicBase64').value = compressed;
+
+        // Update preview
+        const preview = document.getElementById('profilePicPreview');
+        if (preview.tagName === 'IMG') {
+          preview.src = compressed;
+        } else {
+          const newImg = document.createElement('img');
+          newImg.id = 'profilePicPreview';
+          newImg.src = compressed;
+          newImg.alt = 'Profile Picture';
+          newImg.className = 'profile-pic';
+          preview.replaceWith(newImg);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+  // Auto-dismiss flash messages
+  setTimeout(() => {
+    document.querySelectorAll('.alert-success, .alert-error').forEach(el => {
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 400);
+    });
+  }, 4000);
+</script>
 </body>
 </html>
