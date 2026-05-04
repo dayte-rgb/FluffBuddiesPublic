@@ -30,7 +30,7 @@ class jobReviewModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.get(job_id);
+    const info = stmt.all(job_id);
 
     return info;
   }

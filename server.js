@@ -1,10 +1,13 @@
 // Import the Express module, which is a framework for building web applications in Node.js.
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 const logger = new Log('requests.log', true);
+const dateObj = new Date();
 
 // Session and authentication imports
 const { sessionMiddleware } = require('./config/sessionConfig.js');
@@ -31,6 +34,8 @@ const skillCategoryModel = require('./models/skillCategoryModel');
 const skillCategory = new skillCategoryModel();
 const userModel = require('./models/userModel.js');
 const user = new userModel();
+const passwordResetModel = require('./models/passwordResetModel.js');
+const passwordReset = new passwordResetModel();
 const securityQuestionModel = require('./models/securityQuestionModel.js');
 const securityQuestion = new securityQuestionModel();
 const userSecurityAnswerModel = require('./models/userSecurityAnswerModel.js');
@@ -46,8 +51,16 @@ const connections = require('./socket_connections.js');
 const messageModel = new MessageModel();
 const messagingModel = new MessagingModel();
 const userMessageModel = new UserMessageModel();
+const leaderboardContentModel = require('./models/leaderboardContentModel.js');
+const leaderboardContent = new leaderboardContentModel();
 const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
+const UserBadgeModel = require('./models/userBadgeModel.js');
+const userBadgeModel = new UserBadgeModel();
+const AchievementModel = require('./models/achievementModel.js');
+const achievementModel = new AchievementModel();
+const AchievementContentModel = require('./models/achievementContentModel.js');
+const achievementContentModel = new AchievementContentModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -124,19 +137,22 @@ app.post('/job-search', isAuthenticated, (req, res) => {
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
-  const review = await jobReview.getByJobId(req.params.job_id);
+  let reviews = [];
+  const reviewIds = jobReview.getByJobId(req.params.job_id);
+  reviewIds.forEach(reviewIdElem => {
+    reviews.push(reviewContent.getById(reviewIdElem.review_id));
+  })
 
-  if(review){
-    const reviewId = await review.review_id;
-    const reviewData = await reviewContent.getById(reviewId);
-    const userData = await user.getById(jobData.employee_num);
+  console.log(reviews);
 
-    res.render('booking-detail', { jobData, reviewData, userData });
+  if(reviews){
+    const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
+
+    res.render('booking-detail', { jobData, reviews, userData });
   }else{
-    const reviewData = null;
-    const userData = await user.getById(jobData.employee_num);
+    const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
 
-    res.render('booking-detail', { jobData, reviewData, userData });
+    res.render('booking-detail', { jobData, reviews, userData });
   }
 });
 
@@ -200,22 +216,119 @@ app.post('/login', isNotAuthenticated, async (req, res) => {
 });
 
 // Handle forgot password render
+async function createEmailTransporter() {
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+      secure: process.env.SMTP_PORT === '465',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+
+  // const testAccount = await nodemailer.createTestAccount();
+  // return nodemailer.createTransport({
+  //   host: testAccount.smtp.host,
+  //   port: testAccount.smtp.port,
+  //   secure: testAccount.smtp.secure,
+  //   auth: {
+  //     user: testAccount.user,
+  //     pass: testAccount.pass,
+  //   },
+  // });
+}
+
+async function sendPasswordResetEmail(email, code) {
+  try {
+    const transporter = await createEmailTransporter();
+    const mailOptions = {
+      from: process.env.RESET_EMAIL_FROM || 'Paw Patrol <no-reply@pawpatrol.com>',
+      to: email,
+      subject: 'Paw Patrol Password Reset Code',
+      text: `Your password reset code is ${code}. Use this code at http://localhost:${PORT}/reset-password to update your password. The code expires in 15 minutes.`,
+      html: `
+        <p>Hello,</p>
+        <p>We received a request to reset your Paw Patrol password.</p>
+        <p><strong>Your reset code is: ${code}</strong></p>
+        <p>Enter this code <a href="http://localhost:${PORT}/reset-password">here</a>.</p>
+        <p>The code expires in 15 minutes.</p>
+        <p>If you did not request this, you can ignore this email.</p>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    if (!process.env.SMTP_HOST) {
+      logger.write(`[INFO] Sent test password reset email for ${email}. Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    } else {
+      logger.write(`[INFO] Sent password reset email for ${email}`);
+    }
+    return true;
+  } catch (error) {
+    logger.write(`[ERROR] Failed to send password reset email to ${email}: ${error.message}`);
+    return false;
+  }
+}
+
 app.get('/forgot-password', isNotAuthenticated, (req, res) => {
   res.render('forgot-password');
 });
 
 // Handle forgot password submission
-app.post('/forgot-password', isNotAuthenticated, (req, res) => {
+app.post('/forgot-password', isNotAuthenticated, async (req, res) => {
   const { email } = req.body;
+  const normalizedEmail = email ? email.trim().toLowerCase() : '';
+  const existingUser = normalizedEmail ? user.getByEmail(normalizedEmail) : null;
 
-  // TODO: Implement actual password reset logic
-  // As of now it just shows a successful message.
-  logger.write(`[INFO] Password reset requested for email: ${email}`);
+  if (existingUser) {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    passwordReset.create(normalizedEmail, code, expiresAt);
+    await sendPasswordResetEmail(normalizedEmail, code);
+  } else {
+    logger.write(`[INFO] Password reset requested for non-existent email: ${normalizedEmail}`);
+  }
 
   res.json({
     success: true,
-    message: 'If an account with that email exists, a password reset link has been sent.'
+    message: 'If an account with that email exists, a password reset code has been sent. Check your email.'
   });
+});
+
+app.get('/reset-password', isNotAuthenticated, (req, res) => {
+  const email = req.query.email ? req.query.email.trim().toLowerCase() : '';
+  res.render('reset-password', { email, message: null, error: null });
+});
+
+app.post('/reset-password', isNotAuthenticated, async (req, res) => {
+  const { email, code, password, confirmPassword } = req.body;
+  const normalizedEmail = email ? email.trim().toLowerCase() : '';
+
+  if (!normalizedEmail || !code || !password || !confirmPassword) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'All fields are required.' });
+  }
+
+  if (password !== confirmPassword) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'Passwords do not match.' });
+  }
+
+  const resetEntry = passwordReset.getByEmail(normalizedEmail);
+  if (!resetEntry || resetEntry.code !== code || new Date(resetEntry.expires_at) < new Date()) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'Invalid or expired reset code.' });
+  }
+
+  const existingUser = user.getByEmail(normalizedEmail);
+  if (!existingUser) {
+    return res.render('reset-password', { email: normalizedEmail, message: null, error: 'Unable to find an account for that email.' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.update(existingUser.user_id, hashedPassword, existingUser.phone_number, existingUser.email, existingUser.zipcode, existingUser.profile_description, existingUser.account_type, existingUser.profile_picture_link);
+  passwordReset.deleteByEmail(normalizedEmail);
+
+  res.render('login', { success: 'Your password has been reset. Please login with your new password.' });
 });
 
 // Handle logout
@@ -306,42 +419,24 @@ app.get('/inbox', (req, res) => {
 });
 
 app.get('/leaderboard', (req, res) => {
-  const leaderboard = leaderboardContent.getCurrentLeaderboard();
+  // Get the current leaderboard that is stored in the database
+  let leaderboard = leaderboardM.getCurrentLeaderboard();
   
-
+  // if there is no leaderboard, create one!
   if (!leaderboard) {
-    const all = leaderboardContent.getAll();
-    const fallback = all[all.length - 1] || null;
-    return res.render('leaderboard', { leaderboard: fallback, entries: [] });
+    //NOTE: GO BACK AND FIGURE OUT THE BADGE AND METRIC IDS
+    const lb_info = leaderboardContent.create(new Date().toISOString().replace('T', ' ').slice(0, 19), null, 1, 1);
+    leaderboard = leaderboardContent.getById(lb_info.id);
   }
 
-  let entries = leaderboardContent.getEntriesByAvgRating(leaderboard.leaderboard_id);
+  // Get all stats between the start and end date of the leaderboard
+  const start_time = leaderboard.start_time;
+  const end_time = leaderboard.end_time;
+  let entries = leaderboardM.getLeaderboardStats(start_time, end_time);
 
-  // If no entries in period, fall back to leaderboardModel which has no date filter
+  // If no entries in period, fall back to no filter for dates and default k = 10
   if (!entries || entries.length === 0) {
-    const topByJobs   = leaderboardM.getTopKMostJobs(50);
-    const topByRating = leaderboardM.getTopKHighestAvgRating(50);
-
-    const map = {};
-    topByJobs.forEach(row => {
-      map[row.user_id] = { user_id: row.user_id, jobs_completed: row.user_total, avg_rating: null };
-    });
-    topByRating.forEach(row => {
-      if (map[row.user_id]) {
-        map[row.user_id].avg_rating = (row.user_avg_rating / 3).toFixed(2);
-      } else {
-        map[row.user_id] = { user_id: row.user_id, jobs_completed: 0, avg_rating: (row.user_avg_rating / 3).toFixed(2) };
-      }
-    });
-
-    entries = Object.values(map).map(e => {
-      const userData = user.getById(e.user_id);
-      return {
-        worker_name:    userData ? userData.username : `User ${e.user_id}`,
-        avg_rating:     e.avg_rating,
-        jobs_completed: e.jobs_completed,
-      };
-    });
+    entries = leaderboardM.getLeaderboardStats();
   }
 
   res.render('leaderboard', { leaderboard, entries });
@@ -613,7 +708,14 @@ wss.on('connection', (ws) => {
             }
             case 'GET_USER_ID': {
                 const {username} = payload;
-                ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
+
+                //if we cannot find the user, then return undefined for the userId
+                if(!user.getByUsername(username)){
+                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: undefined}));
+                }else{
+                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
+                }
+                
                 break;
             }
             default: {
@@ -624,6 +726,78 @@ wss.on('connection', (ws) => {
         ws.send(`Interaction complete`);
     });
 });
+
+//-----------------------------------------------------------------------------------------------------------------------------------
+// setInterval function that checks for end of leaderboard
+const INTERVAL = 1000 * 60 * 60; // an hour
+setInterval(runBadgeJobs, INTERVAL);
+
+function runBadgeJobs() {
+//get most recent leaderboard
+  const currLeaderboard = leaderboardM.getCurrentLeaderboard();
+
+  if(currLeaderboard){
+    const currDatetime = dateObj.toISOString().replace('T', ' ').slice(0, 19);
+    const endDatetime = currLeaderboard.end_time;
+
+    if(currDatetime >= endDatetime){
+      distributeLeaderboardBadges(currLeaderboard)
+    }
+  };
+
+  // if a user has completed an achievement, add the badge to their profile
+  const num_jobs_by_user = achievementModel.getJobsCompleted();
+  const num_reviews_written_by_user = achievementModel.getReviewsWritten();
+  const num_reviews_received_by_user = achievementModel.getReviewsReceived();
+
+  const achievements = achievementContentModel.getAll();
+
+  //create a map of metrics and what the specific attribute to look at is
+  const metricMap = {
+    1: { data: num_jobs_by_user,            key: 'num_jobs' },
+    2: { data: num_reviews_written_by_user, key: 'num_reviews_written' },
+    3: { data: num_reviews_received_by_user, key: 'num_reviews_received' },
+  };
+
+  achievements.forEach(({ metric_id, required_quantity, badge_id }) => {
+    const metric = metricMap[metric_id];
+    if (!metric) return;
+    metric.data.forEach((user) => {
+      //if the user has above the quantity required and doesn't already have the badge, add it
+      if (user[metric.key] >= required_quantity && !userBadgeModel.getByIds(user.user_id, badge_id)) {
+        userBadgeModel.create(user.user_id, badge_id);
+      }
+    });
+  });
+}
+
+function distributeLeaderboardBadges(leaderboard){
+  const badge_id = leaderboard.badge_id;
+  const top_5_rating = leaderboardM.getTopKRating(leaderboard.start_time, leaderboard.end_time, 5);
+  const top_5_jobs = leaderboardM.getTopKJobs(leaderboard.start_time, leaderboard.end_time, 5);
+
+  top_5_rating.forEach((row) => {
+    try{
+      userBadgeModel.create(row.user_id, badge_id);
+    }catch(e){
+      logger.write(`[WARN] User with user_id ${row.user_id} already has badge with id ${badge_id}, unable to add again`);
+      logger.write(e);
+    }
+  });
+
+  top_5_jobs.forEach((row) => {
+    try{
+      userBadgeModel.create(row.user_id, badge_id);
+    }catch(e){
+      logger.write(`[WARN] User with user_id ${row.user_id} already has badge with id ${badge_id}, unable to add again`);
+      logger.write(e);
+    }
+  });
+}
+
+// run the jobs functions on startup
+runBadgeJobs();
+
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
