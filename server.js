@@ -708,7 +708,14 @@ wss.on('connection', (ws) => {
             }
             case 'GET_USER_ID': {
                 const {username} = payload;
-                ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
+
+                //if we cannot find the user, then return undefined for the userId
+                if(!user.getByUsername(username)){
+                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: undefined}));
+                }else{
+                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
+                }
+                
                 break;
             }
             default: {
