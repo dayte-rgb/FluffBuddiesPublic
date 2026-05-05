@@ -70,9 +70,12 @@
                                 <p><strong>Zip Code:</strong> <%= job.zipcode %></p>
                                 <p><strong>Employer:</strong> <%= job.employer_username %></p>
                                 <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
-                            </div>
-                        <% }); %>
+                                <% if (job.job_completed) { %>
+                                <a href="/review/<%= job.job_id %>" class="btn btn-primary">Leave a Review</a>
+                        <% } %>
                     </div>
+                <% }); %>
+    </div>
                 <% } else { %>
                     <div class="alert alert-info">
                         <i class="fa-solid fa-info-circle"></i> You have no booked jobs yet.

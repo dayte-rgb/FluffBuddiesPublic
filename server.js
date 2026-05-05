@@ -505,12 +505,19 @@ app.get('/leaderboard', (req, res) => {
   res.render('leaderboard', { leaderboard, entries });
 });
 
-app.get('/review-test', (req, res) => {
+app.get('/review/:job_id', isAuthenticated, (req, res) => {
+  const job_id = req.params.job_id;
+  const jobData = jobContent.getById(job_id);
+  if (!jobData) return res.status(404).send('Job not found');
+
+  const employerLink = employerJob.getById(job_id);
+  const workerData = employerLink ? user.getById(employerLink.employer_id) : null;
+
   res.render('review', {
-    worker_name: 'Rex',
-    job_title: 'Dog Walking',
-    job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
+    worker_name: workerData ? workerData.username : 'Unknown',
+    job_title: jobData.description,
+    job_date: jobData.datetime,
+    job_id: job_id
   });
 });
 
