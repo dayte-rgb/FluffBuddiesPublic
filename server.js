@@ -469,6 +469,7 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
 
     // Hash the security answer
     const hashedAnswer = await bcrypt.hash(security_answer, 10);
+    console.log(hashedAnswer);
 
     // Create security answer
     userSecurityAnswer.create(newUser.id, security_question_id, hashedAnswer);
@@ -536,12 +537,13 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 });
 
 app.get('/badges', (req, res) => {
+  runBadgeJobs();
   const all_achievements = achievementModel.getAchivementsAndBadges();
-  const completed_achievement_ids = achievementModel.getAchievementsCompleted(req.session.user_id);
+  const completed_achievement_ids = achievementModel.getAchievementsCompleted(req.session.userId);
   const completed_ids = new Set();
 
   for(let i = 0; i < completed_achievement_ids.length; i++){
-    completed_ids.add(completed_achievements_ids[i].achievement_id);
+    completed_ids.add(completed_achievement_ids[i].achievement_id);
   }
 
   let earned_badges = []

@@ -29,17 +29,17 @@ INSERT INTO JobCategory VALUES
 -- insert data into BadgeContent
 -- (NULL, <badge_name>, <badge_image_link>)
 INSERT INTO BadgeContent VALUES
-(NULL, "First Job", "job_1.png"),
-(NULL, "5 Jobs", "job_5.png"),
-(NULL, "10 Jobs", "job_10.png"),
-(NULL, "25 Jobs", "job_25.png"),
+(NULL, "Complete Your First Job", "job_1.png"),
+(NULL, "Complete 5 Jobs", "job_5.png"),
+(NULL, "Complete 10 Jobs", "job_10.png"),
+(NULL, "Complete 25 Jobs", "job_25.png"),
 (NULL, "1 Review Written", "review_write_1.png"),
 (NULL, "5 Reviews Written", "review_write_5.png"),
 (NULL, "Receive 1 Review", "review_1.png"),
 (NULL, "Receive 5 Reviews", "review_5.png"),
 (NULL, "Receive 10 Reviews", "review_10.png"),
 (NULL, "Receive 25 Reviews", "review_25.png"),
-(NULL, "Leaderboard 26 Q2", "leaderboard_badge.png");
+(NULL, "Top 10: Leaderboard 26 Q2", "leaderboard_badge.png");
 
 -- insert data into SkillCategory
 -- (<skill_category_id>, <category_name>)
@@ -293,7 +293,7 @@ INSERT INTO UserMessage VALUES
 INSERT INTO AchievementContent VALUES
 (NULL, "Complete your first job", 1, 1, 1),
 (NULL, "Complete 5 jobs", 1, 2, 5),
-(NULL, "Compelte 10 jobs", 1, 3, 10),
+(NULL, "Complete 10 jobs", 1, 3, 10),
 (NULL, "Complete 25 jobs", 1, 4, 25),
 (NULL, "Leave your first review", 2, 5, 1),
 (NULL, "Write 5 reviews", 2, 6, 5),
