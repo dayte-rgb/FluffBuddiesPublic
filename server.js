@@ -215,8 +215,10 @@ app.post('/job-search', isAuthenticated, (req, res) => {
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
+  if (!jobData) return res.status(404).send('Job not found');
+  
   let reviews = [];
-  const reviewIds = jobReview.getByJobId(req.params.job_id);
+  const reviewIds = jobReview.getAllByJobId(req.params.job_id);
   reviewIds.forEach(reviewIdElem => {
     reviews.push(reviewContent.getById(reviewIdElem.review_id));
   })
@@ -536,6 +538,7 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 
   try {
     const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
+    jobReview.create(newReview.id, job_id);
     res.json({ review_id: newReview.id });
   } catch (error) {
     console.error('Error saving review:', error);
