@@ -37,8 +37,7 @@
             <% if (earned_badges && earned_badges.length> 0) { %>
                 <% earned_badges.forEach(badge=> { %>
                     <div class="badge-card earned">
-                        <div class="badge-image" style="background-color: <%= badge.color %>">
-                            <i class="<%= badge.icon %>"></i>
+                        <div class="badge-icon" style="background-color: <%= badge.color %>">
                             <img src="images/<%= badge.img_link %>", width="50", height="50">
                         </div>
                         <p class="badge-name">
@@ -70,7 +69,6 @@
                 <% not_earned_badges.forEach(badge=> { %>
                     <div class="badge-card">
                         <div class="badge-icon" style="background-color: <%= badge.color %>">
-                            <i class="<%= badge.icon %>"></i>
                             <img src="images/<%= badge.img_link %>", width="50", height="50">
                         </div>
                         <p class="badge-name">
