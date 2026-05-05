@@ -34,11 +34,12 @@
         </div>
 
         <div class="badges-grid">
-            <% if (earnedBadges && earnedBadges.length> 0) { %>
-                <% earnedBadges.forEach(badge=> { %>
+            <% if (earned_badges && earned_badges.length> 0) { %>
+                <% earned_badges.forEach(badge=> { %>
                     <div class="badge-card earned">
-                        <div class="badge-icon" style="background-color: <%= badge.color %>">
+                        <div class="badge-image" style="background-color: <%= badge.color %>">
                             <i class="<%= badge.icon %>"></i>
+                            <img src="images/<%= badge.img_link %>", width="50", height="50">
                         </div>
                         <p class="badge-name">
                             <%= badge.name %>
@@ -65,11 +66,12 @@
         </div>
 
         <div class="badges-grid">
-            <% if (lockedBadges && lockedBadges.length> 0) { %>
-                <% lockedBadges.forEach(badge=> { %>
+            <% if (not_earned_badges && not_earned_badges.length> 0) { %>
+                <% not_earned_badges.forEach(badge=> { %>
                     <div class="badge-card">
                         <div class="badge-icon" style="background-color: <%= badge.color %>">
                             <i class="<%= badge.icon %>"></i>
+                            <img src="images/<%= badge.img_link %>", width="50", height="50">
                         </div>
                         <p class="badge-name">
                             <%= badge.name %>
