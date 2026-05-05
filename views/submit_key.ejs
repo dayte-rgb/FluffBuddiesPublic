@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Verify Meetup</title>
+</head>
+
+<body>
+    <h1>Verify Meetup</h1>
+
+    <% if (error) { %>
+        <p style="color: red;">
+            <%= error %>
+        </p>
+        <% } %>
+
+            <% if (success) { %>
+                <p style="color: green;">
+                    <%= success %>
+                </p>
+                <a href="/review?job_id=<%= job_id %>">Leave a review</a>
+                <% } else { %>
+                    <p>Enter the verification code sent to the employer's email.</p>
+                    <form action="/submit_key" method="POST">
+                        <input type="hidden" name="job_id" value="<%= job_id %>">
+                        <label>Code:</label>
+                        <input type="text" name="code" placeholder="Enter 6-digit code" required>
+                        <button type="submit">Verify</button>
+                    </form>
+                    <% } %>
+</body>
+
+</html>
