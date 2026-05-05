@@ -57,6 +57,12 @@ const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 const UserBadgeModel = require('./models/userBadgeModel.js');
 const userBadgeModel = new UserBadgeModel();
+const BadgeContentModel = require('./models/badgeContentModel.js');
+const badgeContent = new BadgeContentModel();
+const CertificationContentModel = require('./models/certificationContentModel.js');
+const certificationContent = new CertificationContentModel();
+const UserCertificationModel = require('./models/userCertificationModel.js');
+const userCertification = new UserCertificationModel();
 const AchievementModel = require('./models/achievementModel.js');
 const achievementModel = new AchievementModel();
 const AchievementContentModel = require('./models/achievementContentModel.js');
@@ -73,8 +79,8 @@ const wss = new WebSocket.Server({ server }); // attach to same server
 const PORT = process.env.PORT || 3000;
 
 // Middleware for parsing HTTP responses
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // Session middleware
 app.use(sessionMiddleware);
@@ -112,6 +118,77 @@ app.get('/default', (req, res) => {
         name: 'Student', // A variable named 'name' with the value 'Student'.
         items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
     });
+});
+
+
+// GET /profile
+app.get('/profile', isAuthenticated, (req, res) => {
+  const userId   = req.session.userId;
+  const userData = user.getById(userId);
+  if (!userData) return res.redirect('/login');
+
+  const jobsCompleted   = achievementModel.getJobsCompleted().find(r => r.user_id === userId);
+  const numJobs         = jobsCompleted ? jobsCompleted.num_jobs : 0;
+
+  const reviewsReceived = achievementModel.getReviewsReceived().find(r => r.user_id === userId);
+  const numReviews      = reviewsReceived ? reviewsReceived.num_reviews_received : 0;
+
+  const allUserBadges   = userBadgeModel.getAll().filter(r => r.user_id === userId);
+  const earnedBadges    = allUserBadges.map(ub => badgeContent.getById(ub.badge_id)).filter(Boolean);
+
+  const allAchievements = achievementContentModel.getAll();
+
+  const allUserCerts    = userCertification.getAll().filter(r => r.user_id === userId);
+  const certs           = allUserCerts.map(uc => certificationContent.getById(uc.certification_id)).filter(Boolean);
+
+  // Pull flash messages set by the POST, then clear them
+  const successMessage = req.session.successMessage || null;
+  const errorMessage   = req.session.errorMessage   || null;
+  delete req.session.successMessage;
+  delete req.session.errorMessage;
+
+  res.render('profile', {
+    userData,
+    numJobs,
+    numReviews,
+    earnedBadges,
+    allAchievements,
+    certs,
+    successMessage,
+    errorMessage
+  });
+});
+
+app.post('/profile/update', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+
+  try {
+    const { email, phone_number, zipcode, profile_description, profile_picture_base64 } = req.body;
+
+    const existing = user.getById(userId);  // use 'user' not 'userModel'
+
+    const updatedPicture = profile_picture_base64
+      ? profile_picture_base64
+      : existing.profile_picture_link;
+
+    user.update(
+      userId,
+      existing.password,
+      phone_number.trim(),
+      email.trim(),
+      zipcode.trim(),
+      (profile_description || '').trim(),
+      existing.account_type,
+      updatedPicture
+    );
+
+    req.session.successMessage = 'Profile updated successfully!';
+  } catch (err) {
+    console.error('Profile update error:', err);
+    req.session.errorMessage = 'Something went wrong. Please try again.';
+  }
+
+  res.redirect('/profile');
 });
 
 // Displays job search query page
@@ -419,25 +496,14 @@ app.get('/inbox', (req, res) => {
 });
 
 app.get('/leaderboard', (req, res) => {
-  // Get the current leaderboard that is stored in the database
   let leaderboard = leaderboardM.getCurrentLeaderboard();
   
-  // if there is no leaderboard, create one!
   if (!leaderboard) {
-    //NOTE: GO BACK AND FIGURE OUT THE BADGE AND METRIC IDS
     const lb_info = leaderboardContent.create(new Date().toISOString().replace('T', ' ').slice(0, 19), null, 1, 1);
     leaderboard = leaderboardContent.getById(lb_info.id);
   }
 
-  // Get all stats between the start and end date of the leaderboard
-  const start_time = leaderboard.start_time;
-  const end_time = leaderboard.end_time;
-  let entries = leaderboardM.getLeaderboardStats(start_time, end_time);
-
-  // If no entries in period, fall back to no filter for dates and default k = 10
-  if (!entries || entries.length === 0) {
-    entries = leaderboardM.getLeaderboardStats();
-  }
+  let entries = leaderboardM.getLeaderboardStats('1970-01-01 00:00:00', '9999-12-31 23:59:59');
 
   res.render('leaderboard', { leaderboard, entries });
 });
