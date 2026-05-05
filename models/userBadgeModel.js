@@ -25,6 +25,14 @@ class userBadgeModel {
     return info;
   }
 
+  getByUserId(user_id){
+    const query = "SELECT * FROM UserBadge WHERE user_id = ?";
+
+    const stmt = this.db.prepare(query);
+
+    return stmt.all(user_id);
+  }
+
   getAll(){
     const query = 'SELECT * FROM UserBadge';
 
