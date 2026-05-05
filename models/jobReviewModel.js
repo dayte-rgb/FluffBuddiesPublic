@@ -35,6 +35,12 @@ class jobReviewModel {
     return info;
   }
 
+  getAllByJobId(job_id) {
+    const query = "SELECT review_id FROM JobReview WHERE job_id = ?";
+    const stmt = this.db.prepare(query);
+    return stmt.all(job_id);
+  }
+  
   getAll(){
     const query = 'SELECT * FROM JobReview';
 

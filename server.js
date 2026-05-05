@@ -215,8 +215,10 @@ app.post('/job-search', isAuthenticated, (req, res) => {
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
+  if (!jobData) return res.status(404).send('Job not found');
+  
   let reviews = [];
-  const reviewIds = jobReview.getByJobId(req.params.job_id);
+  const reviewIds = jobReview.getAllByJobId(req.params.job_id);
   reviewIds.forEach(reviewIdElem => {
     reviews.push(reviewContent.getById(reviewIdElem.review_id));
   })
@@ -510,12 +512,19 @@ app.get('/leaderboard', (req, res) => {
   res.render('leaderboard', { leaderboard, entries });
 });
 
-app.get('/review-test', (req, res) => {
+app.get('/review/:job_id', isAuthenticated, (req, res) => {
+  const job_id = req.params.job_id;
+  const jobData = jobContent.getById(job_id);
+  if (!jobData) return res.status(404).send('Job not found');
+
+  const employerLink = employerJob.getById(job_id);
+  const workerData = employerLink ? user.getById(employerLink.employer_id) : null;
+
   res.render('review', {
-    worker_name: 'Rex',
-    job_title: 'Dog Walking',
-    job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
+    worker_name: workerData ? workerData.username : 'Unknown',
+    job_title: jobData.description,
+    job_date: jobData.datetime,
+    job_id: job_id
   });
 });
 
@@ -529,6 +538,7 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 
   try {
     const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
+    jobReview.create(newReview.id, job_id);
     res.json({ review_id: newReview.id });
   } catch (error) {
     console.error('Error saving review:', error);
