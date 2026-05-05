@@ -293,7 +293,7 @@ INSERT INTO UserMessage VALUES
 INSERT INTO AchievementContent VALUES
 (NULL, "Complete your first job", 1, 1, 1),
 (NULL, "Complete 5 jobs", 1, 2, 5),
-(NULL, "Compelte 10 jobs", 1, 3, 10),
+(NULL, "Complete 10 jobs", 1, 3, 10),
 (NULL, "Complete 25 jobs", 1, 4, 25),
 (NULL, "Leave your first review", 2, 5, 1),
 (NULL, "Write 5 reviews", 2, 6, 5),
