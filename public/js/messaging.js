@@ -35,14 +35,14 @@ convButton.addEventListener('click', () => {
 // Send message on Enter key
 messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-    sendMessage();
+        sendMessage();
     }
 });
 
 // Send message on Enter key
 convInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-    startConversation();
+        startConversation();
     }
 });
 
@@ -65,8 +65,9 @@ ws.onmessage = (event) => {
             displayConvIds(userId, ids);
         }
         case 'RET_USER_ID': {
+            //if it can't find the id, will return undefined, which throws an error, which we catch and set toUserId as undefined
             const {userId} = payload;
-            toUserId= userId;
+            toUserId = userId;
             break;
         }
         default: {
@@ -97,6 +98,13 @@ async function startConversation(){
     // then we pray to God that it arrives in time :D
     await new Promise(resolve => setTimeout(resolve, 500));
 
+    // check that if a user inputted a non-existant user or themselves, fails to create a conversation
+    if(!toUserId || toUserId == userId){
+        convInput.value = "";
+        convInput.placeholder = "Please input a valid username"
+        return;
+    }
+
     const newUserId = toUserId;
     toUsername = newUsername;
 
@@ -110,6 +118,11 @@ async function startConversation(){
 function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value.trim();
+
+    //check to make sure toUserId is defined
+    if(!toUserId){
+        return;
+    }
 
     // send to WebSockets
     console.log(userId, toUserId, message);

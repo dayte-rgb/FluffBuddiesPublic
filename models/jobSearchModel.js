@@ -37,8 +37,10 @@ class jobSearchModel {
     // Crazy thing here, but we need to prevent against the SQL trying to open a null object when we pass no skill categories or job categories
     // So, we wrap it in JavaScript. If hasSkills is null, ? will catch that and make that part just '', avoiding the error.
     const stmt = this.db.prepare(`
-        SELECT DISTINCT jcontent.*
+        SELECT DISTINCT username, jcontent.*
         FROM JobContent jcontent 
+        JOIN EmployerJob ej ON jcontent.job_id = ej.job_id
+        JOIN User u ON ej.employer_id = u.user_id
         JOIN SkillCategoriesByJob skillcat ON jcontent.job_id = skillcat.job_id
         JOIN JobCategoriesByJob   jobcat   ON jcontent.job_id = jobcat.job_id
         WHERE (@zipcode IS NULL OR jcontent.zipcode = @zipcode)

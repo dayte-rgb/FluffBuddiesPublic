@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Login - Paw Patrol</title>
     <link rel="stylesheet" href="/css/default_stylesheet.css">
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
     <div class="main-content">
         <% if (user && user.userId) { %>
@@ -36,7 +38,7 @@
                     <%= error %>
                 </div>
             <% } %>
-
+        
             <% if (typeof success !== 'undefined') { %>
                 <div class="success-message" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-family: 'Nunito', sans-serif; border: 1px solid #c3e6cb;">
                     <%= success %>

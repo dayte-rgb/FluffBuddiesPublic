@@ -19,6 +19,12 @@ CREATE TABLE IF NOT EXISTS User (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS PasswordResetToken (
+  email TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS UserMessage (
   message_id INTEGER PRIMARY KEY,
   sender_id INTEGER NOT NULL,
@@ -88,9 +94,8 @@ CREATE TABLE IF NOT EXISTS JobCategoryByUser (
 
 CREATE TABLE IF NOT EXISTS LeaderboardContent (
   leaderboard_id INTEGER PRIMARY KEY ,
-  reward_badge_id INTEGER NOT NULL,
   start_time TEXT NOT NULL,
-  end_time TEXT NOT NULL,
+  end_time TEXT,
   metric_id INTEGER NOT NULL,
   badge_id INTEGER,
   FOREIGN KEY (badge_id)

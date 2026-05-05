@@ -4,35 +4,84 @@ class leaderboardModel {
   constructor() {
     this.db = connectToDatabase();
 
-    this._getMostJobsDone = this.db.prepare(`
-        SELECT u.user_id, u.username, COUNT(*) as user_total
+    this._getLeaderboardStats = this.db.prepare(`
+        SELECT 
+          u.username as worker_name, 
+          COUNT(*) as jobs_completed, 
+          ROUND((AVG(r.punctuality) + AVG(r.quality) + AVG(r.friendliness)) / 3.0, 2) as avg_rating
         FROM EmployeeJob ej
         JOIN JobContent jc ON ej.job_id = jc.job_id
         JOIN User u ON u.user_id = ej.employee_id
-        WHERE jc.job_completed = 1
+        LEFT JOIN JobReview jr ON jr.job_id = jc.job_id
+        LEFT JOIN ReviewContent r ON r.review_id = jr.review_id
+        WHERE jc.job_completed = 1 
+        AND ((@start IS NULL AND @end IS NULL) OR jc.datetime BETWEEN @start AND @end)
         GROUP BY u.user_id
-        ORDER BY user_total DESC
+        ORDER BY jobs_completed DESC, avg_rating DESC;
+    `);
+
+    this._getTopRating = this.db.prepare(`
+        SELECT 
+          u.user_id, 
+          ROUND((AVG(r.punctuality) + AVG(r.quality) + AVG(r.friendliness)) / 3.0, 2) as avg_rating
+        FROM EmployeeJob ej
+        JOIN JobContent jc ON ej.job_id = jc.job_id
+        JOIN User u ON u.user_id = ej.employee_id
+        LEFT JOIN JobReview jr ON jr.job_id = jc.job_id
+        LEFT JOIN ReviewContent r ON r.review_id = jr.review_id
+        WHERE jc.job_completed = 1
+        AND ((@start IS NULL AND @end IS NULL) OR jc.datetime BETWEEN @start AND @end)
+        GROUP BY u.user_id
+        ORDER BY avg_rating DESC
         LIMIT @k;
     `);
-    
-    
-    this._getHighestReview = this.db.prepare(`
-        SELECT ur.user_id, u.username, AVG(r.punctuality + r.quality + r.friendliness) as user_avg_rating
-        FROM UserReview ur
-        JOIN ReviewContent r ON ur.review_id = r.review_id
-        JOIN User u ON ur.user_id = u.user_id
-        GROUP BY ur.user_id
-        ORDER BY user_avg_rating DESC
+
+    this._getTopJobs = this.db.prepare(`
+        SELECT 
+          u.user_id, 
+          COUNT(*) as jobs_completed
+        FROM EmployeeJob ej
+        JOIN JobContent jc ON ej.job_id = jc.job_id
+        JOIN User u ON u.user_id = ej.employee_id
+        WHERE jc.job_completed = 1 
+        AND (((@start IS NULL AND @end IS NULL) OR jc.datetime BETWEEN @start AND @end))
+        GROUP BY u.user_id
+        ORDER BY jobs_completed DESC
         LIMIT @k;
     `);
+
+    this._getCurrLeaderboard = this.db.prepare(`
+        SELECT * FROM LeaderboardContent 
+        ORDER BY start_time DESC 
+        LIMIT 1;
+      `);
   }
 
-  getTopKMostJobs(k){
-    return this._getMostJobsDone.all({k: k});
+  getCurrentLeaderboard() {
+    return this._getCurrLeaderboard.get();
   }
 
-  getTopKHighestAvgRating(k){
-    return this._getHighestReview.all({k: k});
+  getLeaderboardStats(start_time = null, end_time = null){
+    return this._getLeaderboardStats.all({
+      start: start_time,
+      end: end_time
+    });
+  }
+
+  getTopKRating(start_time = null, end_time = null, k = 10){
+    return this._getTopRating.all({
+      k: k,
+      start: start_time,
+      end: end_time
+    });
+  }
+
+  getTopKJobs(start_time = null, end_time = null, k = 10){
+    return this._getTopJobs.all({
+      k: k,
+      start: start_time,
+      end: end_time
+    });
   }
 }
 
