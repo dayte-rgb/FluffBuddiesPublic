@@ -139,14 +139,13 @@
     </div>
 
     <script src="/js/create-job.js"></script>
+    <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
     <script>
         new SlimSelect({
             select: '#job_category',
-            selectedValues: [ job_categories.map(id => `'${id}'`).join(', ') ]
         });
         new SlimSelect({
             select: '#skill_category',
-            selectedValues: [ skill_categories.map(id => `'${id}'`).join(', ') ]
         });
     </script>
 </body>

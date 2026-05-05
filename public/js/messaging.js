@@ -9,14 +9,16 @@ const idBox = document.getElementById('history');
 let messageId = 0;
 let toUserId;
 let toUsername;
-const userId = document.body.dataset.userId;
+let userId = document.body.dataset.userId;
 
 
 // Connect to the WebSocket server
-const ws = new WebSocket('ws://localhost:3000');
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const ws = new WebSocket(`${protocol}//${window.location.host}`);
 
 // Connection opened
 ws.onopen = () => {
+    console.log(userId);
     ws.send(JSON.stringify({type: 'JOIN', userId: userId}));
     ws.send(JSON.stringify({type: 'GET_CONV_IDS', userId: userId}));
     status.textContent = 'Connected to server';
@@ -34,14 +36,14 @@ convButton.addEventListener('click', () => {
 // Send message on Enter key
 messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-    sendMessage();
+        sendMessage();
     }
 });
 
 // Send message on Enter key
 convInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-    startConversation();
+        startConversation();
     }
 });
 
@@ -52,7 +54,7 @@ ws.onmessage = (event) => {
     switch(type){
         case 'NEW_MESSAGE':{
             const {content, datetime} = payload;
-            displayMsg(content, datetime);
+            displayReceivedMsg(content, datetime);
             break;
         }
         case 'HISTORY_RET': {
@@ -64,8 +66,9 @@ ws.onmessage = (event) => {
             displayConvIds(userId, ids);
         }
         case 'RET_USER_ID': {
+            //if it can't find the id, will return undefined, which throws an error, which we catch and set toUserId as undefined
             const {userId} = payload;
-            toUserId= userId;
+            toUserId = userId;
             break;
         }
         default: {
@@ -96,6 +99,13 @@ async function startConversation(){
     // then we pray to God that it arrives in time :D
     await new Promise(resolve => setTimeout(resolve, 500));
 
+    // check that if a user inputted a non-existant user or themselves, fails to create a conversation
+    if(!toUserId || toUserId == userId){
+        convInput.value = "";
+        convInput.placeholder = "Please input a valid username"
+        return;
+    }
+
     const newUserId = toUserId;
     toUsername = newUsername;
 
@@ -109,6 +119,11 @@ async function startConversation(){
 function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value.trim();
+
+    //check to make sure toUserId is defined
+    if(!toUserId){
+        return;
+    }
 
     // send to WebSockets
     console.log(userId, toUserId, message);
@@ -131,6 +146,18 @@ function displayMsg(msg, datetime){
     textElement.id = `historyText${messageId}`;
     messageId += 1;
     textElement.textContent = `[${datetime}] You: ${msg}`;
+    
+    textBox.append(textElement);
+    textBox.scrollTop = textBox.scrollHeight;
+}
+
+function displayReceivedMsg(msg, datetime){
+    // create the text box and add to the DOM
+    const textElement = document.createElement('p');
+
+    textElement.id = `historyText${messageId}`;
+    messageId += 1;
+    textElement.textContent = `[${datetime}] Received: ${msg}`;
     
     textBox.append(textElement);
     textBox.scrollTop = textBox.scrollHeight;
