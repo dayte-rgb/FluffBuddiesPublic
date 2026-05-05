@@ -66,6 +66,7 @@ const userCertification = new UserCertificationModel();
 const AchievementModel = require('./models/achievementModel.js');
 const achievementModel = new AchievementModel();
 const AchievementContentModel = require('./models/achievementContentModel.js');
+const session = require('express-session');
 const achievementContentModel = new AchievementContentModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
@@ -535,31 +536,36 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 });
 
 app.get('/badges', (req, res) => {
-  const ALL_BADGES = [
-    { id: 'first_job', name: 'First Step', description: 'Complete your first job', icon: 'fa-solid fa-paw', color: '#f48b48' },
-    { id: 'five_jobs', name: 'Rising Paw', description: 'Complete 5 jobs', icon: 'fa-solid fa-star', color: '#f4c448' },
-    { id: 'ten_jobs', name: 'All Star', description: 'Complete 10 jobs', icon: 'fa-solid fa-crown', color: '#a855f7' },
-    { id: 'twenty_five_jobs', name: 'Legend', description: 'Complete 25 jobs', icon: 'fa-solid fa-trophy', color: '#e87722' },
-    { id: 'five_star', name: 'Star Player', description: 'Receive a 5-star rating', icon: 'fa-solid fa-medal', color: '#3b82f6' },
-    { id: 'first_review', name: 'Critic', description: 'Leave your first review', icon: 'fa-solid fa-comment', color: '#10b981' },
-    { id: 'streak_5', name: 'On a Roll', description: 'Complete 5 jobs in a row', icon: 'fa-solid fa-fire', color: '#ef4444' },
-    { id: 'streak_10', name: 'Unstoppable', description: 'Complete 10 jobs in a row', icon: 'fa-solid fa-bolt', color: '#f97316' },
-    { id: 'top_leaderboard', name: 'Top of The Pack', description: 'Reach #1 on the leaderboard', icon: 'fa-solid fa-crown', color: '#f4c030' },
-    { id: 'first_booking', name: 'First Booking', description: 'Make your first booking', icon: 'fa-solid fa-handshake', color: '#06b6d4' },
-    { id: 'most_jobs_month', name: 'Hustler', description: 'Most jobs completed in a month', icon: 'fa-solid fa-calendar-check', color: '#8b5cf6' },
-];
+  const all_achievements = achievementModel.getAchivementsAndBadges();
+  const completed_achievement_ids = achievementModel.getAchievementsCompleted(req.session.user_id);
+  const completed_ids = new Set();
 
-  const userJobCount = 3;
-  const userEarnedIds = [];
-  if (userJobCount >= 1) userEarnedIds.push('first_job');
-  if (userJobCount >= 5) userEarnedIds.push('five_jobs');
-  if (userJobCount >= 10) userEarnedIds.push('ten_jobs');
-  if (userJobCount >= 25) userEarnedIds.push('twenty_five_jobs');
+  for(let i = 0; i < completed_achievement_ids.length; i++){
+    completed_ids.add(completed_achievements_ids[i].achievement_id);
+  }
 
-  const earnedBadges = ALL_BADGES.filter(b => userEarnedIds.includes(b.id));
-  const lockedBadges = ALL_BADGES.filter(b => !userEarnedIds.includes(b.id));
+  let earned_badges = []
+  let not_earned_badges = []
+  for(let i = 0; i < all_achievements.length; i++){
+    const temp_achiev = all_achievements[i];
+    if(completed_ids.has(temp_achiev.achievement_id)){
+      earned_badges.push({
+        id: temp_achiev.achievement_id,
+        name: temp_achiev.achievement_name,
+        description: temp_achiev.achievement_name,
+        img_link: temp_achiev.badge_image_link
+      });
+    }else{
+      not_earned_badges.push({
+        id: temp_achiev.achievement_id,
+        name: temp_achiev.achievement_name,
+        description: temp_achiev.achievement_name,
+        img_link: temp_achiev.badge_image_link
+      });
+    }
+  }
 
-  res.render('badges', { earnedBadges, lockedBadges });
+  res.render('badges', { earned_badges, not_earned_badges });
 });
 
 // Display the create job form
