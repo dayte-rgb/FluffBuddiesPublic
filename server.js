@@ -73,10 +73,7 @@ const app = express();
 
 // create websockets server
 const server = http.createServer(app);
-//const wss = new WebSocket.Server({ server }); // attach to same server
-const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const socketUrl = `${protocol}${window.location.host}/socket`;
-const wss = new WebSocket(`${socketUrl}//${window.location.host}`);
+const wss = new WebSocket.Server({ server }); // attach to same server
 
 // Define a constant for the port number on which the server will listen.
 const PORT = process.env.PORT || 3000;
@@ -731,6 +728,7 @@ wss.on('connection', (ws) => {
         switch(type) {
             case 'JOIN': {
                 const {userId} = payload;
+                console.log(`[INFO] WebSocket on server side, ${ws}, userid: ${userId}`);
                 connections.registerUser(userId, ws);
                 ws.userId = userId; //storing this for close
                 console.log("User successfully joined the map");
@@ -741,6 +739,8 @@ wss.on('connection', (ws) => {
                 const {userId, toUserId, content} = payload;
 
                 const toUserSocket = connections.getSocket(toUserId);
+                console.log(`[INFO] TO USER ID: ${toUserId}`);
+                console.log(`[INFO] TO USER SOCKET: ${toUserSocket}`);
 
                 //insert the message into the database
                 const messageInfo = messageModel.create(content);
@@ -791,8 +791,6 @@ wss.on('connection', (ws) => {
                 console.log("oh no");
             }
         }
-
-        ws.send(`Interaction complete`);
     });
 });
 
