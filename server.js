@@ -57,9 +57,16 @@ const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 const UserBadgeModel = require('./models/userBadgeModel.js');
 const userBadgeModel = new UserBadgeModel();
+const BadgeContentModel = require('./models/badgeContentModel.js');
+const badgeContent = new BadgeContentModel();
+const CertificationContentModel = require('./models/certificationContentModel.js');
+const certificationContent = new CertificationContentModel();
+const UserCertificationModel = require('./models/userCertificationModel.js');
+const userCertification = new UserCertificationModel();
 const AchievementModel = require('./models/achievementModel.js');
 const achievementModel = new AchievementModel();
 const AchievementContentModel = require('./models/achievementContentModel.js');
+const session = require('express-session');
 const achievementContentModel = new AchievementContentModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
@@ -73,8 +80,8 @@ const wss = new WebSocket.Server({ server }); // attach to same server
 const PORT = process.env.PORT || 3000;
 
 // Middleware for parsing HTTP responses
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // Session middleware
 app.use(sessionMiddleware);
@@ -112,6 +119,77 @@ app.get('/default', (req, res) => {
         name: 'Student', // A variable named 'name' with the value 'Student'.
         items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
     });
+});
+
+
+// GET /profile
+app.get('/profile', isAuthenticated, (req, res) => {
+  const userId   = req.session.userId;
+  const userData = user.getById(userId);
+  if (!userData) return res.redirect('/login');
+
+  const jobsCompleted   = achievementModel.getJobsCompleted().find(r => r.user_id === userId);
+  const numJobs         = jobsCompleted ? jobsCompleted.num_jobs : 0;
+
+  const reviewsReceived = achievementModel.getReviewsReceived().find(r => r.user_id === userId);
+  const numReviews      = reviewsReceived ? reviewsReceived.num_reviews_received : 0;
+
+  const allUserBadges   = userBadgeModel.getAll().filter(r => r.user_id === userId);
+  const earnedBadges    = allUserBadges.map(ub => badgeContent.getById(ub.badge_id)).filter(Boolean);
+
+  const allAchievements = achievementContentModel.getAll();
+
+  const allUserCerts    = userCertification.getAll().filter(r => r.user_id === userId);
+  const certs           = allUserCerts.map(uc => certificationContent.getById(uc.certification_id)).filter(Boolean);
+
+  // Pull flash messages set by the POST, then clear them
+  const successMessage = req.session.successMessage || null;
+  const errorMessage   = req.session.errorMessage   || null;
+  delete req.session.successMessage;
+  delete req.session.errorMessage;
+
+  res.render('profile', {
+    userData,
+    numJobs,
+    numReviews,
+    earnedBadges,
+    allAchievements,
+    certs,
+    successMessage,
+    errorMessage
+  });
+});
+
+app.post('/profile/update', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+
+  try {
+    const { email, phone_number, zipcode, profile_description, profile_picture_base64 } = req.body;
+
+    const existing = user.getById(userId);  // use 'user' not 'userModel'
+
+    const updatedPicture = profile_picture_base64
+      ? profile_picture_base64
+      : existing.profile_picture_link;
+
+    user.update(
+      userId,
+      existing.password,
+      phone_number.trim(),
+      email.trim(),
+      zipcode.trim(),
+      (profile_description || '').trim(),
+      existing.account_type,
+      updatedPicture
+    );
+
+    req.session.successMessage = 'Profile updated successfully!';
+  } catch (err) {
+    console.error('Profile update error:', err);
+    req.session.errorMessage = 'Something went wrong. Please try again.';
+  }
+
+  res.redirect('/profile');
 });
 
 // Displays job search query page
@@ -391,6 +469,7 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
 
     // Hash the security answer
     const hashedAnswer = await bcrypt.hash(security_answer, 10);
+    console.log(hashedAnswer);
 
     // Create security answer
     userSecurityAnswer.create(newUser.id, security_question_id, hashedAnswer);
@@ -419,25 +498,14 @@ app.get('/inbox', (req, res) => {
 });
 
 app.get('/leaderboard', (req, res) => {
-  // Get the current leaderboard that is stored in the database
   let leaderboard = leaderboardM.getCurrentLeaderboard();
   
-  // if there is no leaderboard, create one!
   if (!leaderboard) {
-    //NOTE: GO BACK AND FIGURE OUT THE BADGE AND METRIC IDS
     const lb_info = leaderboardContent.create(new Date().toISOString().replace('T', ' ').slice(0, 19), null, 1, 1);
     leaderboard = leaderboardContent.getById(lb_info.id);
   }
 
-  // Get all stats between the start and end date of the leaderboard
-  const start_time = leaderboard.start_time;
-  const end_time = leaderboard.end_time;
-  let entries = leaderboardM.getLeaderboardStats(start_time, end_time);
-
-  // If no entries in period, fall back to no filter for dates and default k = 10
-  if (!entries || entries.length === 0) {
-    entries = leaderboardM.getLeaderboardStats();
-  }
+  let entries = leaderboardM.getLeaderboardStats('1970-01-01 00:00:00', '9999-12-31 23:59:59');
 
   res.render('leaderboard', { leaderboard, entries });
 });
@@ -469,31 +537,37 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 });
 
 app.get('/badges', (req, res) => {
-  const ALL_BADGES = [
-    { id: 'first_job', name: 'First Step', description: 'Complete your first job', icon: 'fa-solid fa-paw', color: '#f48b48' },
-    { id: 'five_jobs', name: 'Rising Paw', description: 'Complete 5 jobs', icon: 'fa-solid fa-star', color: '#f4c448' },
-    { id: 'ten_jobs', name: 'All Star', description: 'Complete 10 jobs', icon: 'fa-solid fa-crown', color: '#a855f7' },
-    { id: 'twenty_five_jobs', name: 'Legend', description: 'Complete 25 jobs', icon: 'fa-solid fa-trophy', color: '#e87722' },
-    { id: 'five_star', name: 'Star Player', description: 'Receive a 5-star rating', icon: 'fa-solid fa-medal', color: '#3b82f6' },
-    { id: 'first_review', name: 'Critic', description: 'Leave your first review', icon: 'fa-solid fa-comment', color: '#10b981' },
-    { id: 'streak_5', name: 'On a Roll', description: 'Complete 5 jobs in a row', icon: 'fa-solid fa-fire', color: '#ef4444' },
-    { id: 'streak_10', name: 'Unstoppable', description: 'Complete 10 jobs in a row', icon: 'fa-solid fa-bolt', color: '#f97316' },
-    { id: 'top_leaderboard', name: 'Top of The Pack', description: 'Reach #1 on the leaderboard', icon: 'fa-solid fa-crown', color: '#f4c030' },
-    { id: 'first_booking', name: 'First Booking', description: 'Make your first booking', icon: 'fa-solid fa-handshake', color: '#06b6d4' },
-    { id: 'most_jobs_month', name: 'Hustler', description: 'Most jobs completed in a month', icon: 'fa-solid fa-calendar-check', color: '#8b5cf6' },
-];
+  runBadgeJobs();
+  const all_achievements = achievementModel.getAchivementsAndBadges();
+  const completed_achievement_ids = achievementModel.getAchievementsCompleted(req.session.userId);
+  const completed_ids = new Set();
 
-  const userJobCount = 3;
-  const userEarnedIds = [];
-  if (userJobCount >= 1) userEarnedIds.push('first_job');
-  if (userJobCount >= 5) userEarnedIds.push('five_jobs');
-  if (userJobCount >= 10) userEarnedIds.push('ten_jobs');
-  if (userJobCount >= 25) userEarnedIds.push('twenty_five_jobs');
+  for(let i = 0; i < completed_achievement_ids.length; i++){
+    completed_ids.add(completed_achievement_ids[i].achievement_id);
+  }
 
-  const earnedBadges = ALL_BADGES.filter(b => userEarnedIds.includes(b.id));
-  const lockedBadges = ALL_BADGES.filter(b => !userEarnedIds.includes(b.id));
+  let earned_badges = []
+  let not_earned_badges = []
+  for(let i = 0; i < all_achievements.length; i++){
+    const temp_achiev = all_achievements[i];
+    if(completed_ids.has(temp_achiev.achievement_id)){
+      earned_badges.push({
+        id: temp_achiev.achievement_id,
+        name: temp_achiev.achievement_name,
+        description: temp_achiev.achievement_name,
+        img_link: temp_achiev.badge_image_link
+      });
+    }else{
+      not_earned_badges.push({
+        id: temp_achiev.achievement_id,
+        name: temp_achiev.achievement_name,
+        description: temp_achiev.achievement_name,
+        img_link: temp_achiev.badge_image_link
+      });
+    }
+  }
 
-  res.render('badges', { earnedBadges, lockedBadges });
+  res.render('badges', { earned_badges, not_earned_badges });
 });
 
 // Display the create job form
@@ -662,6 +736,7 @@ wss.on('connection', (ws) => {
         switch(type) {
             case 'JOIN': {
                 const {userId} = payload;
+                console.log(`[INFO] WebSocket on server side, ${ws}, userid: ${userId}`);
                 connections.registerUser(userId, ws);
                 ws.userId = userId; //storing this for close
                 console.log("User successfully joined the map");
@@ -672,6 +747,8 @@ wss.on('connection', (ws) => {
                 const {userId, toUserId, content} = payload;
 
                 const toUserSocket = connections.getSocket(toUserId);
+                console.log(`[INFO] TO USER ID: ${toUserId}`);
+                console.log(`[INFO] TO USER SOCKET: ${toUserSocket}`);
 
                 //insert the message into the database
                 const messageInfo = messageModel.create(content);
@@ -722,8 +799,6 @@ wss.on('connection', (ws) => {
                 console.log("oh no");
             }
         }
-
-        ws.send(`Interaction complete`);
     });
 });
 
