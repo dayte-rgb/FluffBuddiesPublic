@@ -9,14 +9,16 @@ const idBox = document.getElementById('history');
 let messageId = 0;
 let toUserId;
 let toUsername;
-const userId = document.body.dataset.userId;
+let userId = document.body.dataset.userId;
 
 
 // Connect to the WebSocket server
-const ws = new WebSocket('ws://localhost:3000');
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const ws = new WebSocket(`${protocol}//${window.location.host}`);
 
 // Connection opened
 ws.onopen = () => {
+    console.log(userId);
     ws.send(JSON.stringify({type: 'JOIN', userId: userId}));
     ws.send(JSON.stringify({type: 'GET_CONV_IDS', userId: userId}));
     status.textContent = 'Connected to server';
@@ -52,7 +54,7 @@ ws.onmessage = (event) => {
     switch(type){
         case 'NEW_MESSAGE':{
             const {content, datetime} = payload;
-            displayMsg(content, datetime);
+            displayReceivedMsg(content, datetime);
             break;
         }
         case 'HISTORY_RET': {
@@ -144,6 +146,18 @@ function displayMsg(msg, datetime){
     textElement.id = `historyText${messageId}`;
     messageId += 1;
     textElement.textContent = `[${datetime}] You: ${msg}`;
+    
+    textBox.append(textElement);
+    textBox.scrollTop = textBox.scrollHeight;
+}
+
+function displayReceivedMsg(msg, datetime){
+    // create the text box and add to the DOM
+    const textElement = document.createElement('p');
+
+    textElement.id = `historyText${messageId}`;
+    messageId += 1;
+    textElement.textContent = `[${datetime}] Received: ${msg}`;
     
     textBox.append(textElement);
     textBox.scrollTop = textBox.scrollHeight;
