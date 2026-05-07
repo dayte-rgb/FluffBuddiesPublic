@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Inbox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/css/messaging.css">
 </head>
@@ -17,6 +18,28 @@
       <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
       <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
     </nav>
+  </div>
+
+  <div id="left-panel">
+    <h1>@<%= locals.user && locals.user.username ? locals.user.username : '' %></h1>
+    <input type="text" id="newConversationInput" placeholder="Type a username...">
+    <button id="newConversationButton">Start New Conversation</button>
+    <div id="history"></div>
+  </div>
+
+  <div id="right-panel">
+    <div id="chat-header">
+      <div class="avatar"></div>
+      <div>
+        <div id="chatName">Name</div>
+        <div id="chatUsername">@Username</div>
+      </div>
+    </div>
+    <div id="messages"></div>
+    <div id="send-bar">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="send">&#9658;</button>
+    </div>
   </div>
 
   <script src="/js/messaging.js"></script>

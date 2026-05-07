@@ -1,5 +1,17 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-/*Sidebar*/
+body {
+    font-family: 'Nunito', sans-serif;
+    background: #fff;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
 .sidebar {
     width: 80px;
     background-color: #fff;
@@ -40,4 +52,173 @@
     transform: scale(1.15);
 }
 
-/*  Main content  */
+#left-panel {
+    margin-left: 80px;
+    width: 340px;
+    border-right: 2px solid #f48a486f;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    gap: 14px;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+#right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#left-panel h1 {
+    font-family: 'Fredoka One', cursive;
+    color: #665931;
+    font-size: 26px;
+}
+
+#status {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 600;
+}
+
+#newConversationInput {
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 2px solid #f48a486f;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    width: 100%;
+    outline: none;
+}
+
+#newConversationInput:focus {
+    border-color: #f48b48;
+}
+
+#newConversationButton {
+    padding: 10px;
+    border: none;
+    border-radius: 999px;
+    background-color: #f48b48;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+#newConversationButton:hover {
+    background-color: #e07a38;
+}
+
+#history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#history button {
+    padding: 10px 14px;
+    border: 2px solid #f48a486f;
+    border-radius: 12px;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    color: #665931;
+    font-weight: 600;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#history button:hover {
+    background-color: #fff5ee;
+    border-color: #f48b48;
+}
+
+#chat-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 2px solid #f48a486f;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #f48a486f;
+    background-color: #f0ece4;
+}
+
+#chatName {
+    font-family: 'Fredoka One', cursive;
+    color: #665931;
+    font-size: 18px;
+}
+
+#chatUsername {
+    font-size: 13px;
+    color: #aaa;
+    font-weight: 600;
+}
+
+#messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#messages p {
+    max-width: 60%;
+    padding: 10px 16px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+#send-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 2px solid #f48a486f;
+}
+
+#messageInput {
+    flex: 1;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 2px solid #f48a486f;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+#messageInput:focus {
+    border-color: #f48b48;
+}
+
+#send {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background-color: #f48b48;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s ease;
+}
+
+#send:hover {
+    background-color: #e07a38;
+}
