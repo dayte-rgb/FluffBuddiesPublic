@@ -244,12 +244,7 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
   try {
     const jobData = jobContent.getById(job_id);
     //PATCH FOR DEMO - When a job is booked, automatically complete it
-<<<<<<< HEAD
-    jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, 1, 1, 1);
-    console.log(JSON.stringify(jobContent.getById(job_id)));
-=======
     jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employee_num, 1, 1);
->>>>>>> be56465a28e80b5bf80fd93eecf48fd9ffbc7c46
     if (!jobData) {
       return res.status(404).json({ success: false, message: 'Job not found.' });
     }
