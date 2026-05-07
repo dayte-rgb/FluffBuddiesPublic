@@ -126,6 +126,7 @@
             <img src="images/<%= badge.badge_image_link %>" width = '50' height = '50'>
             <div class="badge-name"><%= badge.badge_name %></div>
           </div>
+        <% }); %>
         </div>
 
         <form id="profileForm" action="/profile/update" method="POST">
@@ -267,6 +268,7 @@
                 <% } %>
       </div>
 
+    <% } %>
     </div>
 
     <script>
