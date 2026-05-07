@@ -77,12 +77,12 @@
                 </div>
 
                 <!-- Book Button -->
-                <button id="book-job-button" data-job_id="<%= jobData.job_id %>">
+                <button id="book-job-button" class = "job_button" data-job_id="<%= jobData.job_id %>">
                     Book This Job
                 </button>
 
                 <!-- Send Verification Code Button -->
-                <button id="send-code-btn" data-job_id="<%= jobData.job_id %>">
+                <button id="send-code-btn" class = "job_button" data-job_id="<%= jobData.job_id %>">
                     Send Verification Code
                 </button>
                 <p id="code-msg"></p>
@@ -91,40 +91,48 @@
                 <% if(reviews && reviews.length> 0) { %>
                     <h2 class="job-title">Reviews</h2>
                     <% reviews.forEach(review=> { %>
-                        <div class="info-row">
-                            <span class="info-label">Punctuality</span>
-                            <span class="info-value">
-                                <%= review.punctuality %>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Quality</span>
-                            <span class="info-value">
-                                <%= review.quality %>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Friendliness</span>
-                            <span class="info-value">
-                                <%= review.friendliness %>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Comment</span>
-                            <span class="info-value">
-                                <%= review.comments %>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Creation Date</span>
-                            <span class="info-value">
-                                <%= review.datetime %>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <% if (review.verified==1) { %>
-                                <p>This review has been verified.</p>
-                                <% } %>
+                        <div class="review-card">
+                            <div class="info-row">
+                                <span class="info-label">Employee</span>
+                                <span class="info-value">
+                                    <%= review.username %>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Punctuality</span>
+                                <span class="info-value">
+                                    <%= review.punctuality %>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Quality</span>
+                                <span class="info-value">
+                                    <%= review.quality %>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Friendliness</span>
+                                <span class="info-value">
+                                    <%= review.friendliness %>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Comment</span>
+                                <span class="info-value">
+                                    <%= review.comments %>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Creation Date</span>
+                                <span class="info-value">
+                                    <%= review.datetime.replace('T', ' ').slice(0, 19) %>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <% if (review.verified==1) { %>
+                                    <p>This review has been verified.</p>
+                                    <% } %>
+                            </div>
                         </div>
                         <% }) %>
                             <% } %>
@@ -132,8 +140,9 @@
                                 <!-- Leave a Review Button — always visible -->
                                 <a href="/review/<%= jobData.job_id %>" class="submit-btn"
                                     style="display:inline-block; margin-top: 1rem;">
-                                    <i class="fa-solid fa-star"></i> Leave a Review
+                                    <button class="job_button">Leave a Review</button>
                                 </a>
+                                
 
             </div>
 
