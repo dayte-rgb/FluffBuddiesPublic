@@ -750,10 +750,8 @@ wss.on('connection', (ws) => {
         switch(type) {
             case 'JOIN': {
                 const {userId} = payload;
-                console.log(`[INFO] WebSocket on server side, ${ws}, userid: ${userId}`);
                 connections.registerUser(userId, ws);
                 ws.userId = userId; //storing this for close
-                console.log("User successfully joined the map");
 
         break;
       }
@@ -761,8 +759,6 @@ wss.on('connection', (ws) => {
         const { userId, toUserId, content } = payload;
 
                 const toUserSocket = connections.getSocket(toUserId);
-                console.log(`[INFO] TO USER ID: ${toUserId}`);
-                console.log(`[INFO] TO USER SOCKET: ${toUserSocket}`);
 
         //insert the message into the database
         const messageInfo = messageModel.create(content);
