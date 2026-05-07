@@ -5,14 +5,12 @@
   <title>Review – <%= worker_name %></title>
   <link rel="stylesheet" href="/css/review.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/default_stylesheet.css">
+  <link rel="stylesheet" href="https://unpkg.com/slim-select@latest/dist/slimselect.css">
 </head>
 
 <body>
   <%- include('_navbar') %>
-  
-  <div class="card">
-    <h1>Leave a Review</h1>
-    <p class="subtitle">Job: <%= job_title %> — <%= job_date %></p>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -20,6 +18,7 @@
         <nav class="sidebar-nav">
             <a href="/job-search" class="nav-icon active" title="Search"><i
                     class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
             <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
             <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
             <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
