@@ -27,3 +27,13 @@ if (bookJobButton) {
 } else {
     console.error('Button not found');
 }
+
+const sendCodeBtn = document.getElementById('send-code-btn');
+if (sendCodeBtn) {
+    sendCodeBtn.addEventListener('click', async () => {
+        const job_id = sendCodeBtn.dataset.job_id;
+        const res = await fetch(`/booking/${job_id}/send-verification`, { method: 'POST' });
+        const data = await res.json();
+        document.getElementById('code-msg').textContent = data.message;
+    });
+}
