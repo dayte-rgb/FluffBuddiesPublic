@@ -69,6 +69,7 @@ const AchievementContentModel = require('./models/achievementContentModel.js');
 const session = require('express-session');
 const achievementContentModel = new AchievementContentModel();
 const MeetupVerificationModel = require('./models/meetupVerificationModel.js');
+const { json } = require('stream/consumers');
 const meetupVerification = new MeetupVerificationModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
@@ -247,6 +248,7 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
     const jobData = jobContent.getById(job_id);
     //PATCH FOR DEMO - When a job is booked, automatically complete it
     jobContent.update(jobData.job_id, jobContent.description, jobContent.datetime, jobContent.duration, jobContent.zipcode, 1, 1, 1);
+    console.log(JSON.stringify(jobContent.getById(job_id)));
     if (!jobData) {
       return res.status(404).json({ success: false, message: 'Job not found.' });
     }
