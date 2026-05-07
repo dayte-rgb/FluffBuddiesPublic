@@ -22,11 +22,6 @@
         </nav>
     </div>
 <div class="main-content profile-main">
-  <!-- Ok just put p tags now for spacing lol-->
-  <p></p>
-  <p></p>
-  <p></p>
-  <p></p>
 
   <!-- Profile Card -->
   <div class="profile-card">
@@ -129,8 +124,7 @@
       <div class="badges-grid">
         <% earnedBadges.forEach(badge => { %>
           <div class="badge-item">
-            <i class="fa-solid fa-award"></i>
-            <img src="images/<%= badge.badge_image_link %>" width = "50", height = "50">
+            <img src="images/<%= badge.badge_image_link %>" width = '50' height = '50'>
             <div class="badge-name"><%= badge.badge_name %></div>
           </div>
         <% }); %>

@@ -45,7 +45,8 @@
   margin-left: 80px;
   padding: 40px;
   max-width: 750px;
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -363,4 +364,8 @@
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
+}
+
+img {
+  mix-blend-mode: multiply; /* Effectively "removes" a white background */
 }
