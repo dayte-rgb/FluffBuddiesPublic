@@ -45,7 +45,7 @@
                                 <p><strong>Employees needed:</strong> <%= job.employee_num %></p>
                                 <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
                                 <% if (job.job_completed) { %>
-                                <a href="/review/<%= job.job_id %>" class="btn btn-primary">Leave a Review</a>
+                                    <a href="/review/<%= job.job_id %>" class="btn btn-primary">Leave a Review</a>
                                 <% } %>
                             </div>
                         <% }); %>
@@ -73,9 +73,6 @@
                                 <p><strong>Zip Code:</strong> <%= job.zipcode %></p>
                                 <p><strong>Employer:</strong> <%= job.employer_username %></p>
                                 <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
-                                <!-- <% if (job.job_completed) { %>
-                                <a href="/review/<%= job.job_id %>" class="btn btn-primary">Leave a Review</a>
-                        <% } %> -->
                     </div>
                 <% }); %>
     </div>
