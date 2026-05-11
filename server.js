@@ -57,10 +57,21 @@ const leaderboardModel = require('./models/leaderboardModel.js');
 const leaderboardM = new leaderboardModel();
 const UserBadgeModel = require('./models/userBadgeModel.js');
 const userBadgeModel = new UserBadgeModel();
+const BadgeContentModel = require('./models/badgeContentModel.js');
+const badgeContent = new BadgeContentModel();
+const CertificationContentModel = require('./models/certificationContentModel.js');
+const certificationContent = new CertificationContentModel();
+const UserCertificationModel = require('./models/userCertificationModel.js');
+const userCertification = new UserCertificationModel();
 const AchievementModel = require('./models/achievementModel.js');
 const achievementModel = new AchievementModel();
 const AchievementContentModel = require('./models/achievementContentModel.js');
+const session = require('express-session');
 const achievementContentModel = new AchievementContentModel();
+const MeetupVerificationModel = require('./models/meetupVerificationModel.js');
+const meetupVerification = new MeetupVerificationModel();
+const ReviewModel = require('./models/reviewModel.js');
+const reviewModel = new ReviewModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -73,8 +84,8 @@ const wss = new WebSocket.Server({ server }); // attach to same server
 const PORT = process.env.PORT || 3000;
 
 // Middleware for parsing HTTP responses
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // Session middleware
 app.use(sessionMiddleware);
@@ -107,11 +118,82 @@ app.get('/', (req, res) => {
 
 // Define a route handler for GET requests to the URL ('/default')
 app.get('/default', (req, res) => {
-    // Render the 'default' template and pass an object with dynamic data.
-    res.render('default', {
-        name: 'Student', // A variable named 'name' with the value 'Student'.
-        items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
-    });
+  // Render the 'default' template and pass an object with dynamic data.
+  res.render('default', {
+    name: 'Student', // A variable named 'name' with the value 'Student'.
+    items: ['Apples', 'Bananas', 'Cherries'] // An array named 'items' containing a list of fruits.
+  });
+});
+
+
+// GET /profile
+app.get('/profile', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  const userData = user.getById(userId);
+  if (!userData) return res.redirect('/login');
+
+  const jobsCompleted = achievementModel.getJobsCompleted().find(r => r.user_id === userId);
+  const numJobs = jobsCompleted ? jobsCompleted.num_jobs : 0;
+
+  const reviewsReceived = achievementModel.getReviewsReceived().find(r => r.user_id === userId);
+  const numReviews = reviewsReceived ? reviewsReceived.num_reviews_received : 0;
+
+  const allUserBadges = userBadgeModel.getAll().filter(r => r.user_id === userId);
+  const earnedBadges = allUserBadges.map(ub => badgeContent.getById(ub.badge_id)).filter(Boolean);
+
+  const allAchievements = achievementContentModel.getAll();
+
+  const allUserCerts = userCertification.getAll().filter(r => r.user_id === userId);
+  const certs = allUserCerts.map(uc => certificationContent.getById(uc.certification_id)).filter(Boolean);
+
+  // Pull flash messages set by the POST, then clear them
+  const successMessage = req.session.successMessage || null;
+  const errorMessage = req.session.errorMessage || null;
+  delete req.session.successMessage;
+  delete req.session.errorMessage;
+
+  res.render('profile', {
+    userData,
+    numJobs,
+    numReviews,
+    earnedBadges,
+    allAchievements,
+    certs,
+    successMessage,
+    errorMessage
+  });
+});
+
+app.post('/profile/update', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+
+  try {
+    const { email, phone_number, zipcode, profile_description, profile_picture_base64 } = req.body;
+
+    const existing = user.getById(userId);  // use 'user' not 'userModel'
+
+    const updatedPicture = profile_picture_base64
+      ? profile_picture_base64
+      : existing.profile_picture_link;
+
+    user.update(
+      userId,
+      existing.password,
+      phone_number.trim(),
+      email.trim(),
+      zipcode.trim(),
+      (profile_description || '').trim(),
+      existing.account_type,
+      updatedPicture
+    );
+
+    req.session.successMessage = 'Profile updated successfully!';
+  } catch (err) {
+    console.error('Profile update error:', err);
+    req.session.errorMessage = 'Something went wrong. Please try again.';
+  }
+
+  res.redirect('/profile');
 });
 
 // Displays job search query page
@@ -137,19 +219,16 @@ app.post('/job-search', isAuthenticated, (req, res) => {
 // Display a page with details of a selected job listing
 app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
+  if (!jobData) return res.status(404).send('Job not found');
+  
   let reviews = [];
-  const reviewIds = jobReview.getByJobId(req.params.job_id);
-  reviewIds.forEach(reviewIdElem => {
-    reviews.push(reviewContent.getById(reviewIdElem.review_id));
-  })
+  reviews = reviewModel.getReviewsByJobId(req.params.job_id);
 
-  console.log(reviews);
-
-  if(reviews){
+  if (reviews) {
     const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
 
     res.render('booking-detail', { jobData, reviews, userData });
-  }else{
+  } else {
     const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
 
     res.render('booking-detail', { jobData, reviews, userData });
@@ -163,6 +242,8 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
 
   try {
     const jobData = jobContent.getById(job_id);
+    //PATCH FOR DEMO - When a job is booked, automatically complete it
+    jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employee_num, 1, 1);
     if (!jobData) {
       return res.status(404).json({ success: false, message: 'Job not found.' });
     }
@@ -217,28 +298,28 @@ app.post('/login', isNotAuthenticated, async (req, res) => {
 
 // Handle forgot password render
 async function createEmailTransporter() {
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-      secure: process.env.SMTP_PORT === '465',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
+  // if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+  //   return nodemailer.createTransport({
+  //     host: process.env.SMTP_HOST,
+  //     port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+  //     secure: process.env.SMTP_PORT === '465',
+  //     auth: {
+  //       user: process.env.SMTP_USER,
+  //       pass: process.env.SMTP_PASS,
+  //     },
+  //  });
+  // }
 
-  // const testAccount = await nodemailer.createTestAccount();
-  // return nodemailer.createTransport({
-  //   host: testAccount.smtp.host,
-  //   port: testAccount.smtp.port,
-  //   secure: testAccount.smtp.secure,
-  //   auth: {
-  //     user: testAccount.user,
-  //     pass: testAccount.pass,
-  //   },
-  // });
+  const testAccount = await nodemailer.createTestAccount();
+  return nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
 }
 
 async function sendPasswordResetEmail(email, code) {
@@ -354,7 +435,8 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
   const { username, email, password, phone_number, zipcode, account_type, security_question_id, security_answer } = req.body;
 
   // Validate required fields
-  if (!username || !email || !password || !phone_number || !zipcode || !account_type || !security_question_id || !security_answer) {
+  //deleted: || !security_question_id || !security_answer
+  if (!username || !email || !password || !phone_number || !zipcode || !account_type) {
     logger.write(`[INFO] Signup attempt with missing fields`);
     const securityQuestions = securityQuestion.getAll();
     return res.render('signup', { error: 'All fields are required.', securityQuestions });
@@ -390,10 +472,10 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
     logger.write(`[INFO] New user created: ${newUser.username}`);
 
     // Hash the security answer
-    const hashedAnswer = await bcrypt.hash(security_answer, 10);
+    // const hashedAnswer = await bcrypt.hash(security_answer, 10);
 
     // Create security answer
-    userSecurityAnswer.create(newUser.id, security_question_id, hashedAnswer);
+    // userSecurityAnswer.create(newUser.id, security_question_id, hashedAnswer);
 
     // Create session for new user
     req.session.userId = newUser.id;
@@ -415,43 +497,39 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
 
 app.get('/inbox', (req, res) => {
   res.status(200);
-  res.render('messaging', {userId: req.session.userId});
+  res.render('messaging', { userId: req.session.userId });
 });
 
 app.get('/leaderboard', (req, res) => {
-  // Get the current leaderboard that is stored in the database
   let leaderboard = leaderboardM.getCurrentLeaderboard();
-  
-  // if there is no leaderboard, create one!
+
   if (!leaderboard) {
-    //NOTE: GO BACK AND FIGURE OUT THE BADGE AND METRIC IDS
     const lb_info = leaderboardContent.create(new Date().toISOString().replace('T', ' ').slice(0, 19), null, 1, 1);
     leaderboard = leaderboardContent.getById(lb_info.id);
   }
 
-  // Get all stats between the start and end date of the leaderboard
-  const start_time = leaderboard.start_time;
-  const end_time = leaderboard.end_time;
-  let entries = leaderboardM.getLeaderboardStats(start_time, end_time);
-
-  // If no entries in period, fall back to no filter for dates and default k = 10
-  if (!entries || entries.length === 0) {
-    entries = leaderboardM.getLeaderboardStats();
-  }
+  let entries = leaderboardM.getLeaderboardStats('1970-01-01 00:00:00', '9999-12-31 23:59:59');
 
   res.render('leaderboard', { leaderboard, entries });
 });
 
-app.get('/review-test', (req, res) => {
+app.get('/review/:job_id', isAuthenticated, (req, res) => {
+  const job_id = req.params.job_id;
+  const jobData = jobContent.getById(job_id);
+  if (!jobData) return res.status(404).send('Job not found');
+
+  const employerLink = employerJob.getById(job_id);
+  const workerData = employerLink ? user.getById(employerLink.employer_id) : null;
+
   res.render('review', {
-    worker_name: 'Rex',
-    job_title: 'Dog Walking',
-    job_date: '2025-04-01',
-    job_id: 99  // changed from 1 to 99
+    worker_name: workerData ? workerData.username : 'Unknown',
+    job_title: jobData.description,
+    job_date: jobData.datetime,
+    job_id: job_id
   });
 });
 
-function write_res_log(res){
+function write_res_log(res) {
   logger.write(`[INFO] Returned Status Code: ${res.statusCode}`);
   return;
 }
@@ -461,6 +539,7 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 
   try {
     const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
+    jobReview.create(newReview.id, job_id);
     res.json({ review_id: newReview.id });
   } catch (error) {
     console.error('Error saving review:', error);
@@ -469,31 +548,37 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
 });
 
 app.get('/badges', (req, res) => {
-  const ALL_BADGES = [
-    { id: 'first_job', name: 'First Step', description: 'Complete your first job', icon: 'fa-solid fa-paw', color: '#f48b48' },
-    { id: 'five_jobs', name: 'Rising Paw', description: 'Complete 5 jobs', icon: 'fa-solid fa-star', color: '#f4c448' },
-    { id: 'ten_jobs', name: 'All Star', description: 'Complete 10 jobs', icon: 'fa-solid fa-crown', color: '#a855f7' },
-    { id: 'twenty_five_jobs', name: 'Legend', description: 'Complete 25 jobs', icon: 'fa-solid fa-trophy', color: '#e87722' },
-    { id: 'five_star', name: 'Star Player', description: 'Receive a 5-star rating', icon: 'fa-solid fa-medal', color: '#3b82f6' },
-    { id: 'first_review', name: 'Critic', description: 'Leave your first review', icon: 'fa-solid fa-comment', color: '#10b981' },
-    { id: 'streak_5', name: 'On a Roll', description: 'Complete 5 jobs in a row', icon: 'fa-solid fa-fire', color: '#ef4444' },
-    { id: 'streak_10', name: 'Unstoppable', description: 'Complete 10 jobs in a row', icon: 'fa-solid fa-bolt', color: '#f97316' },
-    { id: 'top_leaderboard', name: 'Top of The Pack', description: 'Reach #1 on the leaderboard', icon: 'fa-solid fa-crown', color: '#f4c030' },
-    { id: 'first_booking', name: 'First Booking', description: 'Make your first booking', icon: 'fa-solid fa-handshake', color: '#06b6d4' },
-    { id: 'most_jobs_month', name: 'Hustler', description: 'Most jobs completed in a month', icon: 'fa-solid fa-calendar-check', color: '#8b5cf6' },
-];
+  runBadgeJobs();
+  const all_achievements = achievementModel.getAchivementsAndBadges();
+  const completed_achievement_ids = achievementModel.getAchievementsCompleted(req.session.userId);
+  const completed_ids = new Set();
 
-  const userJobCount = 3;
-  const userEarnedIds = [];
-  if (userJobCount >= 1) userEarnedIds.push('first_job');
-  if (userJobCount >= 5) userEarnedIds.push('five_jobs');
-  if (userJobCount >= 10) userEarnedIds.push('ten_jobs');
-  if (userJobCount >= 25) userEarnedIds.push('twenty_five_jobs');
+  for(let i = 0; i < completed_achievement_ids.length; i++){
+    completed_ids.add(completed_achievement_ids[i].achievement_id);
+  }
 
-  const earnedBadges = ALL_BADGES.filter(b => userEarnedIds.includes(b.id));
-  const lockedBadges = ALL_BADGES.filter(b => !userEarnedIds.includes(b.id));
+  let earned_badges = []
+  let not_earned_badges = []
+  for(let i = 0; i < all_achievements.length; i++){
+    const temp_achiev = all_achievements[i];
+    if(completed_ids.has(temp_achiev.achievement_id)){
+      earned_badges.push({
+        id: temp_achiev.achievement_id,
+        name: temp_achiev.achievement_name,
+        description: temp_achiev.achievement_name,
+        img_link: temp_achiev.badge_image_link
+      });
+    }else{
+      not_earned_badges.push({
+        id: temp_achiev.achievement_id,
+        name: temp_achiev.achievement_name,
+        description: temp_achiev.achievement_name,
+        img_link: temp_achiev.badge_image_link
+      });
+    }
+  }
 
-  res.render('badges', { earnedBadges, lockedBadges });
+  res.render('badges', { earned_badges, not_earned_badges });
 });
 
 // Display the create job form
@@ -521,7 +606,7 @@ app.post('/create-job', isAuthenticated, (req, res) => {
   // Validate required fields
   if (!description || !datetime || !duration || !zipcode || !employee_num || !username) {
     logger.write(`[INFO] Create job attempt with missing fields`);
-    return res.render('create-job', { 
+    return res.render('create-job', {
       error: 'All required fields must be filled out.',
       success: null,
       jobCategories,
@@ -649,12 +734,12 @@ app.get('/schedule', isAuthenticated, (req, res) => {
 
 wss.on('connection', (ws) => {
 
-    ws.on('close', () => {
-      connections.removeUser(ws.userId);
-      console.log('Client disconnected');
-    });
+  ws.on('close', () => {
+    connections.removeUser(ws.userId);
+    console.log('Client disconnected');
+  });
 
-    console.log('New client connected');
+  console.log('New client connected');
 
     ws.on('message', (message) => {
         const {type, ...payload} = JSON.parse(message.toString()); //otherwise, you will get just the raw bytes
@@ -664,59 +749,63 @@ wss.on('connection', (ws) => {
                 const {userId} = payload;
                 connections.registerUser(userId, ws);
                 ws.userId = userId; //storing this for close
-                console.log("User successfully joined the map");
 
-                break;
-            }
-            case 'SEND_MESSAGE':{
-                const {userId, toUserId, content} = payload;
+        break;
+      }
+      case 'SEND_MESSAGE': {
+        const { userId, toUserId, content } = payload;
 
                 const toUserSocket = connections.getSocket(toUserId);
 
-                //insert the message into the database
-                const messageInfo = messageModel.create(content);
-                userMessageModel.create(messageInfo.message_id, userId, toUserId);
+        //insert the message into the database
+        const messageInfo = messageModel.create(content);
+        userMessageModel.create(messageInfo.message_id, userId, toUserId);
 
-                if(toUserSocket){
-                    toUserSocket.send(JSON.stringify({type: "NEW_MESSAGE", content: content, datetime: messageInfo.datetime}));
-                    console.log("Sent message successfully");
-                } else{
-                    console.log("Message not sent, user is offline");
+        if (toUserSocket) {
+          toUserSocket.send(JSON.stringify({ type: "NEW_MESSAGE", content: content, datetime: messageInfo.datetime }));
+          console.log("Sent message successfully");
+        } else {
+          console.log("Message not sent, user is offline");
+        }
+
+        break;
+      }
+      case 'HISTORY': {
+        const { userId, toUserId } = payload;
+        //load entire history between these 2 and send back to the DOM
+        const history = messagingModel.getHistory(userId, toUserId);
+        ws.send(JSON.stringify({ type: 'HISTORY_RET', history: history, userId: userId }));
+        break;
+      }
+      case 'DISCONNECT': {
+        const { userId } = payload;
+
+        connections.removeUser(userId);
+        ws.send("User removed from mapping");
+      }
+      case 'GET_CONV_IDS': {
+        const { userId } = payload;
+
+        const ids = messagingModel.getConversationIds(userId);
+        ws.send(JSON.stringify({ type: "RET_CONV_IDS", userId: userId, ids: ids }));
+        break;
+      }
+      case 'GET_USER_ID': {
+        const { username } = payload;
+
+                //if we cannot find the user, then return undefined for the userId
+                if(!user.getByUsername(username)){
+                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: undefined}));
+                }else{
+                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
                 }
-
-                break;
-            }
-            case 'HISTORY':{
-                const {userId, toUserId} = payload;
-                //load entire history between these 2 and send back to the DOM
-                const history = messagingModel.getHistory(userId, toUserId);
-                ws.send(JSON.stringify({type: 'HISTORY_RET', history: history, userId: userId}));
-                break;
-            }
-            case 'DISCONNECT': {
-                const {userId} = payload;
-
-                connections.removeUser(userId);
-                ws.send("User removed from mapping");
-            }
-            case 'GET_CONV_IDS': {
-                const {userId} = payload;
-
-                const ids = messagingModel.getConversationIds(userId);
-                ws.send(JSON.stringify({type: "RET_CONV_IDS", userId: userId, ids: ids}));
-                break;
-            }
-            case 'GET_USER_ID': {
-                const {username} = payload;
-                ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
+                
                 break;
             }
             default: {
                 console.log("oh no");
             }
         }
-
-        ws.send(`Interaction complete`);
     });
 });
 
@@ -726,14 +815,14 @@ const INTERVAL = 1000 * 60 * 60; // an hour
 setInterval(runBadgeJobs, INTERVAL);
 
 function runBadgeJobs() {
-//get most recent leaderboard
+  //get most recent leaderboard
   const currLeaderboard = leaderboardM.getCurrentLeaderboard();
 
-  if(currLeaderboard){
+  if (currLeaderboard) {
     const currDatetime = dateObj.toISOString().replace('T', ' ').slice(0, 19);
     const endDatetime = currLeaderboard.end_time;
 
-    if(currDatetime >= endDatetime){
+    if (currDatetime >= endDatetime) {
       distributeLeaderboardBadges(currLeaderboard)
     }
   };
@@ -747,7 +836,7 @@ function runBadgeJobs() {
 
   //create a map of metrics and what the specific attribute to look at is
   const metricMap = {
-    1: { data: num_jobs_by_user,            key: 'num_jobs' },
+    1: { data: num_jobs_by_user, key: 'num_jobs' },
     2: { data: num_reviews_written_by_user, key: 'num_reviews_written' },
     3: { data: num_reviews_received_by_user, key: 'num_reviews_received' },
   };
@@ -764,24 +853,24 @@ function runBadgeJobs() {
   });
 }
 
-function distributeLeaderboardBadges(leaderboard){
+function distributeLeaderboardBadges(leaderboard) {
   const badge_id = leaderboard.badge_id;
   const top_5_rating = leaderboardM.getTopKRating(leaderboard.start_time, leaderboard.end_time, 5);
   const top_5_jobs = leaderboardM.getTopKJobs(leaderboard.start_time, leaderboard.end_time, 5);
 
   top_5_rating.forEach((row) => {
-    try{
+    try {
       userBadgeModel.create(row.user_id, badge_id);
-    }catch(e){
+    } catch (e) {
       logger.write(`[WARN] User with user_id ${row.user_id} already has badge with id ${badge_id}, unable to add again`);
       logger.write(e);
     }
   });
 
   top_5_jobs.forEach((row) => {
-    try{
+    try {
       userBadgeModel.create(row.user_id, badge_id);
-    }catch(e){
+    } catch (e) {
       logger.write(`[WARN] User with user_id ${row.user_id} already has badge with id ${badge_id}, unable to add again`);
       logger.write(e);
     }
@@ -791,6 +880,57 @@ function distributeLeaderboardBadges(leaderboard){
 // run the jobs functions on startup
 runBadgeJobs();
 
+async function sendMeetupVerificationEmail(email, code, job_id) {
+  try {
+    const transporter = await createEmailTransporter();
+    const mailOptions = {
+      from: process.env.RESET_EMAIL_FROM || 'Paw Patrol <no-reply@pawpatrol.com>',
+      to: email,
+      subject: 'Paw Patrol Meetup Verification Code',
+      text: `Your meetup verification code for job #${job_id} is: ${code}. This code expires in 24 hours.`,
+    };
+    const info = await transporter.sendMail(mailOptions);
+    logger.write(`[INFO] Meetup verification email preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    return true;
+  } catch (error) {
+    logger.write(`[ERROR] Failed to send meetup verification email: ${error.message}`);
+    return false;
+  }
+}
+app.post('/booking/:job_id/send-verification', isAuthenticated, async (req, res) => {
+  const job_id = req.params.job_id;
+  const email = req.session.email;
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  meetupVerification.create(job_id, code, expiresAt);
+  await sendMeetupVerificationEmail(email, code, job_id);
+
+  res.json({ success: true, message: 'Verification code sent to your email.' });
+});
+
+app.get('/submit_key', isAuthenticated, (req, res) => {
+  const job_id = req.query.job_id || '';
+  res.render('submit_key', { job_id, error: null, success: null });
+});
+
+app.post('/submit_key', isAuthenticated, (req, res) => {
+  const { job_id, code } = req.body;
+  const entry = meetupVerification.getByJobId(job_id);
+
+  if (!entry) {
+    return res.render('submit_key', { job_id, error: 'No verification code found for this job.', success: null });
+  }
+  if (new Date(entry.expires_at) < new Date()) {
+    return res.render('submit_key', { job_id, error: 'Code has expired.', success: null });
+  }
+  if (entry.code !== code) {
+    return res.render('submit_key', { job_id, error: 'Incorrect code. Please try again.', success: null });
+  }
+
+  meetupVerification.markVerified(job_id);
+  res.render('submit_key', { job_id, error: null, success: 'Meetup verified!' });
+});
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.

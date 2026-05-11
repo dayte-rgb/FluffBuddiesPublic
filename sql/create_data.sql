@@ -10,8 +10,7 @@ INSERT INTO User VALUES
 (NULL, "lisa_sitter", "4", "610-555-0606", "lisa@gmail.com", "23984", "Pet sitter with 5 years experience", 'user', "lisa_pic.jpeg", datetime('now')),
 (NULL, "groom_org", "donthackme", "610-555-0707", "groom@groomorg.com", "71129", "Professional grooming services", 'organization', "groom_logo.jpeg", datetime('now')),
 (NULL, "happy_paws_org", "securepass", "610-555-0808", "happy@happypaws.com", "18042", "Nonprofit focused on pet adoption and care", 'organization', "happy_paws_logo.jpeg", datetime('now')),
-(NULL, "tom_owner", "tompass1", "610-555-0909", "tom@gmail.com", "18045", "Reptile enthusiast and proud tortoise dad", 'owner', "tom_pic.jpeg", datetime('now')),
-(NULL, "snuggles", "slowandsteady", "610-555-1010", "snuggles@gmail.com", "18045", "Laid-back tortoise who enjoys basking and leafy greens", 'pet', "snuggles_pic.jpeg", datetime('now'));
+(NULL, "tom_owner", "tompass1", "610-555-0909", "tom@gmail.com", "18045", "Reptile enthusiast and proud tortoise dad", 'owner', "tom_pic.jpeg", datetime('now'));
 
 -- insert data into JobCategory
 -- (<job_category_id>, <category_name>)
@@ -29,17 +28,17 @@ INSERT INTO JobCategory VALUES
 -- insert data into BadgeContent
 -- (NULL, <badge_name>, <badge_image_link>)
 INSERT INTO BadgeContent VALUES
-(NULL, "First Job", "job_1.png"),
-(NULL, "5 Jobs", "job_5.png"),
-(NULL, "10 Jobs", "job_10.png"),
-(NULL, "25 Jobs", "job_25.png"),
+(NULL, "Complete Your First Job", "job_1.png"),
+(NULL, "Complete 5 Jobs", "job_5.png"),
+(NULL, "Complete 10 Jobs", "job_10.png"),
+(NULL, "Complete 25 Jobs", "job_25.png"),
 (NULL, "1 Review Written", "review_write_1.png"),
 (NULL, "5 Reviews Written", "review_write_5.png"),
 (NULL, "Receive 1 Review", "review_1.png"),
 (NULL, "Receive 5 Reviews", "review_5.png"),
 (NULL, "Receive 10 Reviews", "review_10.png"),
 (NULL, "Receive 25 Reviews", "review_25.png"),
-(NULL, "Leaderboard 26 Q2", "leaderboard_badge.png");
+(NULL, "Top 10: Leaderboard 26 Q2", "leaderboard_badge.png");
 
 -- insert data into SkillCategory
 -- (<skill_category_id>, <category_name>)
@@ -92,7 +91,8 @@ INSERT INTO JobContent VALUES
 (NULL, "Evening dog walk for senior labrador", "2026-05-20 17:00:00", 45, 18042, 1, FALSE, FALSE),
 (NULL, "Cat feeding and litter box service for long weekend", "2026-05-22 09:00:00", 4320, 18045, 1, FALSE, FALSE),
 (NULL, "Eating spare leaves from my garden", "2026-05-20 14:00:00", 4500, 17432, 1, FALSE, FALSE),
-(NULL, "Hamster care and cage cleaning", "2026-05-25 10:00:00", 60, 71129, 1, FALSE, FALSE);
+(NULL, "Hamster care and cage cleaning", "2026-05-25 10:00:00", 60, 71129, 1, FALSE, FALSE),
+(NULL, "Come and eat some lettuce scraps to clean my garden", "2026-05-06 10:00:00", 60, 53202, 1, FALSE, FALSE);
 
 -- insert data into JobCategoriesByJob
 -- (<job_id>, <job_category_id>)
@@ -116,7 +116,8 @@ INSERT INTO JobCategoriesByJob VALUES
 (17, 7),
 (18, 1),
 (19, 2),
-(20, 2);
+(20, 2),
+(22, 6);
 
 -- insert data into SkillCategoriesByJob
 -- (<job_id>, <skill_category_id>)
@@ -142,7 +143,8 @@ INSERT INTO SkillCategoriesByJob VALUES
 (17, 3),
 (18, 1),
 (19, 2),
-(20, 3);
+(20, 3),
+(22, 3);
 
 -- insert data into JobPayment
 -- (<job_id>, <payment_id>, <payment_quantity>)
@@ -190,7 +192,8 @@ INSERT INTO EmployerJob VALUES
 (17, 4),
 (18, 2),
 (19, 5),
-(20, 8);
+(20, 8),
+(22, 3);
 
 -- insert data into EmployeeJob
 -- (<job_id>, <employee_id>)
@@ -293,7 +296,7 @@ INSERT INTO UserMessage VALUES
 INSERT INTO AchievementContent VALUES
 (NULL, "Complete your first job", 1, 1, 1),
 (NULL, "Complete 5 jobs", 1, 2, 5),
-(NULL, "Compelte 10 jobs", 1, 3, 10),
+(NULL, "Complete 10 jobs", 1, 3, 10),
 (NULL, "Complete 25 jobs", 1, 4, 25),
 (NULL, "Leave your first review", 2, 5, 1),
 (NULL, "Write 5 reviews", 2, 6, 5),
