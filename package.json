@@ -4,7 +4,7 @@
   "description": "Turner Day, Gabriela Blanco Reyes, Sana Adnan, and David Broczkowski",
   "main": "database.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js"
   },
   "repository": {
@@ -30,5 +30,9 @@
     "nodemailer": "^8.0.7",
     "slim-select": "^3.4.3",
     "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   }
 }
