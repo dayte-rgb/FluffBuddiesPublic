@@ -3,7 +3,6 @@ let messageInput = document.getElementById('messageInput');
 let convInput = document.getElementById('newConversationInput');
 const sendButton = document.getElementById('send');
 const convButton = document.getElementById('newConversationButton');
-const getHistoryButton = document.getElementById('getHistory');
 const textBox = document.getElementById('messages');
 const idBox = document.getElementById('history');
 let messageId = 0;
@@ -11,63 +10,56 @@ let toUserId;
 let toUsername;
 let userId = document.body.dataset.userId;
 
-
-// Connect to the WebSocket server
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${protocol}//${window.location.host}`);
 
-// Connection opened
 ws.onopen = () => {
     console.log(userId);
-    ws.send(JSON.stringify({type: 'JOIN', userId: userId}));
-    ws.send(JSON.stringify({type: 'GET_CONV_IDS', userId: userId}));
+    ws.send(JSON.stringify({ type: 'JOIN', userId: userId }));
+    ws.send(JSON.stringify({ type: 'GET_CONV_IDS', userId: userId }));
     status.textContent = 'Connected to server';
     status.style.color = 'green';
 };
 
-sendButton.addEventListener('click', () =>{ 
+sendButton.addEventListener('click', () => {
     sendMessage();
 });
 
-convButton.addEventListener('click', () => { 
+convButton.addEventListener('click', () => {
     startConversation();
 });
 
-// Send message on Enter key
 messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         sendMessage();
     }
 });
 
-// Send message on Enter key
 convInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         startConversation();
     }
 });
 
-// listen for messages
 ws.onmessage = (event) => {
-    const {type, ...payload} = JSON.parse(event.data);
+    const { type, ...payload } = JSON.parse(event.data);
 
-    switch(type){
-        case 'NEW_MESSAGE':{
-            const {content, datetime} = payload;
+    switch (type) {
+        case 'NEW_MESSAGE': {
+            const { content, datetime } = payload;
             displayReceivedMsg(content, datetime);
             break;
         }
         case 'HISTORY_RET': {
-            const {history, userId} = payload;
+            const { history, userId } = payload;
             displayHistory(history, userId);
         }
         case 'RET_CONV_IDS': {
-            const {userId, ids} = payload;
+            const { userId, ids } = payload;
             displayConvIds(userId, ids);
         }
         case 'RET_USER_ID': {
-            //if it can't find the id, will return undefined, which throws an error, which we catch and set toUserId as undefined
-            const {userId} = payload;
+            const { userId } = payload;
             toUserId = userId;
             break;
         }
@@ -77,30 +69,25 @@ ws.onmessage = (event) => {
     };
 };
 
-// Handle errors
 ws.onerror = (error) => {
     status.textContent = 'Error: ' + error.message;
     status.style.color = 'red';
 };
 
-// Handle connection close
 ws.onclose = () => {
     status.textContent = 'Disconnected from server';
     status.style.color = 'red';
 };
 
-async function startConversation(){
+async function startConversation() {
     const convInput = document.getElementById('newConversationInput');
     const newUsername = convInput.value;
 
-    ws.send(JSON.stringify({type: "GET_USER_ID", username: newUsername}));
+    ws.send(JSON.stringify({ type: "GET_USER_ID", username: newUsername }));
 
-    // this is jank, but we wait 500ms to give the server enough time to return a response for toUserId, otherwise toUserId will be the wrong value
-    // then we pray to God that it arrives in time :D
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // check that if a user inputted a non-existant user or themselves, fails to create a conversation
-    if(!toUserId || toUserId == userId){
+    if (!toUserId || toUserId == userId) {
         convInput.value = "";
         convInput.placeholder = "Please input a valid username"
         return;
@@ -111,79 +98,70 @@ async function startConversation(){
 
     convInput.value = "";
 
-    //add user to list of users to choose from
     addUserButton(userId, newUserId);
 }
 
-// Function to send a message
 function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value.trim();
 
-    //check to make sure toUserId is defined
-    if(!toUserId){
+    if (!toUserId) {
         return;
     }
 
-    // send to WebSockets
     console.log(userId, toUserId, message);
     if (message) {
-        ws.send(JSON.stringify({type: 'SEND_MESSAGE', userId: userId, toUserId: toUserId, content: message}));
+        ws.send(JSON.stringify({ type: 'SEND_MESSAGE', userId: userId, toUserId: toUserId, content: message }));
         messageInput.value = '';
     };
 
     displayMsg(message, new Date().toLocaleString('en-CA', { hour12: false }).replace(",", ""));
 };
 
-function getChatHistory(userId, toUserId){
-    ws.send(JSON.stringify({type: 'HISTORY', userId: userId, toUserId: toUserId}));
+function getChatHistory(userId, toUserId) {
+    ws.send(JSON.stringify({ type: 'HISTORY', userId: userId, toUserId: toUserId }));
 };
 
-function displayMsg(msg, datetime){
-    // create the text box and add to the DOM
+function displayMsg(msg, datetime) {
     const textElement = document.createElement('p');
-
     textElement.id = `historyText${messageId}`;
     messageId += 1;
     textElement.textContent = `[${datetime}] You: ${msg}`;
-    
     textBox.append(textElement);
     textBox.scrollTop = textBox.scrollHeight;
 }
 
-function displayReceivedMsg(msg, datetime){
-    // create the text box and add to the DOM
+function displayReceivedMsg(msg, datetime) {
     const textElement = document.createElement('p');
-
     textElement.id = `historyText${messageId}`;
     messageId += 1;
     textElement.textContent = `[${datetime}] Received: ${msg}`;
-    
     textBox.append(textElement);
     textBox.scrollTop = textBox.scrollHeight;
 }
 
-function displayHistory(history, userId){
-    for(let i = 0; i < history.length; i++){
+function displayHistory(history, userId) {
+    for (let i = 0; i < history.length; i++) {
         const textElement = document.createElement('p');
         textElement.id = `historyText${messageId}`;
 
-        if(history[i].sender_id == userId){
+        if (history[i].sender_id == userId) {
             textElement.textContent = `[${history[i].datetime}] You: ${history[i].message_content}`;
-        }else{
+        } else {
             textElement.textContent = `[${history[i].datetime}] Recipient: ${history[i].message_content}`;
         };
         messageId += 1;
-        
         textBox.append(textElement);
     };
 }
 
-function displayConvIds(userId, ids){
-    for(let i = 0; i < ids.length; i++){
+function displayConvIds(userId, ids) {
+    for (let i = 0; i < ids.length; i++) {
         const button = document.createElement('button');
 
         button.addEventListener('click', () => {
+            document.getElementById('chatName').textContent = ids[i].contact_username;
+            document.getElementById('chatUsername').textContent = `@${ids[i].contact_username}`;
             toUserId = ids[i].contact_id;
             removeChatHistory();
             getChatHistory(userId, ids[i].contact_id);
@@ -197,10 +175,12 @@ function displayConvIds(userId, ids){
     }
 }
 
-function addUserButton(userId, toUserId){
+function addUserButton(userId, toUserId) {
     const button = document.createElement('button');
 
     button.addEventListener('click', () => {
+        // document.getElementById('chatName').textContent = toUsername;
+        // document.getElementById('chatUsername').textContent = `@${toUsername}`;
         removeChatHistory();
         getChatHistory(userId, toUserId);
     });
@@ -212,6 +192,6 @@ function addUserButton(userId, toUserId){
     idBox.append(button);
 }
 
-function removeChatHistory(){
+function removeChatHistory() {
     textBox.innerHTML = "";
 };

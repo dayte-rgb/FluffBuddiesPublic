@@ -70,6 +70,8 @@ const session = require('express-session');
 const achievementContentModel = new AchievementContentModel();
 const MeetupVerificationModel = require('./models/meetupVerificationModel.js');
 const meetupVerification = new MeetupVerificationModel();
+const ReviewModel = require('./models/reviewModel.js');
+const reviewModel = new ReviewModel();
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -220,12 +222,7 @@ app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   if (!jobData) return res.status(404).send('Job not found');
   
   let reviews = [];
-  const reviewIds = jobReview.getAllByJobId(req.params.job_id);
-  reviewIds.forEach(reviewIdElem => {
-    reviews.push(reviewContent.getById(reviewIdElem.review_id));
-  })
-
-  console.log(reviews);
+  reviews = reviewModel.getReviewsByJobId(req.params.job_id);
 
   if (reviews) {
     const userData = await user.getById(employerJob.getById(req.params.job_id).employer_id);
@@ -245,6 +242,8 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
 
   try {
     const jobData = jobContent.getById(job_id);
+    //PATCH FOR DEMO - When a job is booked, automatically complete it
+    jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employee_num, 1, 1);
     if (!jobData) {
       return res.status(404).json({ success: false, message: 'Job not found.' });
     }
@@ -748,10 +747,8 @@ wss.on('connection', (ws) => {
         switch(type) {
             case 'JOIN': {
                 const {userId} = payload;
-                console.log(`[INFO] WebSocket on server side, ${ws}, userid: ${userId}`);
                 connections.registerUser(userId, ws);
                 ws.userId = userId; //storing this for close
-                console.log("User successfully joined the map");
 
         break;
       }
@@ -759,8 +756,6 @@ wss.on('connection', (ws) => {
         const { userId, toUserId, content } = payload;
 
                 const toUserSocket = connections.getSocket(toUserId);
-                console.log(`[INFO] TO USER ID: ${toUserId}`);
-                console.log(`[INFO] TO USER SOCKET: ${toUserSocket}`);
 
         //insert the message into the database
         const messageInfo = messageModel.create(content);

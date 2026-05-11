@@ -16,13 +16,11 @@
     gap: 10px;
 }
 
-/* Sidebar logo */
 .sidebar-logo {
     width: 55px;
     margin-bottom: 20px;
 }
 
-/* Sidebar icon list */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -30,7 +28,6 @@
     align-items: center;
 }
 
-/* Sidebar icons */
 .nav-icon {
     color: #7a7878;
     font-size: 22px;
@@ -38,8 +35,7 @@
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
-/* Sidebar icon hover animation */
-.nav-icon:hover {
+.nav-icon:hover, .nav-icon.active {
     color: #f48b48;
     transform: scale(1.15);
 }
@@ -49,7 +45,8 @@
   margin-left: 80px;
   padding: 40px;
   max-width: 750px;
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -96,7 +93,7 @@
   gap: 10px;
   font-size: 15px;
   color: #444;
-  font-weight: 600;
+  font-weight: 525;
 }
 
 .profile-meta i {
@@ -108,7 +105,7 @@
 /* Profile description */
 .profile-description {
   font-size: 15px;
-  color: #666;
+  color: #000000;
   margin-top: 4px;
 }
 
@@ -367,4 +364,8 @@
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
+}
+
+img {
+  mix-blend-mode: multiply; /* Effectively "removes" a white background */
 }
