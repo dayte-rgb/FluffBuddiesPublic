@@ -3,31 +3,50 @@
 
 <head>
     <title>Verify Meetup</title>
+    <link rel="stylesheet" href="/css/submit_key.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
-    <h1>Verify Meetup</h1>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+        <nav class="sidebar-nav">
+            <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
+            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-clipboard-list"></i></a>
+            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+        </nav>
+    </div>
 
-    <% if (error) { %>
-        <p style="color: red;">
-            <%= error %>
-        </p>
-        <% } %>
+    <div class="main-content">
+        <div class="card">
+
+            <h2 class="page-title">Verify Meetup</h2>
+
+            <% if (error) { %>
+                <div class="error-msg"><%= error %></div>
+            <% } %>
 
             <% if (success) { %>
-                <p style="color: green;">
-                    <%= success %>
-                </p>
-                <a href="/review?job_id=<%= job_id %>">Leave a review</a>
-                <% } else { %>
-                    <p>Enter the verification code sent to the employer's email.</p>
-                    <form action="/submit_key" method="POST">
-                        <input type="hidden" name="job_id" value="<%= job_id %>">
-                        <label>Code:</label>
-                        <input type="text" name="code" placeholder="Enter 6-digit code" required>
-                        <button type="submit">Verify</button>
-                    </form>
-                    <% } %>
+                <div class="success-msg"><%= success %></div>
+                <a href="/review/<%= job_id %>" class="review-link">Leave a Review</a>
+            <% } else { %>
+                <p>Enter the verification code sent to the employer's email.</p>
+                <form action="/submit_key" method="POST" style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
+                    <input type="hidden" name="job_id" value="<%= job_id %>">
+                    <input type="text" name="code" placeholder="Enter 6-digit code" required class="code-input">
+                    <button type="submit" class="verify-btn">Verify</button>
+                </form>
+            <% } %>
+
+        </div>
+
+        <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
+    </div>
+
 </body>
 
 </html>
