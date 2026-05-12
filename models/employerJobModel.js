@@ -1,9 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class employerJobModel {
-  constructor() {
-    this.db = connectToDatabase();
-  }
+  constructor(db = undefined) {
+      if(db == undefined){
+        this.db = connectToDatabase();
+      }else{
+        this.db = db; //store the db connection
+      }
+    }
 
   create(job_id, employer_id){
     const query = "INSERT INTO EmployerJob (job_id, employer_id) VALUES (?, ?)";

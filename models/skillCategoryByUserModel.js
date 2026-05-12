@@ -1,8 +1,12 @@
 const { connectToDatabase } = require('../database');
 
 class skillCategoryByUserModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   create(user_id, skill_category_id){

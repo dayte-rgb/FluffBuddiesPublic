@@ -1,8 +1,12 @@
 const { connectToDatabase } = require('../database');
 
 class jobReviewModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   create(review_id, job_id){
