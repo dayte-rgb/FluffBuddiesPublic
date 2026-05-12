@@ -24,7 +24,7 @@ class organizationMemberModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(org_id, user_id);
+    const info = stmt.get(org_id, user_id);
 
     return info
   }

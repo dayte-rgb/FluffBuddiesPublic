@@ -14,7 +14,7 @@ class jobCategoryByUserModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(user_id, job_category_id);
+    const info = stmt.run(user_id, job_category_id);
 
     return {user_id, job_category_id};
   }
@@ -42,7 +42,7 @@ class jobCategoryByUserModel {
   delete(user_id, job_category_id){
     const query = "DELETE FROM JobCategoryByUser WHERE user_id = ? AND job_category_id = ?";
 
-    const deleted_info = this.getByIds(user_id);
+    const deleted_info = this.getByIds(user_id, job_category_id);
 
     const stmt = this.db.prepare(query);
 

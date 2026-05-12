@@ -33,27 +33,28 @@
     "ejs": "^5.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "mocha": "^11.7.5",
     "nodemailer": "^8.0.7",
     "slim-select": "^3.4.3",
     "ws": "^8.20.0"
   },
-    "jest": {
-      "testEnvironment": "jsdom",
-      "testMatch": ["**/__tests__/**/*.test.js"],
-      "collectCoverageFrom": [
-        "src/leaderboard.js",
-        "src/review.js"
-      ],
-      "coverageReporters": ["text", "lcov", "html"]
-    },
-    "devDependencies": {
-      "@stryker-mutator/core": "*",
-      "@stryker-mutator/jest-runner": "*",
-      "bcrypt": "*",
-      "better-sqlite3": "*",
-      "jest": "*",
-      "jest-environment-jsdom": "*",
-      "mocha": "*",
-      "supertest": "*"
-    }
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "collectCoverageFrom": [
+      "src/leaderboard.js",
+      "src/review.js"
+    ],
+    "coverageReporters": ["text", "lcov", "html"]
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "*",
+    "@stryker-mutator/jest-runner": "*",
+    "bcrypt": "*",
+    "better-sqlite3": "*",
+    "jest": "*",
+    "jest-environment-jsdom": "*",
+    "mocha": "*",
+    "supertest": "*"
+  }
 }

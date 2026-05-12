@@ -17,7 +17,7 @@ class userModel {
 
     // The `prepare()` method compiles the SQL query, making it ready to execute.
     const stmt = this.db.prepare(query);
-
+    
     // The `run()` method executes the prepared query, replacing the `?` placeholders with actual values.
     const info = stmt.run(username, hashedPassword, phone_number, email, zipcode, profile_description, account_type, profile_picture_link);
 

@@ -14,7 +14,7 @@ class metricContentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(metric_name, description);
+    const info = stmt.run(metric_name, description);
 
     return {id: info.lastInsertRowid, metric_name, description};
   }
@@ -54,7 +54,7 @@ class metricContentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(metric_name, metric_id, description);
+    const info = stmt.run(metric_name, description, metric_id);
 
     return this.getById(metric_id);
   }
