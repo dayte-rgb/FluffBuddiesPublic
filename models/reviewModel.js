@@ -1,8 +1,12 @@
 const { connectToDatabase } = require('../database');
 
 class reviewModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
 
     this._getReviews = this.db.prepare(`
         SELECT u.username, jr.review_id, rc.punctuality, rc.quality, rc.friendliness, rc.comments, rc.datetime, rc.verified

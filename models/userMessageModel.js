@@ -1,10 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class UserMessageModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
-
   create(message_id, sender_id, recipient_id){
     const query = "INSERT INTO UserMessage (message_id, sender_id, recipient_id) VALUES (?, ?, ?)";
 

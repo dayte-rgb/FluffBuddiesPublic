@@ -1,8 +1,12 @@
 const { connectToDatabase } = require('../database');
 
 class organizationMemberModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   create(org_id, user_id){
