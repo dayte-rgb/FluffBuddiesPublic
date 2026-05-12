@@ -2,8 +2,12 @@ const { connectToDatabase } = require('../database');
 const bcrypt = require('bcrypt');
 
 class userSecurityAnswerModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   create(user_id, question_id, answer_text){

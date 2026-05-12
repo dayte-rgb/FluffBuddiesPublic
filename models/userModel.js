@@ -2,8 +2,12 @@ const { connectToDatabase } = require('../database');
 const bcrypt = require('bcrypt');
 
 class userModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   // Create a new user

@@ -1,8 +1,12 @@
 const {connectToDatabase } = require('../database');
 
 class MessagingModel {
-    constructor() {
-        this.db = connectToDatabase();
+    constructor(db = undefined) {
+        if(db == undefined){
+            this.db = connectToDatabase();
+        }else{
+            this.db = db; //store the db connection
+        }
 
         this.historyQuery = this.db.prepare(`
             SELECT msg.message_id, msg.message_content, msg.datetime, um.sender_id, um.recipient_id

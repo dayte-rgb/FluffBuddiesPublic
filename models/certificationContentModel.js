@@ -1,9 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class certificationContentModel {
-  constructor() {
-    this.db = connectToDatabase();
-  }
+  constructor(db = undefined) {
+      if(db == undefined){
+        this.db = connectToDatabase();
+      }else{
+        this.db = db; //store the db connection
+      }
+    }
 
   create(certification_name, company){
     const query = "INSERT INTO CertificationContent (certification_id, certification_name, company) VALUES (NULL, ?, ?)";

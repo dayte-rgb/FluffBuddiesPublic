@@ -1,9 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class achievementContentModel {
-  constructor() {
-    this.db = connectToDatabase();
-  }
+  constructor(db = undefined) {
+      if(db == undefined){
+        this.db = connectToDatabase();
+      }else{
+        this.db = db; //store the db connection
+      }
+    }
 
   create(achievement_name, metric_id, badge_id, required_quantity){
     const query = "INSERT INTO AchievementContent (achievement_id, achievement_name, metric_id, badge_id, required_quantity) VALUES (NULL, ?, ?, ?, ?)";

@@ -1,8 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class passwordResetModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
+
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS PasswordResetToken (
         email TEXT PRIMARY KEY,

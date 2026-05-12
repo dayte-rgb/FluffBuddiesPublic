@@ -1,8 +1,12 @@
 const { connectToDatabase } = require('../database');
 
 class leaderboardContentModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   create(start_time, end_time, metric_id, badge_id){

@@ -1,13 +1,15 @@
 // Import the Express module, which is a framework for building web applications in Node.js.
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const Log = require('./tools/log.js');
 const { start } = require('repl');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
-const logger = new Log('requests.log', true);
+let logger;
 const dateObj = new Date();
+const connections = require('./socket_connections.js');
 
 // Session and authentication imports
 const { sessionMiddleware } = require('./config/sessionConfig.js');
@@ -16,62 +18,61 @@ const { isAuthenticated, isNotAuthenticated } = require('./middleware/authMiddle
 const http = require('http');
 const WebSocket = require('ws');
 
+// Import all models required
 const jobContentModel = require('./models/jobContentModel');
-const jobContent = new jobContentModel();
+let jobContent;
 const jobReviewModel = require('./models/jobReviewModel.js');
-const jobReview = new jobReviewModel();
+let jobReview;
 const reviewContentModel = require('./models/reviewContentModel.js');
-const reviewContent = new reviewContentModel();
+let reviewContent;
 const employeeJobModel = require('./models/employeeJobModel');
-const employeeJob = new employeeJobModel();
+let employeeJob;
 const employerJobModel = require('./models/employerJobModel');
-const employerJob = new employerJobModel();
+let employerJob;
 const JobSearchModel = require('./models/jobSearchModel.js');
-const jobSearch = new JobSearchModel();
+let jobSearch;
 const jobCategoryModel = require('./models/jobCategoryModel');
-const jobCategory = new jobCategoryModel();
+let jobCategory;
 const skillCategoryModel = require('./models/skillCategoryModel');
-const skillCategory = new skillCategoryModel();
+let skillCategory;
 const userModel = require('./models/userModel.js');
-const user = new userModel();
+let user;
 const passwordResetModel = require('./models/passwordResetModel.js');
-const passwordReset = new passwordResetModel();
+let passwordReset;
 const securityQuestionModel = require('./models/securityQuestionModel.js');
-const securityQuestion = new securityQuestionModel();
+let securityQuestion;
 const userSecurityAnswerModel = require('./models/userSecurityAnswerModel.js');
-const userSecurityAnswer = new userSecurityAnswerModel();
+let userSecurityAnswer;
 const skillCategoriesByJobModel = require('./models/skillCategoriesByJobModel.js');
-const skillCategoriesByJob = new skillCategoriesByJobModel();
+let skillCategoriesByJob;
 const jobCategoriesByJobModel = require('./models/jobCategoriesByJobModel.js');
-const jobCategoriesByJob = new jobCategoriesByJobModel();
+let jobCategoriesByJob;
 const MessageModel = require('./models/messageContentModel.js');
+let messageModel;
 const MessagingModel = require('./models/messagingModel.js');
+let messagingModel;
 const UserMessageModel = require('./models/userMessageModel.js');
-const connections = require('./socket_connections.js');
-const messageModel = new MessageModel();
-const messagingModel = new MessagingModel();
-const userMessageModel = new UserMessageModel();
+let userMessageModel;
 const leaderboardContentModel = require('./models/leaderboardContentModel.js');
-const leaderboardContent = new leaderboardContentModel();
+let leaderboardContent;
 const leaderboardModel = require('./models/leaderboardModel.js');
-const leaderboardM = new leaderboardModel();
+let leaderboardM;
 const UserBadgeModel = require('./models/userBadgeModel.js');
-const userBadgeModel = new UserBadgeModel();
+let userBadgeModel;
 const BadgeContentModel = require('./models/badgeContentModel.js');
-const badgeContent = new BadgeContentModel();
+let badgeContent;
 const CertificationContentModel = require('./models/certificationContentModel.js');
-const certificationContent = new CertificationContentModel();
+let certificationContent;
 const UserCertificationModel = require('./models/userCertificationModel.js');
-const userCertification = new UserCertificationModel();
+let userCertification;
 const AchievementModel = require('./models/achievementModel.js');
-const achievementModel = new AchievementModel();
+let achievementModel;
 const AchievementContentModel = require('./models/achievementContentModel.js');
-const session = require('express-session');
-const achievementContentModel = new AchievementContentModel();
+let achievementContentModel;
 const MeetupVerificationModel = require('./models/meetupVerificationModel.js');
-const meetupVerification = new MeetupVerificationModel();
+let meetupVerification;
 const ReviewModel = require('./models/reviewModel.js');
-const reviewModel = new ReviewModel();
+let reviewModel;
 
 // Create an instance of an Express application. This app object will be used to define routes and middleware.
 const app = express();
@@ -495,7 +496,7 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
   }
 });
 
-app.get('/inbox', (req, res) => {
+app.get('/inbox', isAuthenticated, (req, res) => {
   res.status(200);
   res.render('messaging', { userId: req.session.userId });
 });
@@ -877,8 +878,7 @@ function distributeLeaderboardBadges(leaderboard) {
   });
 }
 
-// run the jobs functions on startup
-runBadgeJobs();
+// ----------------------------------------------------------------------------------------------------------------------------------------
 
 async function sendMeetupVerificationEmail(email, code, job_id) {
   try {
@@ -932,9 +932,57 @@ app.post('/submit_key', isAuthenticated, (req, res) => {
   res.render('submit_key', { job_id, error: null, success: 'Meetup verified!' });
 });
 
-// Start the server and make it listen on the specified port.
-// Once the server starts, it logs a message to the console indicating where it is running.
-server.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
-  console.log(`Websocket server running on ws://localhost:${PORT}`);
-});
+// --------------------------------------------------------------------------------------------------------------------------------------------------
+// handle testing with in-memory database
+
+function initModels(db, log_path = 'requests.log'){
+  jobContent = new jobContentModel(db);
+  jobReview = new jobReviewModel(db);
+  reviewContent = new reviewContentModel(db);
+  employeeJob = new employeeJobModel(db);
+  employerJob = new employerJobModel(db);
+  jobSearch  = new JobSearchModel(db);
+  jobCategory = new jobCategoryModel(db);
+  skillCategory = new skillCategoryModel(db);
+  user = new userModel(db);
+  passwordReset = new passwordResetModel(db);
+  securityQuestion = new securityQuestionModel(db);
+  userSecurityAnswer = new userSecurityAnswerModel(db);
+  skillCategoriesByJob = new skillCategoriesByJobModel(db);
+  jobCategoriesByJob = new jobCategoriesByJobModel(db);
+  messageModel = new MessageModel(db);
+  messagingModel = new MessagingModel(db);
+  userMessageModel = new UserMessageModel(db);
+  leaderboardContent = new leaderboardContentModel(db);
+  leaderboardM = new leaderboardModel(db);
+  userBadgeModel  = new UserBadgeModel(db);
+  badgeContent = new BadgeContentModel(db);
+  certificationContent = new CertificationContentModel(db);
+  userCertification = new UserCertificationModel(db);
+  achievementModel = new AchievementModel(db);
+  achievementContentModel = new AchievementContentModel(db);
+  meetupVerification = new MeetupVerificationModel(db);
+  reviewModel = new ReviewModel(db);
+
+
+  logger = new Log(log_path, true);
+}
+
+
+module.exports = app;
+module.exports.initModels = initModels;
+
+//if require.main is the current module, then it was from the command line, so run the server from the command line
+if(require.main === module){
+  const PORT = 3000;
+  initModels();
+
+  // Start the server and make it listen on the specified port.
+  // Once the server starts, it logs a message to the console indicating where it is running.
+  server.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Websocket server running on ws://localhost:${PORT}`);
+  });
+
+  runBadgeJobs();
+}

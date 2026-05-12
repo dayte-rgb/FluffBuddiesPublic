@@ -1,9 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class badgeContentModel {
-  constructor() {
-    this.db = connectToDatabase();
-  }
+  constructor(db = undefined) {
+      if(db == undefined){
+        this.db = connectToDatabase();
+      }else{
+        this.db = db; //store the db connection
+      }
+    }
 
   create(badge_name, badge_image_link){
     const query = "INSERT INTO BadgeContent (badge_id, badge_name, badge_image_link) VALUES (NULL, ?, ?)";
