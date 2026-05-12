@@ -4,7 +4,8 @@
   "description": "Turner Day, Gabriela Blanco Reyes, Sana Adnan, and David Broczkowski",
   "main": "database.js",
   "scripts": {
-    "test": "jest",
+    "test": "mocha 'test/**/*.test.js'",
+    "coverage": "nyc npm test",
     "start": "node server.js"
   },
   "repository": {
@@ -32,7 +33,10 @@
     "ws": "^8.20.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
+    "chai": "^6.2.2",
+    "mocha": "^11.7.5",
+    "nyc": "^18.0.0",
+    "sinon": "^22.0.0",
     "supertest": "^6.3.3"
   }
 }
