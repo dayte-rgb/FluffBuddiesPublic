@@ -12,77 +12,79 @@
 <body>
 
     <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
-        <nav class="sidebar-nav">
-            <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
-            <a href="/schedule" class="nav-icon title" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
-            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
-            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
-            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
-            <a href="/badges" class="nav-icon active" title="Badges"><i class="fa-solid fa-medal"></i></a>
-        </nav>
-    </div>
-
-    <!-- Main content -->
-    <div class="badges-main">
-
-        <!-- Earned badges -->
-        <div class="section-header">
-            <h1>Your Badges</h1>
-            <p class="section-subtitle">Badges you've earned so far</p>
+    <%- include('_navbar') %>
+        <div class="sidebar">
+            <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+            <nav class="sidebar-nav">
+                <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+                <a href="/schedule" class="nav-icon title" title="Schedule"><i
+                        class="fa-solid fa-calendar-days"></i></a>
+                <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+                <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+                <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
+                <a href="/badges" class="nav-icon active" title="Badges"><i class="fa-solid fa-medal"></i></a>
+            </nav>
         </div>
 
-        <div class="badges-grid">
-            <% if (earned_badges && earned_badges.length> 0) { %>
-                <% earned_badges.forEach(badge=> { %>
-                    <div class="badge-card earned">
-                        <div class="badge-icon" style="background-color: <%= badge.color %>">
-                            <img src="images/<%= badge.img_link %>", width="50", height="50">
-                        </div>
-                        <p class="badge-name">
-                            <%= badge.name %>
-                        </p>
-                        <p class="badge-desc">
-                            <%= badge.description %>
-                        </p>
-                    </div>
-                    <% }) %>
-                        <% } else { %>
-                            <div class="empty-state">
-                                <i class="fa-solid fa-paw"></i>
-                                <p>No badges yet — complete your first job to get started!</p>
+        <!-- Main content -->
+        <div class="badges-main">
+
+            <!-- Earned badges -->
+            <div class="section-header">
+                <h1>Your Badges</h1>
+                <p class="section-subtitle">Badges you've earned so far</p>
+            </div>
+
+            <div class="badges-grid">
+                <% if (earned_badges && earned_badges.length> 0) { %>
+                    <% earned_badges.forEach(badge=> { %>
+                        <div class="badge-card earned">
+                            <div class="badge-icon" style="background-color: <%= badge.color %>">
+                                <img src="images/<%= badge.img_link %>" , width="50" , height="50">
                             </div>
-                            <% } %>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- Badges to earn -->
-        <div class="section-header">
-            <h2>Badges to Earn</h2>
-            <p class="section-subtitle">Keep working to unlock these!</p>
-        </div>
-
-        <div class="badges-grid">
-            <% if (not_earned_badges && not_earned_badges.length> 0) { %>
-                <% not_earned_badges.forEach(badge=> { %>
-                    <div class="badge-card">
-                        <div class="badge-icon" style="background-color: <%= badge.color %>">
-                            <img src="images/<%= badge.img_link %>", width="50", height="50">
+                            <p class="badge-name">
+                                <%= badge.name %>
+                            </p>
+                            <p class="badge-desc">
+                                <%= badge.description %>
+                            </p>
                         </div>
-                        <p class="badge-name">
-                            <%= badge.name %>
-                        </p>
-                        <p class="badge-desc">
-                            <%= badge.description %>
-                        </p>
-                    </div>
-                    <% }) %>
-                        <% } %>
-        </div>
+                        <% }) %>
+                            <% } else { %>
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-paw"></i>
+                                    <p>No badges yet — complete your first job to get started!</p>
+                                </div>
+                                <% } %>
+            </div>
 
-    </div>
+            <div class="divider"></div>
+
+            <!-- Badges to earn -->
+            <div class="section-header">
+                <h2>Badges to Earn</h2>
+                <p class="section-subtitle">Keep working to unlock these!</p>
+            </div>
+
+            <div class="badges-grid">
+                <% if (not_earned_badges && not_earned_badges.length> 0) { %>
+                    <% not_earned_badges.forEach(badge=> { %>
+                        <div class="badge-card">
+                            <div class="badge-icon" style="background-color: <%= badge.color %>">
+                                <img src="images/<%= badge.img_link %>" , width="50" , height="50">
+                            </div>
+                            <p class="badge-name">
+                                <%= badge.name %>
+                            </p>
+                            <p class="badge-desc">
+                                <%= badge.description %>
+                            </p>
+                        </div>
+                        <% }) %>
+                            <% } %>
+            </div>
+
+        </div>
 
 </body>
 
