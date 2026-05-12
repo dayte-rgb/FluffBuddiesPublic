@@ -2,16 +2,18 @@ class Log{
     #fileName;
     #async;
     #fs = require('fs');
+    #verbose;
 
     //uses a default parameter here to make it "optional"
-    constructor(fileName, async=false){
+    constructor(fileName, async=false, verbose=true){
         this.#fileName = fileName; 
         this.#async = async;
+        this.#verbose = verbose;
     }
 
     write(message){
         if(typeof message !== 'string'){
-            console.log('Message is not a string, exiting.');
+            if(this.#verbose) console.log('Message is not a string, exiting.');
             return;
         }
 
@@ -24,9 +26,9 @@ class Log{
         }else{
             try{
                 this.#fs.appendFileSync(this.#fileName, updated_message, 'utf-8'); //here, await will make this synchronous as it not continue until appendFile() returns the Promise 
-                console.log("Log entry added");
+                if(this.#verbose) console.log("Log entry added");
             }catch (error){
-                console.error("An error occurred while appending to " + this.#fileName + ": " + error);
+                if(this.#verbose) console.error("An error occurred while appending to " + this.#fileName + ": " + error);
             }
         }
         
@@ -39,9 +41,9 @@ class Log{
     async #write_async(message){
         await this.#fs.appendFile(this.#fileName, message, (err) => {
             if (err){
-                console.error("An error occurred while appending async to " + this.#fileName + ": " + err);
+                if(this.#verbose) console.error("An error occurred while appending async to " + this.#fileName + ": " + err);
             }else{
-                console.log("Log entry added asynchronously");
+                if(this.#verbose) console.log("Log entry added asynchronously");
             };
         });
     }
