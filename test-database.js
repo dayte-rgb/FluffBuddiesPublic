@@ -8,7 +8,7 @@ function connectTestDatabase() {
   db.exec('PRAGMA foreign_keys = ON;');
 
   // Option B: Load your external .sql file for table creation
-  const sqlFilePath = path.join(__dirname, '..', 'sql','create_tables.sql');
+  const sqlFilePath = path.join(__dirname, 'sql','create_tables.sql');
   const sql = fs.readFileSync(sqlFilePath, 'utf8');
   db.exec(sql);
 
