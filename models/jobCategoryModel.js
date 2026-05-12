@@ -1,9 +1,13 @@
 const { connectToDatabase } = require('../database');
 
 class jobCategoryModel {
-  constructor() {
-    this.db = connectToDatabase();
-  }
+  constructor(db = undefined) {
+      if(db == undefined){
+        this.db = connectToDatabase();
+      }else{
+        this.db = db; //store the db connection
+      }
+    }
 
   create(category_name){
     const query = "INSERT INTO JobCategory (job_category_id, category_name) VALUES (NULL, ?)";

@@ -2,8 +2,12 @@ const { connectToDatabase } = require('../database');
 
 class jobSearchModel {
 
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db = undefined) {
+    if(db == undefined){
+      this.db = connectToDatabase();
+    }else{
+      this.db = db; //store the db connection
+    }
   }
 
   getAllMatchedJobs(zipcode, keyword, skill_cat_ids, job_cat_ids){
