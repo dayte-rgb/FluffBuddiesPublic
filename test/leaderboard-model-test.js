@@ -1,20 +1,3 @@
-/**
- * test/leaderboard-model-test.js
- *
- * Tests for leaderboardModel and leaderboardContentModel.
- *
- * These models run multi-table JOIN queries, so the test seeds several
- * related tables (User, JobContent, EmployeeJob, ReviewContent, JobReview)
- * to produce meaningful results.
- *
- * Covers:
- *   leaderboardContentModel – create, getById, update, delete
- *   leaderboardModel        – getCurrentLeaderboard, getLeaderboardStats,
- *                             getTopKRating, getTopKJobs
- *
- * Run: npm test  OR  npm test -- test/leaderboard-model-test.js
- */
-
 'use strict';
 
 const assert = require('assert');

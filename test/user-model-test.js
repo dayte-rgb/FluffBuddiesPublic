@@ -1,12 +1,3 @@
-/**
- * test/user-model-test.js
- *
- * Tests for userModel (User table).
- * Covers: create, getById, getByUsername, getByEmail, update, delete, authenticate.
- *
- * Run: npm test  OR  npm test -- test/user-model-test.js
- */
-
 'use strict';
 
 const assert = require('assert');

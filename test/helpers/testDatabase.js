@@ -1,17 +1,3 @@
-/**
- * testDatabase.js
- *
- * Creates a fresh in-memory SQLite database for every test run.
- * The schema mirrors the production tables that are exercised by the
- * models under test (User, ReviewContent, JobReview, UserReview,
- * JobContent, EmployeeJob, EmployerJob, LeaderboardContent).
- *
- * Usage:
- *   const { connectTestDatabase } = require('./helpers/testDatabase');
- *   const db = connectTestDatabase();   // call once per test file
- *   db.close();                         // call in after()
- */
-
 'use strict';
 
 const Database = require('better-sqlite3');

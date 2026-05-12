@@ -1,12 +1,3 @@
-/**
- * test/reviewContent-model-test.js
- *
- * Tests for reviewContentModel (ReviewContent table).
- * Covers: create, getById, getAll, update, delete.
- *
- * Run: npm test  OR  npm test -- test/reviewContent-model-test.js
- */
-
 'use strict';
 
 const assert = require('assert');
