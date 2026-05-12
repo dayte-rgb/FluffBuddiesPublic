@@ -4,9 +4,14 @@
   "description": "Turner Day, Gabriela Blanco Reyes, Sana Adnan, and David Broczkowski",
   "main": "database.js",
   "scripts": {
-    "test": "mocha 'test/**/*.test.js'",
-    "coverage": "nyc npm test",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test":               "mocha --recursive --timeout 10000",
+    "test:models":        "mocha test/reviewContent-model-test.js test/user-model-test.js test/leaderboard-model-test.js --timeout 10000",
+    "test:routes":        "mocha test/server-test.js --timeout 10000",
+    "test:single":        "mocha --timeout 10000",
+    "mutate":             "stryker run",
+    "mutate:leaderboard": "stryker run --mutate src/leaderboard.js",
+    "mutate:review":      "stryker run --mutate src/review.js"
   },
   "repository": {
     "type": "git",
@@ -32,11 +37,23 @@
     "slim-select": "^3.4.3",
     "ws": "^8.20.0"
   },
-  "devDependencies": {
-    "chai": "^6.2.2",
-    "mocha": "^11.7.5",
-    "nyc": "^18.0.0",
-    "sinon": "^22.0.0",
-    "supertest": "^6.3.3"
-  }
+    "jest": {
+      "testEnvironment": "jsdom",
+      "testMatch": ["**/__tests__/**/*.test.js"],
+      "collectCoverageFrom": [
+        "src/leaderboard.js",
+        "src/review.js"
+      ],
+      "coverageReporters": ["text", "lcov", "html"]
+    },
+    "devDependencies": {
+      "@stryker-mutator/core": "*",
+      "@stryker-mutator/jest-runner": "*",
+      "bcrypt": "*",
+      "better-sqlite3": "*",
+      "jest": "*",
+      "jest-environment-jsdom": "*",
+      "mocha": "*",
+      "supertest": "*"
+    }
 }
