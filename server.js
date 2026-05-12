@@ -878,9 +878,6 @@ function distributeLeaderboardBadges(leaderboard) {
   });
 }
 
-// run the jobs functions on startup
-runBadgeJobs();
-
 async function sendMeetupVerificationEmail(email, code, job_id) {
   try {
     const transporter = await createEmailTransporter();
@@ -966,7 +963,7 @@ function initModels(db, log_path = 'requests.log'){
   reviewModel = new ReviewModel(db);
 
 
-  logger = new Logger(log_path, true);
+  logger = new Log(log_path, true);
 }
 
 
@@ -985,4 +982,5 @@ if(require.main === module){
     console.log(`Websocket server running on ws://localhost:${PORT}`);
   });
 
+  runBadgeJobs();
 }
