@@ -99,7 +99,6 @@ app.use((req, res, next) => {
 
 // Middleware for logging
 app.use(function (req, res, next) {
-  const startTime = Date.now();
   logger.write(`[INFO] Route: ${req.url} Method: ${req.method}`);
   next();
 });
@@ -813,7 +812,7 @@ wss.on('connection', (ws) => {
 //-----------------------------------------------------------------------------------------------------------------------------------
 // setInterval function that checks for end of leaderboard
 const INTERVAL = 1000 * 60 * 60; // an hour
-setInterval(runBadgeJobs, INTERVAL);
+badgeInterval = setInterval(runBadgeJobs, INTERVAL);
 
 function runBadgeJobs() {
   //get most recent leaderboard
@@ -935,7 +934,7 @@ app.post('/submit_key', isAuthenticated, (req, res) => {
 // --------------------------------------------------------------------------------------------------------------------------------------------------
 // handle testing with in-memory database
 
-function initModels(db, log_path = 'requests.log'){
+function initModels(db, log_path = 'requests.log', verbose=true){
   jobContent = new jobContentModel(db);
   jobReview = new jobReviewModel(db);
   reviewContent = new reviewContentModel(db);
@@ -965,7 +964,7 @@ function initModels(db, log_path = 'requests.log'){
   reviewModel = new ReviewModel(db);
 
 
-  logger = new Log(log_path, true);
+  logger = new Log(log_path, true, verbose);
 }
 
 
