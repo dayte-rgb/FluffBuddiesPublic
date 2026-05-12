@@ -977,54 +977,12 @@ if(require.main === module){
   const PORT = 3000;
   initModels();
 
-// --------------------------------------------------------------------------------------------------------------------------------------------------
-// handle testing with in-memory database
+  // Start the server and make it listen on the specified port.
+  // Once the server starts, it logs a message to the console indicating where it is running.
+  server.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Websocket server running on ws://localhost:${PORT}`);
+  });
 
-function initModels(db, log_path = 'requests.log'){
-  jobContent = new jobContentModel(db);
-  jobReview = new jobReviewModel(db);
-  reviewContent = new reviewContentModel(db);
-  employeeJob = new employeeJobModel(db);
-  employerJob = new employerJobModel(db);
-  jobSearch  = new JobSearchModel(db);
-  jobCategory = new jobCategoryModel(db);
-  skillCategory = new skillCategoryModel(db);
-  user = new userModel(db);
-  passwordReset = new passwordResetModel(db);
-  securityQuestion = new securityQuestionModel(db);
-  userSecurityAnswer = new userSecurityAnswerModel(db);
-  skillCategoriesByJob = new skillCategoriesByJobModel(db);
-  jobCategoriesByJob = new jobCategoriesByJobModel(db);
-  messageModel = new MessageModel(db);
-  messagingModel = new MessagingModel(db);
-  userMessageModel = new UserMessageModel(db);
-  leaderboardContent = new leaderboardContentModel(db);
-  leaderboardM = new leaderboardModel(db);
-  userBadgeModel  = new UserBadgeModel(db);
-  badgeContent = new BadgeContentModel(db);
-  certificationContent = new CertificationContentModel(db);
-  userCertification = new UserCertificationModel(db);
-  achievementModel = new AchievementModel(db);
-  achievementContentModel = new AchievementContentModel(db);
-  meetupVerification = new MeetupVerificationModel(db);
-  reviewModel = new ReviewModel(db);
-
-
-  logger = new Log(log_path, true);
+  runBadgeJobs();
 }
-
-
-module.exports = app;
-module.exports.initModels = initModels;
-
-//if require.main is the current module, then it was from the command line, so run the server from the command line
-if(require.main === module){
-  const PORT = 3000;
-  initModels();
-
-// Start the server and make it listen on the specified port.
-// Once the server starts, it logs a message to the console indicating where it is running.
-server.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
-  console.log(`Websocket server running on ws://localhost:${PORT}`);
-});
