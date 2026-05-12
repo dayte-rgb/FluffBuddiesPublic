@@ -3,12 +3,6 @@
 const assert = require('assert');
 const { connectTestDatabase } = require('./helpers/testDatabase');
 
-// ─── Inline model (dependency-injected version) ──────────────────────────────
-// We re-implement the model to accept a `db` argument so the test can
-// supply an in-memory database instead of the production one.
-// This mirrors exactly what the lab instructions ask you to do with your
-// real model class.
-
 class ReviewContentModel {
   constructor(db) {
     this.db = db;

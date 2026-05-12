@@ -62,7 +62,6 @@ class UserModel {
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('UserModel – database model tests', function () {
-  // bcrypt is slow; bump timeout so async tests don't time out
   this.timeout(10000);
 
   let db;
