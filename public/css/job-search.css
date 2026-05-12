@@ -151,7 +151,6 @@ body {
 
 .create-job-btn:hover {
     background-color: #d97a3a;
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(244, 139, 72, 0.3);
 }
 

@@ -11,148 +11,160 @@
 
 <body>
     <%- include('_navbar') %>
-    <!-- Ok just put p tags now for spacing lol-->
-    <p></p>
-    <p></p>
-    <p></p>
-    <p></p>
-    
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
-        <nav class="sidebar-nav">
-            <a href="/job-search" class="nav-icon active" title="Search"><i
-                    class="fa-solid fa-magnifying-glass"></i></a>
-            <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
-            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
-            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
-            <!-- <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a> -->
-            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-clipboard-list"></i></a>
-            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
-        </nav>
-    </div>
+        <!-- Ok just put p tags now for spacing lol-->
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
 
-    <div class="main-content">
-        <div class="card">
-            <h1 class="form-title"><i class="fa-solid fa-plus-circle"></i> Create a New Job</h1>
-
-            <% if (typeof error !== 'undefined' && error) { %>
-                <div class="alert alert-error">
-                    <i class="fa-solid fa-exclamation-circle"></i> <%= error %>
-                </div>
-            <% } %>
-
-            <% if (typeof success !== 'undefined' && success) { %>
-                <div class="alert alert-success">
-                    <i class="fa-solid fa-check-circle"></i> <%= success %>
-                </div>
-                <script>
-                    // Redirect to job search after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = '/job-search';
-                    }, 2000);
-                </script>
-            <% } %>
-
-            <form action="/create-job" method="POST" class="create-job-form">
-                <div class="form-group">
-                    <label for="description">Job Description <span class="required">*</span></label>
-                    <textarea id="description" name="description" placeholder="Describe the job details..." 
-                        rows="4" required></textarea>
-                    <small class="form-text">Provide clear details about the job.</small>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="datetime">Date & Time <span class="required">*</span></label>
-                        <input type="datetime-local" id="datetime" name="datetime" required>
-                        <small class="form-text">When should the job be completed?</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="duration">Duration (minutes) <span class="required">*</span></label>
-                        <input type="number" id="duration" name="duration" placeholder="e.g., 60" 
-                            min="1" required>
-                        <small class="form-text">Estimated time needed.</small>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="zipcode">Zip Code <span class="required">*</span></label>
-                        <input type="text" id="zipcode" name="zipcode" placeholder="e.g., 18042" required>
-                        <small class="form-text">Location where the job will be done.</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="employee_num">Number of Employees <span class="required">*</span></label>
-                        <input type="number" id="employee_num" name="employee_num" placeholder="Number of Employees" 
-                            min="1" required>
-                        <small class="form-text">The number of employees for this job.</small>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <label for="job_filled">
-                            <input type="checkbox" id="job_filled" name="job_filled" value="1">
-                            Mark as Filled
-                        </label>
-                        <small class="form-text">Check if this job is already assigned to someone.</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="username">Username <span class="required">*</span></label>
-                        <input type="text" id="username" name="username" placeholder="Username" required>
-                        <small class="form-text">Your username.</small>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="filter-group">
-                        <label for="job_category">Job Category:</label>
-                        <select id="job_category" name="job_categories[]" multiple>
-                            <% jobCategories.forEach(cat => { %>
-                                <option value="<%= cat.job_category_id %>" <%= job_categories && job_categories.includes(cat.job_category_id.toString()) ? 'selected' : '' %>><%= cat.category_name %></option>
-                            <% }); %>
-                        </select>
-                        <small class="form-text">Select one or more job categories.</small>
-                    </div>
-                    <div class="filter-group">
-                        <label for="skill_category">Skill Category:</label>
-                        <select id="skill_category" name="skill_categories[]" multiple>
-                            <% skillCategories.forEach(cat => { %>
-                                <option value="<%= cat.skill_category_id %>" <%= skill_categories && skill_categories.includes(cat.skill_category_id.toString()) ? 'selected' : '' %>><%= cat.category_name %></option>
-                            <% }); %>
-                        </select>
-                        <small class="form-text">Select one or more job categories.</small>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fa-solid fa-check"></i> Create Job
-                    </button>
-                    <a href="/job-search" class="btn btn-secondary">
-                        <i class="fa-solid fa-times"></i> Cancel
-                    </a>
-                </div>
-            </form>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+            <nav class="sidebar-nav">
+                <a href="/job-search" class="nav-icon active" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+                <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
+                <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+                <a href="/notifications" class="nav-icon active" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+                <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+                <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
+                <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+            </nav>
         </div>
 
-        <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
-    </div>
+        <div class="main-content">
+            <div class="card">
+                <h1 class="form-title"><i class="fa-solid fa-plus-circle"></i> Create a New Job</h1>
 
-    <script src="/js/create-job.js"></script>
-    <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
-    <script>
-        new SlimSelect({
-            select: '#job_category',
-        });
-        new SlimSelect({
-            select: '#skill_category',
-        });
-    </script>
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div class="alert alert-error">
+                        <i class="fa-solid fa-exclamation-circle"></i>
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <% if (typeof success !=='undefined' && success) { %>
+                            <div class="alert alert-success">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <%= success %>
+                            </div>
+                            <script>
+                                // Redirect to job search after 2 seconds
+                                setTimeout(() => {
+                                    window.location.href = '/job-search';
+                                }, 2000);
+                            </script>
+                            <% } %>
+
+                                <form action="/create-job" method="POST" class="create-job-form">
+                                    <div class="form-group">
+                                        <label for="description">Job Description <span class="required">*</span></label>
+                                        <textarea id="description" name="description"
+                                            placeholder="Describe the job details..." rows="4" required></textarea>
+                                        <small class="form-text">Provide clear details about the job.</small>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="datetime">Date & Time <span class="required">*</span></label>
+                                            <input type="datetime-local" id="datetime" name="datetime" required>
+                                            <small class="form-text">When should the job be completed?</small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="duration">Duration (minutes) <span
+                                                    class="required">*</span></label>
+                                            <input type="number" id="duration" name="duration" placeholder="e.g., 60"
+                                                min="1" required>
+                                            <small class="form-text">Estimated time needed.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="zipcode">Zip Code <span class="required">*</span></label>
+                                            <input type="text" id="zipcode" name="zipcode" placeholder="e.g., 18042"
+                                                required>
+                                            <small class="form-text">Location where the job will be done.</small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="employee_num">Number of Employees <span
+                                                    class="required">*</span></label>
+                                            <input type="number" id="employee_num" name="employee_num"
+                                                placeholder="Number of Employees" min="1" required>
+                                            <small class="form-text">The number of employees for this job.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group checkbox-group">
+                                            <label for="job_filled">
+                                                <input type="checkbox" id="job_filled" name="job_filled" value="1">
+                                                Mark as Filled
+                                            </label>
+                                            <small class="form-text">Check if this job is already assigned to
+                                                someone.</small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="username">Username <span class="required">*</span></label>
+                                            <input type="text" id="username" name="username" placeholder="Username"
+                                                required>
+                                            <small class="form-text">Your username.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="filter-group">
+                                            <label for="job_category">Job Category:</label>
+                                            <select id="job_category" name="job_categories[]" multiple>
+                                                <% jobCategories.forEach(cat=> { %>
+                                                    <option value="<%= cat.job_category_id %>" <%=job_categories &&
+                                                        job_categories.includes(cat.job_category_id.toString())
+                                                        ? 'selected' : '' %>><%= cat.category_name %>
+                                                    </option>
+                                                    <% }); %>
+                                            </select>
+                                            <small class="form-text">Select one or more job categories.</small>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="skill_category">Skill Category:</label>
+                                            <select id="skill_category" name="skill_categories[]" multiple>
+                                                <% skillCategories.forEach(cat=> { %>
+                                                    <option value="<%= cat.skill_category_id %>" <%=skill_categories &&
+                                                        skill_categories.includes(cat.skill_category_id.toString())
+                                                        ? 'selected' : '' %>><%= cat.category_name %>
+                                                    </option>
+                                                    <% }); %>
+                                            </select>
+                                            <small class="form-text">Select one or more job categories.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa-solid fa-check"></i> Create Job
+                                        </button>
+                                        <a href="/job-search" class="btn btn-secondary">
+                                            <i class="fa-solid fa-times"></i> Cancel
+                                        </a>
+                                    </div>
+                                </form>
+            </div>
+
+            <a href="/job-search" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
+        </div>
+
+        <script src="/js/create-job.js"></script>
+        <script src="https://unpkg.com/slim-select@latest/dist/slimselect.js"></script>
+        <script>
+            new SlimSelect({
+                select: '#job_category',
+            });
+            new SlimSelect({
+                select: '#skill_category',
+            });
+        </script>
 </body>
 
 </html>
