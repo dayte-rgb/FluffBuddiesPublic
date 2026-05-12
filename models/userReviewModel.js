@@ -1,8 +1,8 @@
 const { connectToDatabase } = require('../database');
 
 class userReviewModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db) {
+    this.db = db || connectToDatabase();
   }
 
   create(review_id, user_id){

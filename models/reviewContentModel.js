@@ -1,8 +1,8 @@
 const { connectToDatabase } = require('../database');
 
 class reviewContentModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db) {
+    this.db = db || connectToDatabase();
   }
 
   create(punctuality, quality, friendliness, comments, datetime, verified){

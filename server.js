@@ -934,7 +934,15 @@ app.post('/submit_key', isAuthenticated, (req, res) => {
 
 // Start the server and make it listen on the specified port.
 // Once the server starts, it logs a message to the console indicating where it is running.
-server.listen(PORT, () => {
+/*server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
   console.log(`Websocket server running on ws://localhost:${PORT}`);
-});
+}); */
+
+module.exports = app;
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Websocket server running on ws://localhost:${PORT}`);
+  });
+}

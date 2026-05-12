@@ -1,8 +1,8 @@
 const { connectToDatabase } = require('../database');
 
 class leaderboardModel {
-  constructor() {
-    this.db = connectToDatabase();
+  constructor(db) {
+    this.db = db || connectToDatabase();
 
     this._getLeaderboardStats = this.db.prepare(`
         SELECT 
