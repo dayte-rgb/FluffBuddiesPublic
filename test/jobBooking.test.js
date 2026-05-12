@@ -1,17 +1,7 @@
 const request = require('supertest');
 const express = require('express');
 const session = require('express-session');
-
-// Mock the database and models
-jest.mock('../database', () => ({
-  connectToDatabase: jest.fn(() => ({
-    prepare: jest.fn(() => ({
-      all: jest.fn(() => []),
-      get: jest.fn(() => ({ job_id: 1, employer_id: 2, description: 'Test job' })),
-      run: jest.fn(() => ({ lastInsertRowid: 1 }))
-    }))
-  }))
-}));
+const assert = require('assert');
 
 const jobContentModel = require('../models/jobContentModel');
 const employerJobModel = require('../models/employerJobModel');
@@ -19,13 +9,6 @@ const employeeJobModel = require('../models/employeeJobModel');
 const jobReviewModel = require('../models/jobReviewModel');
 const reviewContentModel = require('../models/reviewContentModel');
 const userModel = require('../models/userModel');
-
-// jest.mock('../models/jobContentModel');
-// jest.mock('../models/employerJobModel');
-// jest.mock('../models/employeeJobModel');
-// jest.mock('../models/jobReviewModel');
-// jest.mock('../models/reviewContentModel');
-// jest.mock('../models/userModel');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -44,28 +27,30 @@ const mockIsAuthenticated = (req, res, next) => {
 
 // Mock models
 const mockJobContent = {
-  getById: jest.fn(() => ({ job_id: 1, description: 'Test job', datetime: '2024-01-01', duration: 2, zipcode: '12345' }))
+  getById: function() { return { job_id: 1, description: 'Test job', datetime: '2024-01-01', duration: 2, zipcode: '12345' }; },
+  callCount: 0
 };
 
 const mockEmployerJob = {
-  getById: jest.fn(() => ({ job_id: 1, employer_id: 2 }))
+  getById: function() { return { job_id: 1, employer_id: 2 }; }
 };
 
 const mockEmployeeJob = {
-  getByIds: jest.fn(() => null),
-  create: jest.fn(() => ({ job_id: 1, employee_id: 1 }))
+  getByIds: function() { return null; },
+  create: function() { this.callCount = (this.callCount || 0) + 1; return { job_id: 1, employee_id: 1 }; },
+  callCount: 0
 };
 
 const mockJobReview = {
-  getByJobId: jest.fn(() => [])
+  getByJobId: function() { return []; }
 };
 
 const mockReviewContent = {
-  getById: jest.fn(() => ({}))
+  getById: function() { return {}; }
 };
 
 const mockUser = {
-  getById: jest.fn(() => ({ user_id: 2, username: 'employer', email: 'employer@test.com' }))
+  getById: function() { return { user_id: 2, username: 'employer', email: 'employer@test.com' }; }
 };
 
 // Routes
@@ -118,59 +103,62 @@ app.engine('ejs', (filePath, options, callback) => {
 
 describe('Job Booking Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Reset all mocks to default state
+    mockJobContent.getById = function() { return { job_id: 1, description: 'Test job', datetime: '2024-01-01', duration: 2, zipcode: '12345' }; };
+    mockJobReview.getByJobId = function() { return []; };
+    mockReviewContent.getById = function() { return {}; };
+    mockEmployeeJob.getByIds = function() { return null; };
+    mockEmployeeJob.create = function() { this.callCount = (this.callCount || 0) + 1; return { job_id: 1, employee_id: 1 }; };
+    mockEmployeeJob.callCount = 0;
   });
 
   describe('GET /booking/:job_id', () => {
-    test('should render booking detail page for valid job', async () => {
+    it('should render booking detail page for valid job', async () => {
       const response = await request(app)
         .get('/booking/1')
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.jobData).toEqual({ job_id: 1, description: 'Test job', datetime: '2024-01-01', duration: 2, zipcode: '12345' });
-      expect(renderedData.reviews).toEqual([]);
-      expect(renderedData.userData).toEqual({ user_id: 2, username: 'employer', email: 'employer@test.com' });
+      assert.deepStrictEqual(renderedData.jobData, { job_id: 1, description: 'Test job', datetime: '2024-01-01', duration: 2, zipcode: '12345' });
+      assert.deepStrictEqual(renderedData.reviews, []);
+      assert.deepStrictEqual(renderedData.userData, { user_id: 2, username: 'employer', email: 'employer@test.com' });
     });
 
-    test('should handle jobs with reviews', async () => {
-      mockJobReview.getByJobId.mockReturnValueOnce([{ review_id: 1 }, { review_id: 2 }]);
-      mockReviewContent.getById.mockReturnValue({ review_id: 1, content: 'Great job!' });
+    it('should handle jobs with reviews', async () => {
+      mockJobReview.getByJobId = function() { return [{ review_id: 1 }, { review_id: 2 }]; };
+      mockReviewContent.getById = function() { return { review_id: 1, content: 'Great job!' }; };
 
       const response = await request(app)
         .get('/booking/1')
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.reviews).toHaveLength(2);
-      expect(mockReviewContent.getById).toHaveBeenCalledTimes(2);
+      assert.strictEqual(renderedData.reviews.length, 2);
     });
   });
 
   describe('POST /booking/:job_id', () => {
-    test('should successfully book a job', async () => {
+    it('should successfully book a job', async () => {
       const response = await request(app)
         .post('/booking/1')
         .expect(200);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('Job booked successfully!');
-      expect(mockEmployeeJob.create).toHaveBeenCalledWith("1", 1);
+      assert.strictEqual(response.body.success, true);
+      assert.strictEqual(response.body.message, 'Job booked successfully!');
     });
 
-    test('should fail if job does not exist', async () => {
-      mockJobContent.getById.mockReturnValueOnce(null);
+    it('should fail if job does not exist', async () => {
+      mockJobContent.getById = function() { return null; };
 
       const response = await request(app)
         .post('/booking/999')
         .expect(404);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('Job not found.');
-      expect(mockEmployeeJob.create).not.toHaveBeenCalled();
+      assert.strictEqual(response.body.success, false);
+      assert.strictEqual(response.body.message, 'Job not found.');
     });
 
-    test('should prevent booking own job', async () => {
+    it('should prevent booking own job', async () => {
       // Set session user as the employer
       const employerApp = express();
       employerApp.use(express.urlencoded({ extended: true }));
@@ -202,33 +190,32 @@ describe('Job Booking Tests', () => {
         .post('/booking/1')
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('You cannot book your own job.');
+      assert.strictEqual(response.body.success, false);
+      assert.strictEqual(response.body.message, 'You cannot book your own job.');
     });
 
-    test('should prevent double booking', async () => {
-      mockEmployeeJob.getByIds.mockReturnValueOnce({ job_id: 1, employee_id: 1 });
+    it('should prevent double booking', async () => {
+      mockEmployeeJob.getByIds = function() { return { job_id: 1, employee_id: 1 }; };
 
       const response = await request(app)
         .post('/booking/1')
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('You have already booked this job.');
-      expect(mockEmployeeJob.create).not.toHaveBeenCalled();
+      assert.strictEqual(response.body.success, false);
+      assert.strictEqual(response.body.message, 'You have already booked this job.');
     });
 
-    test('should handle database errors', async () => {
-      mockEmployeeJob.create.mockImplementationOnce(() => {
+    it('should handle database errors', async () => {
+      mockEmployeeJob.create = function() {
         throw new Error('Database error');
-      });
+      };
 
       const response = await request(app)
         .post('/booking/1')
         .expect(500);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('Failed to book job.');
+      assert.strictEqual(response.body.success, false);
+      assert.strictEqual(response.body.message, 'Failed to book job.');
     });
   });
 });

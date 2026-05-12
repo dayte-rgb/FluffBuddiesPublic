@@ -1,28 +1,11 @@
 const request = require('supertest');
 const express = require('express');
 const session = require('express-session');
-//const { connectToDatabase } = require('../database');
+const assert = require('assert');
 
-// Mock the database connection
-jest.mock('../database', () => ({
-  connectToDatabase: jest.fn(() => ({
-    prepare: jest.fn(() => ({
-      all: jest.fn(() => []),
-      get: jest.fn(() => ({})),
-      run: jest.fn(() => ({ lastInsertRowid: 1 }))
-    }))
-  }))
-}));
-
-// Import models after mocking
 const jobSearchModel = require('../models/jobSearchModel');
 const jobCategoryModel = require('../models/jobCategoryModel');
 const skillCategoryModel = require('../models/skillCategoryModel');
-
-// Mock the models
-jest.mock('../models/jobSearchModel');
-jest.mock('../models/jobCategoryModel');
-jest.mock('../models/skillCategoryModel');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -61,24 +44,20 @@ app.engine('ejs', (filePath, options, callback) => {
 });
 
 describe('Job Search Tests', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('GET /job-search', () => {
-    test('should render job search page with categories', async () => {
+    it('should render job search page with categories', async () => {
       const response = await request(app)
         .get('/job-search')
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.jobCategories).toBeDefined();
-      expect(renderedData.skillCategories).toBeDefined();
-      expect(renderedData.results).toBeNull();
-      expect(renderedData.searchParams).toBeNull();
+      assert.ok(renderedData.jobCategories !== undefined);
+      assert.ok(renderedData.skillCategories !== undefined);
+      assert.strictEqual(renderedData.results, null);
+      assert.strictEqual(renderedData.searchParams, null);
     });
 
-    test('should require authentication', async () => {
+    it('should require authentication', async () => {
       // Remove the mock authentication for this test
       const unauthApp = express();
       unauthApp.use(express.urlencoded({ extended: true }));
@@ -103,7 +82,7 @@ describe('Job Search Tests', () => {
   });
 
   describe('POST /job-search', () => {
-    test('should handle search with all parameters', async () => {
+    it('should handle search with all parameters', async () => {
       const searchData = {
         zipcode: '12345',
         keyword: 'dog walking',
@@ -117,11 +96,11 @@ describe('Job Search Tests', () => {
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.results).toEqual([]);
-      expect(renderedData.searchParams).toEqual(searchData);
+      assert.deepStrictEqual(renderedData.results, []);
+      assert.deepStrictEqual(renderedData.searchParams, searchData);
     });
 
-    test('should handle search with minimal parameters', async () => {
+    it('should handle search with minimal parameters', async () => {
       const searchData = {
         zipcode: '',
         keyword: '',
@@ -135,11 +114,11 @@ describe('Job Search Tests', () => {
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.results).toEqual([]);
-      expect(renderedData.searchParams).toEqual(searchData);
+      assert.deepStrictEqual(renderedData.results, []);
+      assert.deepStrictEqual(renderedData.searchParams, searchData);
     });
 
-    test('should handle search with only zipcode', async () => {
+    it('should handle search with only zipcode', async () => {
       const searchData = {
         zipcode: '12345',
         keyword: '',
@@ -153,10 +132,10 @@ describe('Job Search Tests', () => {
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.searchParams.zipcode).toBe('12345');
+      assert.strictEqual(renderedData.searchParams.zipcode, '12345');
     });
 
-    test('should handle search with keyword', async () => {
+    it('should handle search with keyword', async () => {
       const searchData = {
         zipcode: '',
         keyword: 'pet sitting',
@@ -170,10 +149,10 @@ describe('Job Search Tests', () => {
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.searchParams.keyword).toBe('pet sitting');
+      assert.strictEqual(renderedData.searchParams.keyword, 'pet sitting');
     });
 
-    test('should handle search with job categories', async () => {
+    it('should handle search with job categories', async () => {
       const searchData = {
         zipcode: '',
         keyword: '',
@@ -187,10 +166,10 @@ describe('Job Search Tests', () => {
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.searchParams.job_categories).toEqual(['1', '3']);
+      assert.deepStrictEqual(renderedData.searchParams.job_categories, ['1', '3']);
     });
 
-    test('should handle search with skill categories', async () => {
+    it('should handle search with skill categories', async () => {
       const searchData = {
         zipcode: '',
         keyword: '',
@@ -204,7 +183,7 @@ describe('Job Search Tests', () => {
         .expect(200);
 
       const renderedData = JSON.parse(response.text);
-      expect(renderedData.searchParams.skill_categories).toEqual(['2', '4']);
+      assert.deepStrictEqual(renderedData.searchParams.skill_categories, ['2', '4']);
     });
   });
 });
