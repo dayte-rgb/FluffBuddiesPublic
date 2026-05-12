@@ -496,7 +496,7 @@ app.post('/signup', isNotAuthenticated, async (req, res) => {
   }
 });
 
-app.get('/inbox', (req, res) => {
+app.get('/inbox', isAuthenticated, (req, res) => {
   res.status(200);
   res.render('messaging', { userId: req.session.userId });
 });
@@ -877,6 +877,8 @@ function distributeLeaderboardBadges(leaderboard) {
     }
   });
 }
+
+// ----------------------------------------------------------------------------------------------------------------------------------------
 
 async function sendMeetupVerificationEmail(email, code, job_id) {
   try {
