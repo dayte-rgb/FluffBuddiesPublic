@@ -220,7 +220,7 @@ app.post('/job-search', isAuthenticated, (req, res) => {
 app.get('/booking/:job_id', isAuthenticated, async (req, res) => {
   const jobData = await jobContent.getById(req.params.job_id);
   if (!jobData) return res.status(404).send('Job not found');
-  
+
   let reviews = [];
   reviews = reviewModel.getReviewsByJobId(req.params.job_id);
 
@@ -298,28 +298,28 @@ app.post('/login', isNotAuthenticated, async (req, res) => {
 
 // Handle forgot password render
 async function createEmailTransporter() {
-  // if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-  //   return nodemailer.createTransport({
-  //     host: process.env.SMTP_HOST,
-  //     port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-  //     secure: process.env.SMTP_PORT === '465',
-  //     auth: {
-  //       user: process.env.SMTP_USER,
-  //       pass: process.env.SMTP_PASS,
-  //     },
-  //  });
-  // }
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+      secure: process.env.SMTP_PORT === '465',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
 
-  const testAccount = await nodemailer.createTestAccount();
-  return nodemailer.createTransport({
-    host: testAccount.smtp.host,
-    port: testAccount.smtp.port,
-    secure: testAccount.smtp.secure,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass,
-    },
-  });
+  // const testAccount = await nodemailer.createTestAccount();
+  // return nodemailer.createTransport({
+  //   host: testAccount.smtp.host,
+  //   port: testAccount.smtp.port,
+  //   secure: testAccount.smtp.secure,
+  //   auth: {
+  //     user: testAccount.user,
+  //     pass: testAccount.pass,
+  //   },
+  // });
 }
 
 async function sendPasswordResetEmail(email, code) {
@@ -540,6 +540,7 @@ app.post('/api/reviews', isAuthenticated, (req, res) => {
   try {
     const newReview = reviewContent.create(punctuality, quality, friendliness, comments, new Date().toISOString(), 0);
     jobReview.create(newReview.id, job_id);
+    runBadgeJobs();
     res.json({ review_id: newReview.id });
   } catch (error) {
     console.error('Error saving review:', error);
@@ -553,22 +554,22 @@ app.get('/badges', (req, res) => {
   const completed_achievement_ids = achievementModel.getAchievementsCompleted(req.session.userId);
   const completed_ids = new Set();
 
-  for(let i = 0; i < completed_achievement_ids.length; i++){
+  for (let i = 0; i < completed_achievement_ids.length; i++) {
     completed_ids.add(completed_achievement_ids[i].achievement_id);
   }
 
   let earned_badges = []
   let not_earned_badges = []
-  for(let i = 0; i < all_achievements.length; i++){
+  for (let i = 0; i < all_achievements.length; i++) {
     const temp_achiev = all_achievements[i];
-    if(completed_ids.has(temp_achiev.achievement_id)){
+    if (completed_ids.has(temp_achiev.achievement_id)) {
       earned_badges.push({
         id: temp_achiev.achievement_id,
         name: temp_achiev.achievement_name,
         description: temp_achiev.achievement_name,
         img_link: temp_achiev.badge_image_link
       });
-    }else{
+    } else {
       not_earned_badges.push({
         id: temp_achiev.achievement_id,
         name: temp_achiev.achievement_name,
@@ -741,21 +742,21 @@ wss.on('connection', (ws) => {
 
   console.log('New client connected');
 
-    ws.on('message', (message) => {
-        const {type, ...payload} = JSON.parse(message.toString()); //otherwise, you will get just the raw bytes
-        
-        switch(type) {
-            case 'JOIN': {
-                const {userId} = payload;
-                connections.registerUser(userId, ws);
-                ws.userId = userId; //storing this for close
+  ws.on('message', (message) => {
+    const { type, ...payload } = JSON.parse(message.toString()); //otherwise, you will get just the raw bytes
+
+    switch (type) {
+      case 'JOIN': {
+        const { userId } = payload;
+        connections.registerUser(userId, ws);
+        ws.userId = userId; //storing this for close
 
         break;
       }
       case 'SEND_MESSAGE': {
         const { userId, toUserId, content } = payload;
 
-                const toUserSocket = connections.getSocket(toUserId);
+        const toUserSocket = connections.getSocket(toUserId);
 
         //insert the message into the database
         const messageInfo = messageModel.create(content);
@@ -793,20 +794,20 @@ wss.on('connection', (ws) => {
       case 'GET_USER_ID': {
         const { username } = payload;
 
-                //if we cannot find the user, then return undefined for the userId
-                if(!user.getByUsername(username)){
-                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: undefined}));
-                }else{
-                  ws.send(JSON.stringify({type: 'RET_USER_ID', userId: user.getByUsername(username).user_id}));
-                }
-                
-                break;
-            }
-            default: {
-                console.log("oh no");
-            }
+        //if we cannot find the user, then return undefined for the userId
+        if (!user.getByUsername(username)) {
+          ws.send(JSON.stringify({ type: 'RET_USER_ID', userId: undefined }));
+        } else {
+          ws.send(JSON.stringify({ type: 'RET_USER_ID', userId: user.getByUsername(username).user_id }));
         }
-    });
+
+        break;
+      }
+      default: {
+        console.log("oh no");
+      }
+    }
+  });
 });
 
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -934,13 +935,14 @@ app.post('/submit_key', isAuthenticated, (req, res) => {
 // --------------------------------------------------------------------------------------------------------------------------------------------------
 // handle testing with in-memory database
 
+
 function initModels(db, log_path = 'requests.log', verbose=true){
   jobContent = new jobContentModel(db);
   jobReview = new jobReviewModel(db);
   reviewContent = new reviewContentModel(db);
   employeeJob = new employeeJobModel(db);
   employerJob = new employerJobModel(db);
-  jobSearch  = new JobSearchModel(db);
+  jobSearch = new JobSearchModel(db);
   jobCategory = new jobCategoryModel(db);
   skillCategory = new skillCategoryModel(db);
   user = new userModel(db);
@@ -954,7 +956,7 @@ function initModels(db, log_path = 'requests.log', verbose=true){
   userMessageModel = new UserMessageModel(db);
   leaderboardContent = new leaderboardContentModel(db);
   leaderboardM = new leaderboardModel(db);
-  userBadgeModel  = new UserBadgeModel(db);
+  userBadgeModel = new UserBadgeModel(db);
   badgeContent = new BadgeContentModel(db);
   certificationContent = new CertificationContentModel(db);
   userCertification = new UserCertificationModel(db);
@@ -972,7 +974,7 @@ module.exports = app;
 module.exports.initModels = initModels;
 
 //if require.main is the current module, then it was from the command line, so run the server from the command line
-if(require.main === module){
+if (require.main === module) {
   const PORT = 3000;
   initModels();
 
@@ -985,3 +987,60 @@ if(require.main === module){
 
   runBadgeJobs();
 }
+
+//-------------------------------------------------------
+//notification system
+app.get('/notifications', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  const bookingNotifications = [];
+  const reviewNotifications = [];
+
+  const myBookings = employeeJob.getBookingsByEmployeeId(userId);
+
+  myBookings.forEach(booking => {
+    const jobData = jobContent.getById(booking.job_id);
+    if (!jobData) return;
+
+    const reviewIds = jobReview.getAllByJobId(booking.job_id);
+    if (reviewIds) {
+      reviewIds.forEach(r => {
+        const review = reviewContent.getById(r.review_id);
+        if (review) {
+          const employerLink = employerJob.getById(booking.job_id);
+          const employer = employerLink ? user.getById(employerLink.employer_id) : null;
+          const employerName = employer ? employer.username : 'Someone';
+          reviewNotifications.push({
+            type: 'review',
+            message: employerName + ' left a review on your job: ' + jobData.description,
+            punctuality: review.punctuality,
+            quality: review.quality,
+            friendliness: review.friendliness,
+            comments: review.comments,
+            datetime: review.datetime
+          });
+        }
+      });
+    }
+  });
+
+  const myJobs = employerJob.getJobsByEmployerId(userId);
+  myJobs.forEach(job => {
+    const jobData = jobContent.getById(job.job_id);
+    if (!jobData) return;
+
+    const allBookings = employeeJob.getAll().filter(b => b.job_id === job.job_id);
+    allBookings.forEach(b => {
+      const booker = user.getById(b.employee_id);
+      if (booker) {
+        bookingNotifications.push({
+          type: 'booking',
+          message: booker.username + ' booked your job: ' + jobData.description,
+          datetime: jobData.datetime
+        });
+      }
+    });
+  });
+
+  const notifications = bookingNotifications.concat(reviewNotifications);
+  res.render('notifications', { notifications });
+});

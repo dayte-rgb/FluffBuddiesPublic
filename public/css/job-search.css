@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Fredoka+One&display=swap');
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 html {
     height: 100%;
@@ -146,7 +151,6 @@ body {
 
 .create-job-btn:hover {
     background-color: #d97a3a;
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(244, 139, 72, 0.3);
 }
 

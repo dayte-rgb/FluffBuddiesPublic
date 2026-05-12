@@ -2,97 +2,99 @@
 <html lang="en">
 
 <head>
-  <title>Review – <%= worker_name %></title>
-  <link rel="stylesheet" href="/css/review.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/default_stylesheet.css">
-  <link rel="stylesheet" href="https://unpkg.com/slim-select@latest/dist/slimselect.css">
+    <title>Review – <%= worker_name %>
+    </title>
+    <link rel="stylesheet" href="/css/review.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/default_stylesheet.css">
+    <link rel="stylesheet" href="https://unpkg.com/slim-select@latest/dist/slimselect.css">
 </head>
 
 <body>
-  <%- include('_navbar') %>
+    <%- include('_navbar') %>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
-        <nav class="sidebar-nav">
-            <a href="/job-search" class="nav-icon active" title="Search"><i
-                    class="fa-solid fa-magnifying-glass"></i></a>
-            <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
-            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
-            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
-            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
-            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
-        </nav>
-    </div>
-
-    <!-- Main content -->
-    <div class="review-main">
-        <div class="review-card">
-
-            <div class="review-header">
-                <h1>Leave a Review</h1>
-                <p class="subtitle">Job: <strong>
-                        <%= job_title %>
-                    </strong> &mdash; <%= job_date %>
-                </p>
-            </div>
-
-            <form id="review-form">
-                <input type="hidden" id="job_id" value="<%= job_id %>">
-
-                <div class="metric">
-                    <label><i class="fa-solid fa-clock"></i> Punctuality</label>
-                    <div class="stars">
-                        <input type="radio" name="punctuality" id="p5" value="5"><label for="p5">★</label>
-                        <input type="radio" name="punctuality" id="p4" value="4"><label for="p4">★</label>
-                        <input type="radio" name="punctuality" id="p3" value="3"><label for="p3">★</label>
-                        <input type="radio" name="punctuality" id="p2" value="2"><label for="p2">★</label>
-                        <input type="radio" name="punctuality" id="p1" value="1"><label for="p1">★</label>
-                    </div>
-                </div>
-
-                <div class="metric">
-                    <label><i class="fa-solid fa-star"></i> Quality of Work</label>
-                    <div class="stars">
-                        <input type="radio" name="quality" id="q5" value="5"><label for="q5">★</label>
-                        <input type="radio" name="quality" id="q4" value="4"><label for="q4">★</label>
-                        <input type="radio" name="quality" id="q3" value="3"><label for="q3">★</label>
-                        <input type="radio" name="quality" id="q2" value="2"><label for="q2">★</label>
-                        <input type="radio" name="quality" id="q1" value="1"><label for="q1">★</label>
-                    </div>
-                </div>
-
-                <div class="metric">
-                    <label><i class="fa-solid fa-heart"></i> Friendliness</label>
-                    <div class="stars">
-                        <input type="radio" name="friendliness" id="f5" value="5"><label for="f5">★</label>
-                        <input type="radio" name="friendliness" id="f4" value="4"><label for="f4">★</label>
-                        <input type="radio" name="friendliness" id="f3" value="3"><label for="f3">★</label>
-                        <input type="radio" name="friendliness" id="f2" value="2"><label for="f2">★</label>
-                        <input type="radio" name="friendliness" id="f1" value="1"><label for="f1">★</label>
-                    </div>
-                </div>
-
-                <div class="metric">
-                    <label><i class="fa-solid fa-comment"></i> Additional Comments (optional)</label>
-                    <textarea id="comments" rows="3" placeholder="Describe the service..."></textarea>
-                </div>
-
-                <p id="error-msg" class="error-msg">Please rate all three categories before submitting.</p>
-                <button type="submit" class="submit-btn">Submit Review</button>
-            </form>
-
-            <div id="success" style="display: none;">
-                <div class="checkmark"><i class="fa-solid fa-paw"></i></div>
-                <h1>Review submitted!</h1>
-                <p>Your review has been recorded. It will take effect once the job is verified.</p>
-                <a href="/job-search" class="back-btn">Back to Search</a>
-            </div>
-
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+            <nav class="sidebar-nav">
+                <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+                <a href="/schedule" class="nav-icon" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
+                <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+                <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+                <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+                <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
+                <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+            </nav>
         </div>
-    </div>
 
-    <script src="/js/review.js"></script>
+        <!-- Main content -->
+        <div class="review-main">
+            <div class="review-card">
+
+                <div class="review-header">
+                    <h1>Leave a Review</h1>
+                    <p class="subtitle">Job: <strong>
+                            <%= job_title %>
+                        </strong> &mdash; <%= job_date %>
+                    </p>
+                </div>
+
+                <form id="review-form">
+                    <input type="hidden" id="job_id" value="<%= job_id %>">
+
+                    <div class="metric">
+                        <label><i class="fa-solid fa-clock"></i> Punctuality</label>
+                        <div class="stars">
+                            <input type="radio" name="punctuality" id="p5" value="5"><label for="p5">★</label>
+                            <input type="radio" name="punctuality" id="p4" value="4"><label for="p4">★</label>
+                            <input type="radio" name="punctuality" id="p3" value="3"><label for="p3">★</label>
+                            <input type="radio" name="punctuality" id="p2" value="2"><label for="p2">★</label>
+                            <input type="radio" name="punctuality" id="p1" value="1"><label for="p1">★</label>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <label><i class="fa-solid fa-star"></i> Quality of Work</label>
+                        <div class="stars">
+                            <input type="radio" name="quality" id="q5" value="5"><label for="q5">★</label>
+                            <input type="radio" name="quality" id="q4" value="4"><label for="q4">★</label>
+                            <input type="radio" name="quality" id="q3" value="3"><label for="q3">★</label>
+                            <input type="radio" name="quality" id="q2" value="2"><label for="q2">★</label>
+                            <input type="radio" name="quality" id="q1" value="1"><label for="q1">★</label>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <label><i class="fa-solid fa-heart"></i> Friendliness</label>
+                        <div class="stars">
+                            <input type="radio" name="friendliness" id="f5" value="5"><label for="f5">★</label>
+                            <input type="radio" name="friendliness" id="f4" value="4"><label for="f4">★</label>
+                            <input type="radio" name="friendliness" id="f3" value="3"><label for="f3">★</label>
+                            <input type="radio" name="friendliness" id="f2" value="2"><label for="f2">★</label>
+                            <input type="radio" name="friendliness" id="f1" value="1"><label for="f1">★</label>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <label><i class="fa-solid fa-comment"></i> Additional Comments (optional)</label>
+                        <textarea id="comments" rows="3" placeholder="Describe the service..."></textarea>
+                    </div>
+
+                    <p id="error-msg" class="error-msg">Please rate all three categories before submitting.</p>
+                    <button type="submit" class="submit-btn">Submit Review</button>
+                </form>
+
+                <div id="success" style="display: none;">
+                    <div class="checkmark"><i class="fa-solid fa-paw"></i></div>
+                    <h1>Review submitted!</h1>
+                    <p>Your review has been recorded. Thank you!</p>
+                    <a href="/job-search" class="back-btn">Back to Search</a>
+                </div>
+
+            </div>
+        </div>
+
+        <script src="/js/review.js"></script>
 </body>
+
 </html>
