@@ -14,7 +14,7 @@ class jobCategoryModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(category_name);
+    const info = stmt.run(category_name);
 
     return {id: info.lastInsertRowid, category_name};
   }

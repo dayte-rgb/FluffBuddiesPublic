@@ -24,7 +24,7 @@ class userAchievementModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(user_id, achievement_id);
+    const info = stmt.get(user_id, achievement_id);
 
     return info
   }

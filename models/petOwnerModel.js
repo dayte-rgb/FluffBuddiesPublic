@@ -24,7 +24,7 @@ class petOwnerModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(owner_id, pet_id);
+    const info = stmt.get(owner_id, pet_id);
 
     return info;
   }

@@ -44,7 +44,7 @@ class messageContentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(message_content, message_id, datetime);
+    const info = stmt.run(message_content, datetime, message_id);
 
     return this.getById(message_id);
   }

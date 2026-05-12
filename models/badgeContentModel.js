@@ -14,7 +14,7 @@ class badgeContentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(badge_name, badge_image_link);
+    const info = stmt.run(badge_name, badge_image_link);
 
     return {id: info.lastInsertRowid, badge_name, badge_image_link};
   }
@@ -54,7 +54,7 @@ class badgeContentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(badge_name, badge_id, badge_image_link);
+    const info = stmt.run(badge_name, badge_image_link, badge_id,);
 
     return this.getById(badge_id);
   }

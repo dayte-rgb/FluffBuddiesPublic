@@ -43,7 +43,7 @@ class UserMessageModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(sender_id, message_id, recipient_id);
+    const info = stmt.run(sender_id, recipient_id, message_id);
 
     return this.getById(message_id);
   }

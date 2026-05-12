@@ -14,7 +14,7 @@ class skillCategoryByUserModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(user_id, skill_category_id);
+    const info = stmt.run(user_id, skill_category_id);
 
     return {user_id, skill_category_id};
   }

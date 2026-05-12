@@ -24,7 +24,7 @@ class userCertificationModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(user_id, certification_id);
+    const info = stmt.get(user_id, certification_id);
 
     return info
   }

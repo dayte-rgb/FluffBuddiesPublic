@@ -14,7 +14,7 @@ class jobPaymentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = query.run(job_id, payment_id, payment_quantity);
+    const info = stmt.run(job_id, payment_id, payment_quantity);
 
     return {job_id, payment_id, payment_quantity};
   }
@@ -44,7 +44,7 @@ class jobPaymentModel {
 
     const stmt = this.db.prepare(query);
 
-    const info = stmt.run(payment_id, job_id, payment_quantity);
+    const info = stmt.run(payment_id, payment_quantity, job_id);
 
     return this.getById(job_id);
   }
