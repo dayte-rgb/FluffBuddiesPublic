@@ -272,7 +272,8 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
     employeeJob.create(job_id, employee_id);
 
     //update job to filled status
-    jobContent.update(jobData.id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employeeNum, 1, 0);
+    jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employee_num, 1, 0);
+
     res.json({ success: true, message: 'Job booked successfully!' });
   } catch (error) {
     console.error('Error booking job:', error);
@@ -742,7 +743,8 @@ app.get('/schedule', isAuthenticated, (req, res) => {
   const userId = req.session.userId;
   const scheduledJobs = employerJob.getJobsByEmployerId(userId);
   const bookedJobs = employeeJob.getBookingsByEmployeeId(userId);
-
+  console.log(JSON.stringify(scheduledJobs));
+  console.log(JSON.stringify(bookedJobs));
   res.render('schedule', {
     scheduledJobs,
     bookedJobs
@@ -1011,7 +1013,7 @@ app.post('/submit_key', isAuthenticated, (req, res) => {
   const jobData = jobContent.getById(job_id);
 
   //update job to completed status
-  jobContent.update(jobData.id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employeeNum, 1, 1);
+  jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employee_num, 1, 1);
 
   res.render('submit_key', { job_id, error: null, success: 'Meetup verified!' });
 });
