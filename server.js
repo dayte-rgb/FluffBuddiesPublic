@@ -15,6 +15,9 @@ const connections = require('./socket_connections.js');
 const { sessionMiddleware } = require('./config/sessionConfig.js');
 const { isAuthenticated, isNotAuthenticated } = require('./middleware/authMiddleware.js');
 
+// Database imports
+const { connectToDatabase } = require('./database.js');
+
 const http = require('http');
 const WebSocket = require('ws');
 
@@ -206,14 +209,22 @@ app.get('/job-search', isAuthenticated, (req, res) => {
 
 // Handles execution of search query
 app.post('/job-search', isAuthenticated, (req, res) => {
+  console.log("Search was activated.");
   let { zipcode, keyword, job_categories, skill_categories } = req.body;
+  console.log("Search params:", { zipcode, keyword, job_categories, skill_categories });
 
-  let results = jobSearch.getAllMatchedJobs(zipcode || null, keyword || null, skill_categories || null, job_categories || null);
+  // Treat empty strings as null
+  zipcode = zipcode && zipcode.trim() !== '' ? zipcode.trim() : null;
+  keyword = keyword && keyword.trim() !== '' ? `%${keyword.trim()}%` : null;
+
+  let results = jobSearch.getAllMatchedJobs(zipcode, keyword, skill_categories || null, job_categories || null);
+  console.log("Search results count:", results ? results.length : 'null');
+  console.log("First few results:", results ? results.slice(0, 3) : 'no results');
 
   const jobCategories = jobCategory.getAll();
   const skillCategories = skillCategory.getAll();
 
-  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword, job_categories, skill_categories } });
+  res.render('job-search', { jobCategories, skillCategories, results, searchParams: { zipcode, keyword: keyword ? keyword.replace(/%/g, '') : null, job_categories, skill_categories } });
 });
 
 // Display a page with details of a selected job listing
@@ -730,6 +741,63 @@ app.get('/schedule', isAuthenticated, (req, res) => {
   });
 });
 
+//-------------------------------------------------------
+//notification system
+app.get('/notifications', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  const bookingNotifications = [];
+  const reviewNotifications = [];
+
+  const myBookings = employeeJob.getBookingsByEmployeeId(userId);
+
+  myBookings.forEach(booking => {
+    const jobData = jobContent.getById(booking.job_id);
+    if (!jobData) return;
+
+    const reviewIds = jobReview.getAllByJobId(booking.job_id);
+    if (reviewIds) {
+      reviewIds.forEach(r => {
+        const review = reviewContent.getById(r.review_id);
+        if (review) {
+          const employerLink = employerJob.getById(booking.job_id);
+          const employer = employerLink ? user.getById(employerLink.employer_id) : null;
+          const employerName = employer ? employer.username : 'Someone';
+          reviewNotifications.push({
+            type: 'review',
+            message: employerName + ' left a review on your job: ' + jobData.description,
+            punctuality: review.punctuality,
+            quality: review.quality,
+            friendliness: review.friendliness,
+            comments: review.comments,
+            datetime: review.datetime
+          });
+        }
+      });
+    }
+  });
+
+  const myJobs = employerJob.getJobsByEmployerId(userId);
+  myJobs.forEach(job => {
+    const jobData = jobContent.getById(job.job_id);
+    if (!jobData) return;
+
+    const allBookings = employeeJob.getAll().filter(b => b.job_id === job.job_id);
+    allBookings.forEach(b => {
+      const booker = user.getById(b.employee_id);
+      if (booker) {
+        bookingNotifications.push({
+          type: 'booking',
+          message: booker.username + ' booked your job: ' + jobData.description,
+          datetime: jobData.datetime
+        });
+      }
+    });
+  });
+
+  const notifications = bookingNotifications.concat(reviewNotifications);
+  res.render('notifications', { notifications });
+});
+
 // -------------------------------------------------------------------------------------------------------------------
 // WebSockets logic for messaging
 
@@ -976,7 +1044,8 @@ module.exports.initModels = initModels;
 //if require.main is the current module, then it was from the command line, so run the server from the command line
 if (require.main === module) {
   const PORT = 3000;
-  initModels();
+  const db = connectToDatabase();
+  initModels(db);
 
   // Start the server and make it listen on the specified port.
   // Once the server starts, it logs a message to the console indicating where it is running.
@@ -987,60 +1056,3 @@ if (require.main === module) {
 
   runBadgeJobs();
 }
-
-//-------------------------------------------------------
-//notification system
-app.get('/notifications', isAuthenticated, (req, res) => {
-  const userId = req.session.userId;
-  const bookingNotifications = [];
-  const reviewNotifications = [];
-
-  const myBookings = employeeJob.getBookingsByEmployeeId(userId);
-
-  myBookings.forEach(booking => {
-    const jobData = jobContent.getById(booking.job_id);
-    if (!jobData) return;
-
-    const reviewIds = jobReview.getAllByJobId(booking.job_id);
-    if (reviewIds) {
-      reviewIds.forEach(r => {
-        const review = reviewContent.getById(r.review_id);
-        if (review) {
-          const employerLink = employerJob.getById(booking.job_id);
-          const employer = employerLink ? user.getById(employerLink.employer_id) : null;
-          const employerName = employer ? employer.username : 'Someone';
-          reviewNotifications.push({
-            type: 'review',
-            message: employerName + ' left a review on your job: ' + jobData.description,
-            punctuality: review.punctuality,
-            quality: review.quality,
-            friendliness: review.friendliness,
-            comments: review.comments,
-            datetime: review.datetime
-          });
-        }
-      });
-    }
-  });
-
-  const myJobs = employerJob.getJobsByEmployerId(userId);
-  myJobs.forEach(job => {
-    const jobData = jobContent.getById(job.job_id);
-    if (!jobData) return;
-
-    const allBookings = employeeJob.getAll().filter(b => b.job_id === job.job_id);
-    allBookings.forEach(b => {
-      const booker = user.getById(b.employee_id);
-      if (booker) {
-        bookingNotifications.push({
-          type: 'booking',
-          message: booker.username + ' booked your job: ' + jobData.description,
-          datetime: jobData.datetime
-        });
-      }
-    });
-  });
-
-  const notifications = bookingNotifications.concat(reviewNotifications);
-  res.render('notifications', { notifications });
-});

@@ -45,10 +45,10 @@ class jobSearchModel {
         FROM JobContent jcontent 
         JOIN EmployerJob ej ON jcontent.job_id = ej.job_id
         JOIN User u ON ej.employer_id = u.user_id
-        JOIN SkillCategoriesByJob skillcat ON jcontent.job_id = skillcat.job_id
-        JOIN JobCategoriesByJob   jobcat   ON jcontent.job_id = jobcat.job_id
-        WHERE (@zipcode IS NULL OR jcontent.zipcode = @zipcode)
-        AND (@keyword IS NULL   OR jcontent.description LIKE @keyword)
+        LEFT JOIN SkillCategoriesByJob skillcat ON jcontent.job_id = skillcat.job_id
+        LEFT JOIN JobCategoriesByJob   jobcat   ON jcontent.job_id = jobcat.job_id
+        WHERE ((@zipcode IS NULL OR @zipcode = '') OR jcontent.zipcode = @zipcode)
+        AND ((@keyword IS NULL OR @keyword = '') OR jcontent.description LIKE @keyword)
         ${hasSkills ? `AND jcontent.job_id IN (
             SELECT DISTINCT sc.job_id
             FROM SkillCategoriesByJob sc
