@@ -1,4 +1,5 @@
 const userMap = new Map();
+const WebSocket = require('ws');
 
 function registerUser(userId, socket){
     if(userId == undefined || !(Number.isInteger(userId))){
@@ -28,7 +29,7 @@ function getSocket(userId){
         console.log(`[ERROR] userId ${userId} is not an integer`);
         return null;
     }
-    
+
     return userMap.get(String(userId));
 };
 
