@@ -33,7 +33,13 @@ Packages Used:
 
 ## Installation Instructions
 All necessary packages should already be inside the repository. In the event some packages are missing, run ```npm install``` in the terminal, 
-which should automatically install all necessary packages.
+which should automatically install all necessary packages. On the first installation, ```website.db``` needs to be initialized. In order to do this, run the following commands in order:
+- ```sqlite3```
+- ```.open website.db```
+- ```.read sql/create_tables.sql```
+- ```.read sql/create_data.sql```
+- ```.exit```
+The database should now be fully set up on your computer!
 
 ## How to Start the Program
 In the terminal, run ```npm start``` to begin running the program at ```localhost:3000```. Then open any browser and put ```localhost:3000``` in 
