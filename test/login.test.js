@@ -54,12 +54,12 @@ describe('Login System Tests', () => {
     describe('POST /login', () => {
         it('should pass with valid credentials', async () => {
             mockUser.authenticate = async function () {
-                return { user_id: 1, username: 'testuser', email: 'test@test.com', account_type: 'user' };
+                return { user_id: 1, username: 'PrincessG', email: 'PinkissoPretty@test.com', account_type: 'user' };
             };
 
             const response = await request(app)
                 .post('/login')
-                .send({ username: 'testuser', password: 'password123' })
+                .send({ username: 'PrincessG', password: 'password123' })
                 .expect(200);
 
             assert.strictEqual(response.body.success, true);
@@ -68,7 +68,7 @@ describe('Login System Tests', () => {
         it('should fail with wrong password', async () => {
             const response = await request(app)
                 .post('/login')
-                .send({ username: 'testuser', password: 'wrongpass' })
+                .send({ username: 'PrincessG', password: 'wrongpass' })
                 .expect(401);
 
             assert.strictEqual(response.body.success, false);
