@@ -11,78 +11,106 @@
 <body>
     <%- include('_navbar') %>
 
-    <div class="sidebar">
-        <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
-        <nav class="sidebar-nav">
-            <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
-            <a href="/schedule" class="nav-icon active" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
-            <!-- <a href="/create-job" class="nav-icon" title="Create Job"><i class="fa-solid fa-plus"></i></a> -->
-            <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
-            <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
-            <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
-            <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
-        </nav>
-    </div>
-
-    <div class="main-content">
-        <div class="card">
-            <h1 class="form-title"><i class="fa-solid fa-calendar-days"></i> My Schedule</h1>
-
-            <section class="schedule-section">
-                <h2>Posted Jobs</h2>
-                <% if (scheduledJobs && scheduledJobs.length > 0) { %>
-                    <div class="schedule-grid">
-                        <% scheduledJobs.forEach(job => { %>
-                            <div class="schedule-card">
-                                <div class="schedule-header">
-                                    <span class="schedule-title">Job #<%= job.job_id %></span>
-                                    <span class="schedule-status <%= job.job_completed ? 'status-completed' : job.job_filled ? 'status-filled' : 'status-open' %>"> <%= job.job_completed ? 'Completed' : job.job_filled ? 'Filled' : 'Open' %> </span>
-                                </div>
-                                <p class="schedule-description"><%= job.description %></p>
-                                <p><strong>Date:</strong> <%= new Date(job.datetime).toLocaleString() %></p>
-                                <p><strong>Duration:</strong> <%= job.duration %> min</p>
-                                <p><strong>Zip Code:</strong> <%= job.zipcode %></p>
-                                <p><strong>Employees needed:</strong> <%= job.employee_num %></p>
-                                <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
-                                <% if (job.job_completed) { %>
-                                    <a href="/review/<%= job.job_id %>" class="btn btn-primary">Leave a Review</a>
-                                <% } %>
-                            </div>
-                        <% }); %>
-                    </div>
-                <% } else { %>
-                    <div class="alert alert-info">
-                        <i class="fa-solid fa-info-circle"></i> You have not created any jobs yet.
-                    </div>
-                <% } %>
-            </section>
-
-            <section class="schedule-section">
-                <h2>Booked Jobs</h2>
-                <% if (bookedJobs && bookedJobs.length > 0) { %>
-                    <div class="schedule-grid">
-                        <% bookedJobs.forEach(job => { %>
-                            <div class="schedule-card">
-                                <div class="schedule-header">
-                                    <span class="schedule-title">Job #<%= job.job_id %></span>
-                                    <span class="schedule-status <%= job.job_completed ? 'status-completed' : job.job_filled ? 'status-filled' : 'status-open' %>"> <%= job.job_completed ? 'Completed' : job.job_filled ? 'Filled' : 'Booked' %> </span>
-                                </div>
-                                <p class="schedule-description"><%= job.description %></p>
-                                <p><strong>Date:</strong> <%= new Date(job.datetime).toLocaleString() %></p>
-                                <p><strong>Duration:</strong> <%= job.duration %> min</p>
-                                <p><strong>Zip Code:</strong> <%= job.zipcode %></p>
-                                <p><strong>Employer:</strong> <%= job.employer_username %></p>
-                                <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
-                    </div>
-                <% }); %>
-    </div>
-                <% } else { %>
-                    <div class="alert alert-info">
-                        <i class="fa-solid fa-info-circle"></i> You have no booked jobs yet.
-                    </div>
-                <% } %>
-            </section>
+        <div class="sidebar">
+            <a href="/"><img src="/images/logo.png" alt="Paw Patrol Logo" class="sidebar-logo"></a>
+            <nav class="sidebar-nav">
+                <a href="/job-search" class="nav-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+                <a href="/schedule" class="nav-icon active" title="Schedule"><i class="fa-solid fa-calendar-days"></i></a>
+                <a href="/profile" class="nav-icon" title="Profile"><i class="fa-solid fa-user"></i></a>
+                <a href="/notifications" class="nav-icon" title="Notifications"><i class="fa-solid fa-bell"></i></a>
+                <a href="/inbox" class="nav-icon" title="Messages"><i class="fa-solid fa-envelope"></i></a>
+                <a href="/leaderboard" class="nav-icon" title="Leaderboard"><i class="fa-solid fa-trophy"></i></a>
+                <a href="/badges" class="nav-icon" title="Badges"><i class="fa-solid fa-medal"></i></a>
+            </nav>
         </div>
-    </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h1 class="form-title"><i class="fa-solid fa-calendar-days"></i> My Schedule</h1>
+
+                <section class="schedule-section">
+                    <h2>Posted Jobs</h2>
+                    <% if (scheduledJobs && scheduledJobs.length> 0) { %>
+                        <div class="schedule-grid">
+                            <% scheduledJobs.forEach(job=> { %>
+                                <div class="schedule-card">
+                                    <div class="schedule-header">
+                                        <span class="schedule-title">Job #<%= job.job_id %></span>
+                                        <span
+                                            class="schedule-status <%= job.job_completed ? 'status-completed' : job.job_filled ? 'status-filled' : 'status-open' %>">
+                                            <%= job.job_completed ? 'Completed' : job.job_filled ? 'Filled' : 'Open' %>
+                                        </span>
+                                    </div>
+                                    <p class="schedule-description">
+                                        <%= job.description %>
+                                    </p>
+                                    <p><strong>Date:</strong>
+                                        <%= new Date(job.datetime).toLocaleString() %>
+                                    </p>
+                                    <p><strong>Duration:</strong>
+                                        <%= job.duration %> min
+                                    </p>
+                                    <p><strong>Zip Code:</strong>
+                                        <%= job.zipcode %>
+                                    </p>
+                                    <p><strong>Employees needed:</strong>
+                                        <%= job.employee_num %>
+                                    </p>
+                                    <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
+                                    <% if (job.job_completed) { %>
+                                        <a href="/review/<%= job.job_id %>" class="btn btn-primary">Leave a Review</a>
+                                        <% } %>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } else { %>
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle"></i> You have not created any jobs yet.
+                            </div>
+                            <% } %>
+                </section>
+
+                <section class="schedule-section">
+                    <h2>Booked Jobs</h2>
+                    <% if (bookedJobs && bookedJobs.length> 0) { %>
+                        <div class="schedule-grid">
+                            <% bookedJobs.forEach(job=> { %>
+                                <div class="schedule-card">
+                                    <div class="schedule-header">
+                                        <span class="schedule-title">Job #<%= job.job_id %></span>
+                                        <span
+                                            class="schedule-status <%= job.job_completed ? 'status-completed' : job.job_filled ? 'status-filled' : 'status-open' %>">
+                                            <%= job.job_completed ? 'Completed' : job.job_filled ? 'Filled' : 'Booked'
+                                                %>
+                                        </span>
+                                    </div>
+                                    <p class="schedule-description">
+                                        <%= job.description %>
+                                    </p>
+                                    <p><strong>Date:</strong>
+                                        <%= new Date(job.datetime).toLocaleString() %>
+                                    </p>
+                                    <p><strong>Duration:</strong>
+                                        <%= job.duration %> min
+                                    </p>
+                                    <p><strong>Zip Code:</strong>
+                                        <%= job.zipcode %>
+                                    </p>
+                                    <p><strong>Employer:</strong>
+                                        <%= job.employer_username %>
+                                    </p>
+                                    <a href="/booking/<%= job.job_id %>" class="btn btn-secondary">View Job</a>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } else { %>
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle"></i> You have no booked jobs yet.
+                            </div>
+                            <% } %>
+                </section>
+            </div>
+        </div>
 </body>
+
 </html>

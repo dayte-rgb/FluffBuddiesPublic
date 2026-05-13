@@ -200,6 +200,8 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
 /* Darkens and scales up on hover */
@@ -251,4 +253,29 @@ body {
     border-radius: 12px;
     width: 100%;
     justify-content: flex-start;
+}
+
+/*Send Verification Code Button*/
+.verify-link {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f48b48;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.verify-link:hover {
+    background-color: #d97a3a;
+    transform: scale(1.05);
+}
+
+#code-msg:empty {
+    display: none;
 }
