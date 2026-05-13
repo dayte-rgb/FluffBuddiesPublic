@@ -268,7 +268,11 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
       return res.status(400).json({ success: false, message: 'You have already booked this job.' });
     }
 
+    //link employee
     employeeJob.create(job_id, employee_id);
+
+    //update job to filled status
+    jobContent.update(jobData.id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employeeNum, 1, 0);
     res.json({ success: true, message: 'Job booked successfully!' });
   } catch (error) {
     console.error('Error booking job:', error);
@@ -1000,8 +1004,15 @@ app.post('/submit_key', isAuthenticated, (req, res) => {
   if (entry.code !== code) {
     return res.render('submit_key', { job_id, error: 'Incorrect code. Please try again.', success: null });
   }
-
+  
+  //mark as verified
   meetupVerification.markVerified(job_id);
+
+  const jobData = jobContent.getById(job_id);
+
+  //update job to completed status
+  jobContent.update(jobData.id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employeeNum, 1, 1);
+
   res.render('submit_key', { job_id, error: null, success: 'Meetup verified!' });
 });
 
