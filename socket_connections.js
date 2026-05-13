@@ -2,22 +2,27 @@ const userMap = new Map();
 const WebSocket = require('ws');
 
 function registerUser(userId, socket){
-    if(userId == undefined || !(Number.isInteger(userId))){
+    if(userId == undefined){
         console.log(`[ERROR] userId ${userId} is not an integer`);
-        return null;
+        return;
     }
 
     if(socket == undefined || !(socket instanceof WebSocket)){
         console.log(`[ERROR] socket is undefined or not an instance of WebSocket`);
-        return null;
+        return;
     }
 
     userMap.set(String(userId), socket);
 };
 
 function removeUser(userId){
-    if(userId == undefined || !(Number.isInteger(userId))){
+    if(userId == undefined){
         console.log(`[ERROR] userId ${userId} is not an integer`);
+        return null;
+    }
+
+    if(!userMap.has(String(userId))){
+        console.log(`[ERROR] userId ${userId} is not in the map and has no socket.`);
         return null;
     }
 
@@ -25,8 +30,13 @@ function removeUser(userId){
 };
 
 function getSocket(userId){
-    if(userId == undefined || !(Number.isInteger(userId))){
-        console.log(`[ERROR] userId ${userId} is not an integer`);
+    if(userId == undefined){
+        console.log(`[ERROR] userId ${userId} null`);
+        return null;
+    }
+
+    if(!userMap.has(String(userId))){
+        console.log(`[ERROR] userId ${userId} is not in the map and has no socket.`);
         return null;
     }
 

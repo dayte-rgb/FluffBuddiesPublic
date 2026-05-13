@@ -308,8 +308,7 @@ INSERT INTO AchievementContent VALUES
 -- insert data into UserSpecies
 -- (<user_id>, <species>)
 INSERT INTO UserSpecies VALUES
-(3, "Dog"),
-(11, "Tortoise");
+(3, "Dog");
 
 -- insert data into UserReview
 -- (<review_id>, <user_id>)
