@@ -35,6 +35,28 @@
                 <p class="section-subtitle">Badges you've earned so far</p>
             </div>
 
+        <div class="badges-grid">
+            <% if (earned_badges && earned_badges.length> 0) { %>
+                <% earned_badges.forEach(badge=> { %>
+                    <div class="badge-card earned">
+                        <div class="badge-icon" style="background-color: <%= badge.color %>">
+                            <img src="images/<%= badge.img_link %>", width="50", height="50">
+                        </div>
+                        <p class="badge-name">
+                            <%= badge.name %>
+                        </p>
+                        <p class="badge-desc">
+                            <%= badge.description %>
+                        </p>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fa-solid fa-paw"></i>
+                                <p>No badges yet, complete your first job to get started!</p>
+                            </div>
+                            <% } %>
+        </div>
             <div class="badges-grid">
                 <% if (earned_badges && earned_badges.length> 0) { %>
                     <% earned_badges.forEach(badge=> { %>
