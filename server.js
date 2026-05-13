@@ -253,8 +253,7 @@ app.post('/booking/:job_id', isAuthenticated, (req, res) => {
 
   try {
     const jobData = jobContent.getById(job_id);
-    //PATCH FOR DEMO - When a job is booked, automatically complete it
-    jobContent.update(jobData.job_id, jobData.description, jobData.datetime, jobData.duration, jobData.zipcode, jobData.employee_num, 1, 1);
+
     if (!jobData) {
       return res.status(404).json({ success: false, message: 'Job not found.' });
     }
@@ -309,7 +308,12 @@ app.post('/login', isNotAuthenticated, async (req, res) => {
 
 // Handle forgot password render
 async function createEmailTransporter() {
+  console.log(process.env.SMTP_HOST);
+  console.log(process.env.SMTP_USER);
+  console.log(process.env.SMTP_PASS);
+  console.log(process.env);
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    console.log("HELLO");
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
@@ -957,6 +961,7 @@ async function sendMeetupVerificationEmail(email, code, job_id) {
       subject: 'Paw Patrol Meetup Verification Code',
       text: `Your meetup verification code for job #${job_id} is: ${code}. This code expires in 24 hours.`,
     };
+    console.log(JSON.stringify(mailOptions));
     const info = await transporter.sendMail(mailOptions);
     logger.write(`[INFO] Meetup verification email preview URL: ${nodemailer.getTestMessageUrl(info)}`);
     return true;
