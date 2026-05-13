@@ -13,7 +13,9 @@ app.use(session({
 }));
 
 const mockUser = {
-    authenticate: async function () { return null; }
+    getByUsername: function () { return null; },
+    getByEmail: function () { return null; },
+    create: async function () { return { id: 1, username: 'princessG', email: 'PrincessG@test.com', account_type: 'user' }; }
 };
 
 const mockIsNotAuthenticated = (req, res, next) => next();
