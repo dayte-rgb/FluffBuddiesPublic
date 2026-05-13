@@ -80,7 +80,7 @@
                                         <span class="schedule-title">Job #<%= job.job_id %></span>
                                         <span
                                             class="schedule-status <%= job.job_completed ? 'status-completed' : job.job_filled ? 'status-filled' : 'status-open' %>">
-                                            <%= job.job_completed ? 'Completed' : job.job_filled ? 'Filled' : 'Booked'
+                                            <%= job.job_completed ? 'Completed' : job.job_filled ? 'Booked' : 'Open'
                                                 %>
                                         </span>
                                     </div>
